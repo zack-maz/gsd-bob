@@ -111,6 +111,57 @@ function mergeCustomModes(existingYamlText, gsdModeEntry) {
 }
 
 /**
+ * Un-merge the gsd-owned modes from an existing custom_modes.yaml — the
+ * slug-removing sibling of mergeCustomModes, required by uninstall (D-06,
+ * Open Question Q2). YAML handling stays confined to this adapter so the
+ * installer's staging path never requires js-yaml.
+ *
+ * Discipline mirrors mergeCustomModes exactly:
+ *   - js-yaml v4 SAFE schema (`yaml.load` does not execute arbitrary tags).
+ *   - `null`/`undefined` parse result is treated as `{}` (empty mapping).
+ *   - a sequence/scalar root throws the SAME concrete non-mapping error.
+ * Removal rule: filter OUT any entry whose slug is gsd-owned (isOwnedSlug).
+ * When `ownedSlugs` is a non-empty array the caller scopes removal to that
+ * intersection; when omitted/empty it falls back to ALL isOwnedSlug entries
+ * (the uninstall default). D-06: NEVER deletes the file and NEVER drops a
+ * non-owned user slug.
+ *
+ * @param {string} existingYamlText  current custom_modes.yaml text (may be empty)
+ * @param {string[]} [ownedSlugs]    optional removal scope; omitted = all gsd-owned
+ * @returns {string} the un-merged YAML text
+ */
+function unmergeCustomModes(existingYamlText, ownedSlugs) {
+  let doc;
+  if (existingYamlText) {
+    const parsed = yaml.load(existingYamlText);
+    if (parsed === null || parsed === undefined) {
+      doc = {};
+    } else if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+      const got = Array.isArray(parsed) ? 'sequence' : typeof parsed;
+      throw new Error(
+        `unmergeCustomModes: custom_modes.yaml root is not a mapping (got ${got}); ` +
+          'refusing to silently drop user modes',
+      );
+    } else {
+      doc = parsed;
+    }
+  } else {
+    doc = {};
+  }
+  const modes = Array.isArray(doc.customModes) ? doc.customModes : [];
+  const scope = Array.isArray(ownedSlugs) && ownedSlugs.length > 0 ? ownedSlugs : null;
+  // Remove an entry iff it is gsd-owned AND (when a scope is given) in that scope.
+  // Non-owned user slugs are ALWAYS preserved.
+  const filtered = modes.filter((m) => {
+    if (!m || !isOwnedSlug(m.slug)) return true;
+    if (scope && !scope.includes(m.slug)) return true;
+    return false;
+  });
+  doc.customModes = filtered;
+  return yaml.dump(doc, { lineWidth: -1 });
+}
+
+/**
  * Curated skip-list (D-10) backing cases skill metadata cannot self-describe.
  * Maps a candidate name -> a concrete reason. A small, explicit list keeps the
  * parity-first gap LOUD: anything here is omitted from the loadable set and
@@ -199,6 +250,7 @@ module.exports = {
   BOB_SKIP_LIST,
   emitGsdMode,
   mergeCustomModes,
+  unmergeCustomModes,
   gateArtifact,
   buildSupportRoster,
 };
