@@ -8,7 +8,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test \"test/**/*.test.cjs\""
   },
   "dependencies": {
     "js-yaml": "4.1.0"
