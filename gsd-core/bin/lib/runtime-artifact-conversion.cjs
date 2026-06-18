@@ -677,7 +677,46 @@ function convertClaudeCommandToAntigravitySkill(content, skillName, _runtime = n
 // (never filter-in-place) so every unsupported key is stripped by omission, and
 // reuse gsd-core's shipped `yamlQuote` so YAML flow chars (e.g. a leading `[BETA]`)
 // can't break Bob's frontmatter parser (a skill with an unparseable description is
-// silently ignored by Bob). The upstream PR moves these into gsd-core verbatim.
+// silently ignored by Bob). Both converters ALSO run their bodies through
+// convertClaudeToBobContent, which rewrites Claude config-home path references to
+// the `.bob` home and translates the colon command dialect to the routable hyphen
+// form, so emitted `.bob/` artifacts never point at paths that do not exist under a
+// Bob install. The upstream PR moves these into gsd-core verbatim.
+/**
+ * Apply Bob-specific content conversion — path replacement + command name conversion.
+ * Mirrors convertClaudeToAntigravityContent but maps to Bob's `.bob` config home.
+ * Path mappings depend on install mode:
+ *   Global: $HOME/.claude/ & ~/.claude/ → ~/.bob/  (bare forms → ~/.bob)
+ *   Local:  $HOME/.claude/ & ~/.claude/ → .bob/    (bare forms → .bob)
+ * Always: ./.claude/ → ./.bob/, .claude/ → .bob/, and the colon command dialect
+ * (`gsd:`) → the routable hyphen form (`gsd-`).
+ * Backend-agnostic by design (RUNTIME-04): does NOT call neutralizeAgentReferences
+ * (that is a Gemini-backend concern). Pure string replaces — dependency-free.
+ * @param {string} content - Source content to convert
+ * @param {boolean} [isGlobal=false] - Whether this is a global install
+ */
+function convertClaudeToBobContent(content, isGlobal = false) {
+    let c = content;
+    if (isGlobal) {
+        c = c.replace(/\$HOME\/\.claude\//g, '~/.bob/');
+        c = c.replace(/~\/\.claude\//g, '~/.bob/');
+        // Bare form (no trailing slash) — must come after slash form to avoid double-replace
+        c = c.replace(/\$HOME\/\.claude\b/g, '~/.bob');
+        c = c.replace(/~\/\.claude\b/g, '~/.bob');
+    }
+    else {
+        c = c.replace(/\$HOME\/\.claude\//g, '.bob/');
+        c = c.replace(/~\/\.claude\//g, '.bob/');
+        // Bare form (no trailing slash) — must come after slash form to avoid double-replace
+        c = c.replace(/\$HOME\/\.claude\b/g, '.bob');
+        c = c.replace(/~\/\.claude\b/g, '.bob');
+    }
+    c = c.replace(/\.\/\.claude\//g, './.bob/');
+    c = c.replace(/\.claude\//g, '.bob/');
+    // Command name conversion (the colon command dialect → routable hyphen form).
+    c = c.replace(/gsd:/g, 'gsd-');
+    return c;
+}
 /**
  * Convert a Claude command/skill (.md) to a Bob skill (SKILL.md).
  * Reduces frontmatter to `name` + `description` only; body preserved verbatim.
@@ -689,11 +728,15 @@ function convertClaudeCommandToAntigravitySkill(content, skillName, _runtime = n
  * @param {string} skillName     target skill name (becomes the `name:` field)
  * @param {*} _runtime           unused (API symmetry with skillsKind wrapper)
  * @param {*} _cmdNames          unused (API symmetry)
- * @param {boolean} _isGlobal    unused (API symmetry)
- * @returns {string} SKILL.md with name+description-only frontmatter + body
+ * @param {boolean} isGlobal     whether this is a global install (5th positional,
+ *                               supplied by skillsKind) — drives the `.bob` home mapping
+ * @returns {string} SKILL.md with name+description-only frontmatter + neutralized body
  */
-function convertClaudeCommandToBobSkill(content, skillName, _runtime = null, _cmdNames = null, _isGlobal = false) {
-    const { frontmatter, body } = extractFrontmatterAndBody(content);
+function convertClaudeCommandToBobSkill(content, skillName, _runtime = null, _cmdNames = null, isGlobal = false) {
+    // Neutralize the FULL content first (mirrors the Antigravity skill converter):
+    // rewrites .claude→.bob path refs and gsd:→gsd- before frontmatter reduction.
+    const converted = convertClaudeToBobContent(content, isGlobal);
+    const { frontmatter, body } = extractFrontmatterAndBody(converted);
     const name = skillName || extractFrontmatterField(frontmatter || '', 'name') || 'unknown';
     const description = (frontmatter && extractFrontmatterField(frontmatter, 'description')) || '';
     const fm = `---\nname: ${name}\ndescription: ${yamlQuote(description)}\n---`;
@@ -709,9 +752,15 @@ function convertClaudeCommandToBobSkill(content, skillName, _runtime = null, _cm
  *
  * @param {string} content       raw command markdown (may have frontmatter)
  * @param {string} _commandName  target command name (unused; API symmetry)
+ * @param {boolean} [isGlobal=false] whether this is a global install. NOTE: the live
+ *                               stageCommandsForRuntimeFlat dispatch calls the converter
+ *                               with only (content, commandName) (install-profiles.cjs:604),
+ *                               so isGlobal defaults to the local `.bob/` mapping — correct
+ *                               for both global and local Bob installs, which both reference
+ *                               `.bob/...` relative paths in command bodies.
  * @returns {string} command markdown with description+argument-hint-only frontmatter
  */
-function convertClaudeCommandToBobCommand(content, _commandName) {
+function convertClaudeCommandToBobCommand(content, _commandName, isGlobal = false) {
     const { frontmatter, body } = extractFrontmatterAndBody(content);
     const description = (frontmatter && extractFrontmatterField(frontmatter, 'description')) || null;
     const argumentHint = (frontmatter && extractFrontmatterField(frontmatter, 'argument-hint')) || null;
@@ -721,8 +770,10 @@ function convertClaudeCommandToBobCommand(content, _commandName) {
     if (argumentHint !== null)
         fm += `argument-hint: ${yamlQuote(argumentHint)}\n`;
     fm += '---\n';
-    // Project $ARGUMENTS -> $1 (documented transform; simple/no-arg case).
-    const projectedBody = body.replace(/\$ARGUMENTS\b/g, '$1');
+    // Neutralize the body FIRST (.claude→.bob, gsd:→gsd-), THEN project $ARGUMENTS
+    // -> $1 (order matters — neutralize then project; documented simple/no-arg case).
+    const neutralizedBody = convertClaudeToBobContent(body, isGlobal);
+    const projectedBody = neutralizedBody.replace(/\$ARGUMENTS\b/g, '$1');
     return `${fm}${projectedBody}`;
 }
 function toSingleLine(value) {
@@ -1960,6 +2011,7 @@ module.exports = {
     convertClaudeCommandToCopilotSkill,
     convertClaudeToAntigravityContent,
     convertClaudeCommandToAntigravitySkill,
+    convertClaudeToBobContent,
     convertClaudeCommandToBobSkill,
     convertClaudeCommandToBobCommand,
     convertClaudeCommandToClaudeSkill,
