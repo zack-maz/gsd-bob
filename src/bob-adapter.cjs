@@ -88,8 +88,83 @@ function mergeCustomModes(existingYamlText, gsdModeEntry) {
   return yaml.dump(doc, { lineWidth: -1 });
 }
 
+/**
+ * Curated skip-list (D-10) backing cases skill metadata cannot self-describe.
+ * Maps a candidate name -> a concrete reason. A small, explicit list keeps the
+ * parity-first gap LOUD: anything here is omitted from the loadable set and
+ * recorded in the support roster, never emitted broken.
+ *
+ * Kept intentionally tiny for v1 (proves the mechanism); full-set gating across
+ * the whole skill roster rides with Phases 4-5.
+ */
+const BOB_SKIP_LIST = {
+  // Example representative: a workflow whose hard dependency on isolated subagent
+  // fan-out cannot be expressed purely in skill metadata.
+  'gsd-autonomous': 'requires isolated subagent orchestration that Bob runs sequentially inline',
+};
+
+/**
+ * Human-readable reasons for each conservative-lower-bound primitive Bob lacks.
+ * @type {Record<string,string>}
+ */
+const PRIMITIVE_REASONS = {
+  isolatedSubagents:
+    'requires isolated subagents; Bob runs subagents sequentially inline',
+  structuredPrompts:
+    'requires structured prompts; Bob supports text_mode prompting only',
+};
+
+/**
+ * Programmatic flag/skip gate (D-10, TRANS-04). A candidate is SUPPORTED iff
+ * every required primitive is supported by the bob capability declaration AND
+ * the candidate name is not on the curated skip-list. Otherwise it is EXCLUDED
+ * from the loadable set and a concrete reason is returned for the roster.
+ *
+ * @param {{name:string, requires?:string[]}} candidate  artifact + required primitives
+ * @param {Record<string,boolean>} capabilityDecl  bob's supported-primitive map
+ * @returns {{supported:true} | {supported:false, reason:string}}
+ */
+function gateArtifact(candidate, capabilityDecl) {
+  const decl = capabilityDecl || {};
+  // Curated skip-list takes precedence (covers what metadata can't express).
+  if (candidate && Object.prototype.hasOwnProperty.call(BOB_SKIP_LIST, candidate.name)) {
+    return { supported: false, reason: BOB_SKIP_LIST[candidate.name] };
+  }
+  const required = (candidate && Array.isArray(candidate.requires)) ? candidate.requires : [];
+  for (const primitive of required) {
+    if (!decl[primitive]) {
+      const reason = PRIMITIVE_REASONS[primitive] || `requires unsupported primitive '${primitive}'`;
+      return { supported: false, reason };
+    }
+  }
+  return { supported: true };
+}
+
+/**
+ * Build a loud support roster (D-10): one `unsupported on Bob: <reason>` line
+ * per EXCLUDED candidate so the parity gap is never silent. Supported candidates
+ * produce no line (they are emitted to .bob/commands / .bob/skills as usual).
+ *
+ * @param {Array<{name:string, requires?:string[]}>} candidates
+ * @param {Record<string,boolean>} capabilityDecl
+ * @returns {string[]} roster lines for the unsupported candidates
+ */
+function buildSupportRoster(candidates, capabilityDecl) {
+  const lines = [];
+  for (const candidate of candidates || []) {
+    const res = gateArtifact(candidate, capabilityDecl);
+    if (!res.supported) {
+      lines.push(`${candidate.name}: ${UNSUPPORTED_MARKER} ${res.reason}`);
+    }
+  }
+  return lines;
+}
+
 module.exports = {
   UNSUPPORTED_MARKER,
+  BOB_SKIP_LIST,
   emitGsdMode,
   mergeCustomModes,
+  gateArtifact,
+  buildSupportRoster,
 };
