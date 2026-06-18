@@ -78,3 +78,26 @@ test('merge removes a stale gsd-* owned slug matching the entry slug only when s
   assert.ok(bySlug['gsd-legacy'], 'differently-slugged gsd-* entry retained');
   assert.ok(bySlug.gsd, 'new gsd entry added');
 });
+
+// TRANS-05 (WR-01): a non-mapping YAML root must FAIL LOUD, never silently drop
+// the gsd mode. A sequence root and a scalar root each throw a concrete error.
+test('merge throws loud on a sequence-root (non-mapping) custom_modes.yaml', () => {
+  assert.throws(
+    () => adapter.mergeCustomModes('- one\n- two\n', adapter.emitGsdMode()),
+    /mapping|non-mapping|not a mapping/i,
+  );
+});
+
+test('merge throws loud (concrete, not opaque) on a scalar-root custom_modes.yaml', () => {
+  assert.throws(
+    () => adapter.mergeCustomModes('just a scalar string', adapter.emitGsdMode()),
+    /mapping|non-mapping|not a mapping/i,
+  );
+});
+
+test('merge happy path not regressed: empty and undefined still yield a single gsd entry', () => {
+  const fromEmpty = modesBySlug(adapter.mergeCustomModes('', adapter.emitGsdMode()));
+  const fromUndef = modesBySlug(adapter.mergeCustomModes(undefined, adapter.emitGsdMode()));
+  assert.ok(fromEmpty.gsd, 'empty -> single gsd entry');
+  assert.ok(fromUndef.gsd, 'undefined -> single gsd entry');
+});

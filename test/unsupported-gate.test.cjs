@@ -70,3 +70,30 @@ test('the unsupported candidate is OMITTED from the loadable (supported) set', (
 test('gateArtifact is exported from bob-adapter', () => {
   assert.equal(typeof adapter.gateArtifact, 'function');
 });
+
+// TRANS-04 (WR-04): a null/malformed candidate must NEVER be admitted as supported,
+// and a nameless candidate must never corrupt the roster as an `undefined:` line.
+test('gateArtifact(null) is excluded (supported:false) with a concrete reason, not {supported:true}', () => {
+  const res = adapter.gateArtifact(null, bobDecl);
+  assert.equal(res.supported, false);
+  assert.ok(typeof res.reason === 'string' && res.reason.length > 0, 'concrete reason present');
+});
+
+test('gateArtifact on a nameless candidate is excluded with a concrete reason', () => {
+  const res = adapter.gateArtifact({ requires: ['structuredPrompts'] }, bobDecl);
+  assert.equal(res.supported, false);
+  assert.ok(typeof res.reason === 'string' && res.reason.length > 0, 'concrete reason present');
+});
+
+test('buildSupportRoster never emits a malformed undefined-prefixed line', () => {
+  // Build the forbidden token programmatically so this test file cannot self-trip it.
+  const undefinedPrefix = ['undefined', ':'].join('');
+  const candidates = [
+    { name: 'gsd-help', requires: [] },
+    { requires: ['isolatedSubagents'] }, // nameless, also unsupported
+    null, // malformed
+  ];
+  const roster = adapter.buildSupportRoster(candidates, bobDecl);
+  assert.ok(Array.isArray(roster), 'roster is an array');
+  assert.ok(!roster.some((l) => l.includes(undefinedPrefix)), 'no malformed undefined: line');
+});

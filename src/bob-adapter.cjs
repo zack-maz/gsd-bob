@@ -76,7 +76,29 @@ function isOwnedSlug(slug) {
  */
 function mergeCustomModes(existingYamlText, gsdModeEntry) {
   // js-yaml v4 default = SAFE schema; does not execute arbitrary tags (T-02-04).
-  const doc = existingYamlText ? (yaml.load(existingYamlText) || {}) : {};
+  let doc;
+  if (existingYamlText) {
+    const parsed = yaml.load(existingYamlText);
+    // TRANS-05 (WR-01): a non-empty file must parse to a MAPPING. A scalar, array,
+    // or other non-object root means a malformed/hand-broken custom_modes.yaml —
+    // FAIL LOUD rather than silently dropping the gsd mode (or throwing opaquely
+    // when we later try to assign `doc.customModes`). `null` is the one allowed
+    // non-object: a file of only comments/whitespace yields `null` and is treated
+    // as an empty mapping (no user modes to preserve, nothing to lose).
+    if (parsed === null || parsed === undefined) {
+      doc = {};
+    } else if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+      const got = Array.isArray(parsed) ? 'sequence' : typeof parsed;
+      throw new Error(
+        `mergeCustomModes: custom_modes.yaml root is not a mapping (got ${got}); ` +
+          'refusing to silently drop the gsd mode',
+      );
+    } else {
+      doc = parsed;
+    }
+  } else {
+    doc = {};
+  }
   const modes = Array.isArray(doc.customModes) ? doc.customModes : [];
   // Remove only the owned slug that matches the incoming entry's slug — leaves
   // every other slug (including differently-named gsd-* slugs) untouched.
@@ -126,8 +148,14 @@ const PRIMITIVE_REASONS = {
  */
 function gateArtifact(candidate, capabilityDecl) {
   const decl = capabilityDecl || {};
+  // TRANS-04 (WR-04): a null/malformed candidate must NEVER be admitted as
+  // supported. Guard the candidate shape FIRST (before skip-list/primitive checks)
+  // so a missing or non-string name is excluded with a concrete reason.
+  if (!candidate || typeof candidate.name !== 'string' || candidate.name.length === 0) {
+    return { supported: false, reason: 'invalid candidate: missing or non-string name' };
+  }
   // Curated skip-list takes precedence (covers what metadata can't express).
-  if (candidate && Object.prototype.hasOwnProperty.call(BOB_SKIP_LIST, candidate.name)) {
+  if (Object.prototype.hasOwnProperty.call(BOB_SKIP_LIST, candidate.name)) {
     return { supported: false, reason: BOB_SKIP_LIST[candidate.name] };
   }
   const required = (candidate && Array.isArray(candidate.requires)) ? candidate.requires : [];
@@ -154,7 +182,13 @@ function buildSupportRoster(candidates, capabilityDecl) {
   for (const candidate of candidates || []) {
     const res = gateArtifact(candidate, capabilityDecl);
     if (!res.supported) {
-      lines.push(`${candidate.name}: ${UNSUPPORTED_MARKER} ${res.reason}`);
+      // TRANS-04 (WR-04): never interpolate a possibly-undefined name (which would
+      // emit a malformed `undefined:` line). Fall back to a fixed placeholder label.
+      const label =
+        candidate && typeof candidate.name === 'string' && candidate.name.length > 0
+          ? candidate.name
+          : '<unnamed candidate>';
+      lines.push(`${label}: ${UNSUPPORTED_MARKER} ${res.reason}`);
     }
   }
   return lines;
