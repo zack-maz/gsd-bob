@@ -671,6 +671,60 @@ function convertClaudeCommandToAntigravitySkill(content, skillName, _runtime = n
     const fm = `---\nname: ${name}\ndescription: ${yamlQuote(description)}\n---`;
     return `${fm}\n${body}`;
 }
+// --- Bob converters (gsd-bob HAND-EDIT to this GENERATED file; vendored-payload approach) ---
+// IBM Bob reads ONLY `name`+`description` on skills and `description`+`argument-hint`
+// on commands. Both converters reconstruct the frontmatter from that whitelist
+// (never filter-in-place) so every unsupported key is stripped by omission, and
+// reuse gsd-core's shipped `yamlQuote` so YAML flow chars (e.g. a leading `[BETA]`)
+// can't break Bob's frontmatter parser (a skill with an unparseable description is
+// silently ignored by Bob). The upstream PR moves these into gsd-core verbatim.
+/**
+ * Convert a Claude command/skill (.md) to a Bob skill (SKILL.md).
+ * Reduces frontmatter to `name` + `description` only; body preserved verbatim.
+ * Unlike the Antigravity analog, this does NOT early-return when frontmatter is
+ * absent — Bob ignores a skill without a usable description, so a 2-line block
+ * (with an empty description) is always emitted.
+ *
+ * @param {string} content       raw command/skill markdown (may have frontmatter)
+ * @param {string} skillName     target skill name (becomes the `name:` field)
+ * @param {*} _runtime           unused (API symmetry with skillsKind wrapper)
+ * @param {*} _cmdNames          unused (API symmetry)
+ * @param {boolean} _isGlobal    unused (API symmetry)
+ * @returns {string} SKILL.md with name+description-only frontmatter + body
+ */
+function convertClaudeCommandToBobSkill(content, skillName, _runtime = null, _cmdNames = null, _isGlobal = false) {
+    const { frontmatter, body } = extractFrontmatterAndBody(content);
+    const name = skillName || extractFrontmatterField(frontmatter || '', 'name') || 'unknown';
+    const description = (frontmatter && extractFrontmatterField(frontmatter, 'description')) || '';
+    const fm = `---\nname: ${name}\ndescription: ${yamlQuote(description)}\n---`;
+    return `${fm}\n${body}`;
+}
+/**
+ * Convert a Claude command (.md) to a Bob slash command (.bob/commands/<name>.md).
+ * Templated on the Cursor command converter BUT — unlike Cursor, which strips ALL
+ * frontmatter — Bob KEEPS its two allowed fields (`description`, `argument-hint`),
+ * rebuilt from a whitelist. Projects `$ARGUMENTS` in the body to Bob's `$1`
+ * positional arg (the simple/no-arg case; complex multi-arg projection is deferred
+ * to Phases 4-5 per RESEARCH Open Questions).
+ *
+ * @param {string} content       raw command markdown (may have frontmatter)
+ * @param {string} _commandName  target command name (unused; API symmetry)
+ * @returns {string} command markdown with description+argument-hint-only frontmatter
+ */
+function convertClaudeCommandToBobCommand(content, _commandName) {
+    const { frontmatter, body } = extractFrontmatterAndBody(content);
+    const description = (frontmatter && extractFrontmatterField(frontmatter, 'description')) || null;
+    const argumentHint = (frontmatter && extractFrontmatterField(frontmatter, 'argument-hint')) || null;
+    let fm = '---\n';
+    if (description !== null)
+        fm += `description: ${yamlQuote(description)}\n`;
+    if (argumentHint !== null)
+        fm += `argument-hint: ${yamlQuote(argumentHint)}\n`;
+    fm += '---\n';
+    // Project $ARGUMENTS -> $1 (documented transform; simple/no-arg case).
+    const projectedBody = body.replace(/\$ARGUMENTS\b/g, '$1');
+    return `${fm}${projectedBody}`;
+}
 function toSingleLine(value) {
     return value.replace(/\s+/g, ' ').trim();
 }
@@ -1906,6 +1960,8 @@ module.exports = {
     convertClaudeCommandToCopilotSkill,
     convertClaudeToAntigravityContent,
     convertClaudeCommandToAntigravitySkill,
+    convertClaudeCommandToBobSkill,
+    convertClaudeCommandToBobCommand,
     convertClaudeCommandToClaudeSkill,
     convertClaudeCommandToKimiSkill,
     buildKimiAgentArtifacts,
