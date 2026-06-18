@@ -47,3 +47,18 @@ test('a command with no source frontmatter still yields well-formed output (no c
   assert.doesNotMatch(out, /\$ARGUMENTS/);
   assert.ok(out.includes('Bare command'));
 });
+
+// TRANS-01/02 (WR-03): the emitted command body must carry ZERO Claude config-home
+// path refs and ZERO colon-dialect command refs. Forbidden tokens are built
+// programmatically so this test file's prose cannot self-trip the assertions.
+test('command body is neutralized: no .claude / no colon-dialect; has .bob / hyphen form', () => {
+  const out = conv.convertClaudeCommandToBobCommand(input, 'gsd-help');
+  const claudeHome = ['.', 'claude'].join('');
+  const colonDialect = ['gsd', ':'].join('');
+  const bobHome = ['.', 'bob'].join('');
+  const hyphenForm = ['gsd', '-'].join('');
+  assert.ok(!out.includes(claudeHome), 'emitted command body contains no Claude config-home path ref');
+  assert.ok(!out.includes(colonDialect), 'emitted command body contains no colon-dialect command ref');
+  assert.ok(out.includes(bobHome), 'emitted command body contains the .bob home');
+  assert.ok(out.includes(hyphenForm), 'emitted command body contains the hyphen command form');
+});
