@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "GSD for IBM Bob — a standalone, installable adapter that runs the open-gsd spec-driven planning framework natively inside IBM Bob.",
   "license": "MIT",
+  "bin": {
+    "gsd-bob": "bin/gsd-bob.cjs"
+  },
   "engines": {
     "node": ">=22.15.0",
     "npm": ">=10.0.0"
