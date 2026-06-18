@@ -1,0 +1,48 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { requireVendor, repoRoot } = require('./_helpers/vendor.cjs');
+
+// TRANS-02: GSD skill -> .bob/skills/<name>/SKILL.md, name+description frontmatter only.
+const conv = requireVendor('runtime-artifact-conversion.cjs');
+
+const fixDir = path.join(repoRoot, 'test', 'fixtures', 'skill');
+const input = fs.readFileSync(path.join(fixDir, 'input.md'), 'utf8');
+const expected = fs.readFileSync(path.join(fixDir, 'expected.md'), 'utf8');
+
+test('convertClaudeCommandToBobSkill is exported as a function', () => {
+  assert.equal(typeof conv.convertClaudeCommandToBobSkill, 'function');
+});
+
+test('skill output is byte-identical to the golden expected fixture', () => {
+  const out = conv.convertClaudeCommandToBobSkill(input, 'gsd-ultraplan-phase');
+  assert.equal(out, expected);
+});
+
+test('skill frontmatter contains ONLY name + description (unsupported keys stripped)', () => {
+  const out = conv.convertClaudeCommandToBobSkill(input, 'gsd-ultraplan-phase');
+  const fmEnd = out.indexOf('---', 3);
+  assert.ok(fmEnd > 0, 'frontmatter block present');
+  const fm = out.substring(3, fmEnd);
+  assert.match(fm, /^name:/m);
+  assert.match(fm, /^description:/m);
+  assert.doesNotMatch(fm, /^effort:/m);
+  assert.doesNotMatch(fm, /^allowed-tools:/m);
+  assert.doesNotMatch(fm, /^argument-hint:/m);
+});
+
+test('description with YAML flow chars ([BETA]) is safely quoted via yamlQuote', () => {
+  const out = conv.convertClaudeCommandToBobSkill(input, 'gsd-ultraplan-phase');
+  // JSON.stringify wraps the value in double quotes -> safe for YAML parsers.
+  assert.match(out, /^description: "\[BETA\]/m);
+});
+
+test('a skill with no source frontmatter still yields well-formed output (no crash)', () => {
+  const bare = '# Just a body\n\nNo frontmatter here.\n';
+  const out = conv.convertClaudeCommandToBobSkill(bare, 'gsd-bare');
+  assert.match(out, /^---\nname: gsd-bare\ndescription: ""\n---\n/);
+  assert.ok(out.includes('Just a body'));
+});
