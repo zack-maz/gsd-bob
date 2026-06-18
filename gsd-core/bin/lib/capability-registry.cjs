@@ -3038,6 +3038,75 @@ const runtimes = {
       "extendedHookEvents": []
     }
   },
+  // gsd-bob HAND-EDIT to this GENERATED registry (vendored-payload approach;
+  // RESEARCH Pitfall 2). The upstream PR will add a capabilities/bob/capability.json
+  // source so the generator emits this same data — the resulting object is identical.
+  // Backend-agnostic by design: no model/backend brand names appear in this entry.
+  "bob": {
+    "id": "bob",
+    "role": "runtime",
+    "title": "IBM Bob",
+    "description": "IBM Bob (bob.ibm.com) — backend-agnostic; .bob/skills + .bob/commands; text_mode prompts; sequential-inline subagents.",
+    "tier": "core",
+    "requires": [],
+    "runtime": {
+      "configHome": {
+        "kind": "dot-home",
+        "name": ".bob",
+        "env": [
+          "BOB_CONFIG_DIR"
+        ]
+      },
+      "configFormat": "none",
+      "artifactLayout": {
+        "global": [
+          {
+            "kind": "skills",
+            "destSubpath": "skills",
+            "prefix": "gsd-",
+            "nesting": "nested",
+            "recursive": false,
+            "converter": "convertClaudeCommandToBobSkill"
+          },
+          {
+            "kind": "commands",
+            "destSubpath": "commands",
+            "prefix": "gsd-",
+            "nesting": "flat",
+            "recursive": false,
+            "converter": "convertClaudeCommandToBobCommand"
+          }
+        ],
+        "local": [
+          {
+            "kind": "skills",
+            "destSubpath": "skills",
+            "prefix": "gsd-",
+            "nesting": "nested",
+            "recursive": false,
+            "converter": "convertClaudeCommandToBobSkill"
+          },
+          {
+            "kind": "commands",
+            "destSubpath": "commands",
+            "prefix": "gsd-",
+            "nesting": "flat",
+            "recursive": false,
+            "converter": "convertClaudeCommandToBobCommand"
+          }
+        ]
+      },
+      "commandStyle": "slash-hyphen",
+      "hooksSurface": "none",
+      "hookEvents": "none",
+      "sandboxTier": "none",
+      "supportTier": 2,
+      "installSurface": "profile-marker-only",
+      "writesSharedSettings": false,
+      "permissionWriter": null,
+      "extendedHookEvents": []
+    }
+  },
   "gemini": {
     "id": "gemini",
     "role": "runtime",

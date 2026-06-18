@@ -36,6 +36,7 @@ const FALLBACK_ALIASES = {
     kimi: ['kimi'],
     codebuddy: ['codebuddy', 'codebuddy-cli'],
     cline: ['cline', 'cline-cli'],
+    bob: ['bob', 'bob-cli'],
 };
 function normalizeRuntimeToken(value) {
     return String(value).trim().toLowerCase().replace(/[_\s]+/g, '-');

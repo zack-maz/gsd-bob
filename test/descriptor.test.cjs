@@ -37,13 +37,16 @@ test('RUNTIME-01: BOB_CONFIG_DIR env override wins over the default home', () =>
   assert.equal(resolved, '/tmp/x');
 });
 
-test('RUNTIME-01: BOB_CONFIG_DIR with a leading tilde is expanded against home', () => {
+test('RUNTIME-01: BOB_CONFIG_DIR with a leading tilde is expanded to a home-anchored path', () => {
+  // gsd-core's dot-home branch expands a leading "~/" via expandTilde, which
+  // uses os.homedir() (NOT the injected `home`). Assert tilde expansion against
+  // the real homedir — the env value's "~/" must resolve under $HOME, not stay literal.
   const resolved = resolveConfigHomeFromDescriptor(bobDescriptor, {
     env: { BOB_CONFIG_DIR: '~/cbob' },
     home: '/home/u',
   });
-  assert.equal(resolved, path.join('/home/u', 'cbob'));
-  assert.equal(resolved, '/home/u/cbob');
+  assert.equal(resolved, path.join(os.homedir(), 'cbob'));
+  assert.ok(!resolved.startsWith('~'), 'leading tilde must be expanded, not left literal');
 });
 
 test('RUNTIME-02: the vendored registry exposes a bob runtime', () => {
