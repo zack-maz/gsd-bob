@@ -1,0 +1,18 @@
+customModes:
+  - slug: my-mode
+    name: My Custom Mode
+    roleDefinition: |-
+      A user-authored mode that must never be touched by the gsd merge.
+      It spans multiple lines to exercise the YAML round-trip.
+    whenToUse: Use this for my own bespoke workflow.
+    customInstructions: Do my thing, not the gsd thing.
+    groups:
+      - read
+      - edit
+  - slug: gsd
+    name: GSD (stale)
+    roleDefinition: An out-of-date gsd entry that the merge must REPLACE in place.
+    whenToUse: stale
+    customInstructions: stale
+    groups:
+      - read
