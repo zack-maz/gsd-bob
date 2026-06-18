@@ -1,0 +1,10 @@
+.planning/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Transient test output (the vendored gsd-core/ payload IS committed — it is the
+# payload, not a build artifact — so it is deliberately NOT ignored here)
+test/.tmp/
+*.tmp
