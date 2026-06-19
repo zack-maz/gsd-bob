@@ -16,6 +16,72 @@ This is the single, consolidated, **root-anchored** (`.planning/ACCEPTANCE-CHECK
 
 ---
 
+## How to Run
+
+Run this entire file once, top to bottom, on a **real Bob-enabled machine**. Coverage is already proven: every v1 success criterion across Phases 1–5 maps to ≥1 step below (see `.planning/phases/06-on-device-acceptance-verification/06-COVERAGE-MATRIX.md`, mechanically re-proven by `test/acceptance-coverage.test.cjs`). Your job is the single empirical pass, not interpretation.
+
+**Prerequisites:**
+- A real Bob install (IDE or Bob Shell), since no live Bob exists during development.
+- Node `>=22.15.0` (the project engines floor).
+- A throwaway / scratch workspace — the mutating steps install, run the loop, and uninstall against `.bob/`; do not run them in a workspace you care about.
+
+**Install gsd-bob (the one mutating bootstrap, performed inside the AC-13 step):**
+
+```
+npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local
+```
+
+**For each step:** run the `Cmd:` line verbatim; type numbered answers when a flow prompts you. Mark `Result: [ ] pass [ ] fail` inline AND fill the matching row in `## Results Roll-Up`. Mark **fail** whenever the observed output does not match `Expect:`. **If a fail concerns a watch-list assumption** (a conservative Phase-1 default — subagent isolation, structured prompts, config-home override, IDE-vs-Shell signal), record the refutation in `.planning/ACCEPTANCE-FOLLOWUPS.md` so it becomes a tracked v2 enhancement rather than a silent gap.
+
+**Read-only by default (T-01-SC preserved):** Steps `AC-01..AC-12` and `AC-26` are pure read-only observation and may run in any order. The ONLY mutating commands are the already-marked install / core-loop / quality-gate / uninstall runs inside `AC-13..AC-25` (`npx … gsd-bob …`, `/gsd-*` invocations). This run scaffolding adds **no new `Cmd:` line** and does not weaken the read-only-by-default posture — run the mutating steps in the dependency order below.
+
+## Execution Order
+
+1. **Read-only first (any order):** `AC-01..AC-12` (observation / `grep` / `cat` / `echo` only) and `AC-26` (README / upstream doc greps). `AC-11`'s read-only `cat`/`grep` is most meaningful AFTER the `AC-13` install has run, but the command itself mutates nothing.
+2. **Mutating steps, in this exact dependency order** (each depends on prior install / loop state):
+   - `AC-13` — install (`gsd-bob --bob --local`) into a fresh scratch `.bob/`.
+   - `AC-14` — re-run the same install (idempotency), after seeding a user mode/command/rule.
+   - `AC-16` — `--dry-run` (no-op; writes nothing — placed here for narrative grouping with the install lifecycle).
+   - `AC-17 → AC-18 → AC-19 → AC-20 → AC-21` — the core loop **in sequence** (`new-project → plan-phase → execute-phase → verify-work → progress`; each step needs the prior step's artifact).
+   - `AC-22 → AC-23 → AC-24 → AC-25` — the quality gates (each needs the `AC-13` install).
+   - `AC-26` — README / upstream doc checks (read-only; may also run anytime).
+   - `AC-15` — uninstall (`--uninstall`) **LAST, as teardown.** AC-15 destroys the install that `AC-17..AC-25` require, so it MUST run after the loop and gates complete. Running it earlier tears down a prerequisite the later steps need.
+
+## Results Roll-Up
+
+The single at-a-glance pass/fail record to report. Mark each row (keep the inline `Result:` checkbox in each step too); add a short note on any `fail` and a `FU-NN` reference if you logged the refutation in `.planning/ACCEPTANCE-FOLLOWUPS.md`.
+
+| AC-ID | pass/fail | notes |
+|-------|-----------|-------|
+| AC-01 | [ ] pass  [ ] fail | |
+| AC-02 | [ ] pass  [ ] fail | |
+| AC-03 | [ ] pass  [ ] fail | |
+| AC-04 | [ ] pass  [ ] fail | |
+| AC-05 | [ ] pass  [ ] fail | |
+| AC-06 | [ ] pass  [ ] fail | |
+| AC-07 | [ ] pass  [ ] fail | |
+| AC-08 | [ ] pass  [ ] fail | |
+| AC-09 | [ ] pass  [ ] fail | |
+| AC-10 | [ ] pass  [ ] fail | |
+| AC-11 | [ ] pass  [ ] fail | |
+| AC-12 | [ ] pass  [ ] fail | |
+| AC-13 | [ ] pass  [ ] fail | |
+| AC-14 | [ ] pass  [ ] fail | |
+| AC-15 | [ ] pass  [ ] fail | |
+| AC-16 | [ ] pass  [ ] fail | |
+| AC-17 | [ ] pass  [ ] fail | |
+| AC-18 | [ ] pass  [ ] fail | |
+| AC-19 | [ ] pass  [ ] fail | |
+| AC-20 | [ ] pass  [ ] fail | |
+| AC-21 | [ ] pass  [ ] fail | |
+| AC-22 | [ ] pass  [ ] fail | |
+| AC-23 | [ ] pass  [ ] fail | |
+| AC-24 | [ ] pass  [ ] fail | |
+| AC-25 | [ ] pass  [ ] fail | |
+| AC-26 | [ ] pass  [ ] fail | |
+
+---
+
 ## AC-01 — Subagent isolation
 
 Cmd:    Run a GSD stub mode/command under Bob that attempts to spawn an isolated subtask and await a completion signal, then list Bob's available tools (read-only). Example, inside a Bob session: invoke the stub mode, then in its terminal run `node gsd-core/bin/gsd-tools.cjs query state.load` and observe whether any isolated-subagent/`new_task` tool was offered.
