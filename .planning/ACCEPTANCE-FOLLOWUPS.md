@@ -1,0 +1,23 @@
+# On-Device Acceptance Follow-Ups
+
+**Established:** Phase 6 (On-Device Acceptance Verification) · **Run target:** Phase 6 (populated during the on-device pass)
+
+This is the single, **root-anchored** (`.planning/ACCEPTANCE-FOLLOWUPS.md`), wrong-assumption log for gsd-bob — a sibling of `.planning/ACCEPTANCE-CHECKLIST.md`, never nested under a phase directory. It is referenced by path from the checklist's `## How to Run` preamble: when an on-device step's observed output contradicts a watch-list assumption, the runner records the refutation here so it becomes a tracked enhancement rather than a silent gap. It ships **pre-seeded but empty of refutations** — its existence, fixed schema, and watch-list rows ARE the VERIFY-02 SC#3 mechanism; populating the `Observed on-device` / flipping `Status` is the user's on-device act.
+
+A **refuted** lower-bound is the *good surprise*: every Phase-1 default was set conservatively (assume Bob is poorer than it might be). If the on-device pass proves Bob is actually richer than assumed — isolated subagents exist, structured prompts exist, a config-home override is honored — that refutation must become tracked v2 work, not a forgotten note.
+
+**Schema (D-05):** Each row has a stable ID (`FU-01`, `FU-02`, …) and seven fields in this exact column order:
+- `ID` — stable follow-up id (`FU-NN`)
+- `Status` — seed value `unconfirmed`; the runner flips it to `confirmed-as-assumed` (default held) or `refuted` (Bob richer than assumed) after the pass
+- `Assumption` — the conservative Phase-1 lower-bound default being watched
+- `Observed on-device` — what the runner actually saw (filled during the pass)
+- `Impact` — what becomes possible / what changes if the assumption is refuted
+- `Proposed enhancement` — the v2 work a refutation unlocks (a requirement ID where one exists; a descriptive candidate where none does)
+- `Links` — refuted `AC-NN` step(s) + the `CAPABILITY-MAP` watch-list row + any v2 requirement ID
+
+| ID | Status | Assumption | Observed on-device | Impact | Proposed enhancement | Links |
+|----|--------|------------|--------------------|--------|----------------------|-------|
+| FU-01 | unconfirmed | SPIKE-01: Bob has no isolated subagents → GSD delegated work runs sequentially inline (no parallel completion signal). | *(fill during pass: did an isolated-subagent / `new_task` tool appear with a completion signal?)* | If refuted (isolation + completion signals exist), parallel wave execution becomes possible — the sequential-inline lower bound can be lifted for fan-out flows. | Worktree-isolated parallel execution (PAR-01); map the gap to a rich Bob-native equivalent rather than degrade (NATIVE-01). | → **PAR-01** + **NATIVE-01**, AC-01, CAPABILITY-MAP SPIKE-01 |
+| FU-02 | unconfirmed | SPIKE-02: Bob has no structured-choice primitive → interactive flows degrade to conversational numbered `text_mode`. | *(fill during pass: did a structured / multiple-choice suggestion payload render instead of plain numbered text?)* | If refuted (a structured prompt primitive exists), GSD `AskUserQuestion` flows can re-model onto Bob's native structured choices instead of text_mode. | Map the flagged prompt primitive to a rich Bob-native equivalent (NATIVE-01) rather than holding the text_mode fallback. | → **NATIVE-01**, AC-02, CAPABILITY-MAP SPIKE-02 |
+| FU-03 | unconfirmed | SPIKE-04(b): config home `~/.bob` is fixed — no documented env override relocates it (override dropped). | *(fill during pass: is a `BOB_CONFIG_DIR`/`BOB_HOME` or other env override actually honored to relocate the config home?)* | If refuted (an override var is honored), the bob runtime descriptor can carry a config-home env override instead of a hard-coded `~/.bob`. | descriptor config-home-override enhancement — **v2 candidate, no requirement ID yet** (REQUIREMENTS.md §v2 has no config-home-override ID; add one or accept this descriptive link). | → descriptor config-home-override (descriptive, no v2 ID), AC-04 + AC-06, CAPABILITY-MAP SPIKE-04(b) |
+| FU-04 | unconfirmed | SPIKE-04(c): IDE-vs-Shell context is detectable only via `BOB_SHELL_CLI_IDE_SERVER_PORT` (set under the IDE-integrated terminal, unset in a plain Shell). | *(fill during pass: is `BOB_SHELL_CLI_IDE_SERVER_PORT` set under the IDE terminal and unset in a plain Shell as assumed — or is there a richer/different signal?)* | If a richer signal exists, gsd-bob can offer signal-aware mode behavior (IDE vs headless Shell) beyond the single port-presence heuristic. | Map the IDE-vs-Shell signal to a rich Bob-native, signal-aware mode (NATIVE-01). | → **NATIVE-01**, AC-04, CAPABILITY-MAP SPIKE-04(c) |
