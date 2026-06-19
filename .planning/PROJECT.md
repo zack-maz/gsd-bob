@@ -43,6 +43,7 @@ A Bob user can install via a single command and run the full GSD planning loop â
 - **IBM Bob** (bob.ibm.com) is the target host. Its extension/command/mode/agent architecture is the primary unknown and must be researched fresh from its docs before the translation design is locked.
 - **Backend neutrality is a design principle**: Bob can drive multiple model CLIs; the GSD logic should not branch on which one. We emit Bob-native artifacts and let Bob route.
 - **Open-source contribution is an explicit goal**, so naming, structure, and code quality should anticipate maintainer review from day one.
+- **Development is test-deferred**: there is no Bob install on the dev device, so the build leans heavily on Bob's official docs (bob.ibm.com) and the close mapping to gsd-core's existing Cline/Cursor-family converters. Conservative assumptions are chosen so the package runs even on Bob's most constrained documented behavior; richer capability discovered on-device is an enhancement, not a prerequisite.
 
 ## Constraints
 
@@ -50,6 +51,7 @@ A Bob user can install via a single command and run the full GSD planning loop â
 - **Tech stack**: Installer is npx/Node, mirroring gsd-core's `npx @opengsd/...` pattern â€” cross-platform, familiar to existing GSD users.
 - **Dependencies**: Bound to IBM Bob's actual extension capabilities (unknown until researched) and to gsd-core's evolving structure (it is the upstream source of truth).
 - **Contribution-readiness**: Adapter must be structured and documented to a standard the open-gsd maintainers would plausibly accept.
+- **No local Bob for testing**: IBM Bob is not available on the development device and won't be. All work is built against Bob's documented behavior plus conservative lower-bound assumptions; empirical validation happens once, in a final on-device acceptance pass run by the user on a Bob-enabled machine. Every phase must therefore emit device-runnable verification steps (commands + expected outputs) rather than relying on live testing during development.
 
 ## Key Decisions
 
@@ -61,6 +63,7 @@ A Bob user can install via a single command and run the full GSD planning loop â
 | Backend-agnostic core; Bob owns model routing | Avoids per-model branching; keeps GSD logic portable | â€” Pending |
 | Parity-first; flag gaps rather than degrade | Keep a high "native" fidelity bar for v1; defer rich Bob-native re-modeling | â€” Pending |
 | npx/Node installer (local/global, clean/update) | Matches existing GSD install UX; lowest friction for current users | â€” Pending |
+| Develop test-deferred against docs + conservative defaults; verify once on-device | No Bob on the dev device; assume the constrained lower bound (no isolated subagents, no structured prompts) so it runs anywhere, then validate on a Bob machine | â€” Pending |
 
 ## Evolution
 
@@ -80,4 +83,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-17 after initialization*
+*Last updated: 2026-06-17 after initialization; added no-local-Bob testing constraint (develop test-deferred, verify once on-device)*

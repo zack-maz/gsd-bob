@@ -1,0 +1,129 @@
+# On-Device Acceptance Checklist
+
+**Established:** Phase 1 (Bob Capability Mapping) · **Run target:** Phase 6 (On-Device Acceptance Verification)
+
+This is the single, consolidated, **root-anchored** (`.planning/ACCEPTANCE-CHECKLIST.md`), device-runnable acceptance checklist for gsd-bob. It exists from Phase 1 onward and lives at the planning root — never nested under a phase directory.
+
+**Cross-phase append convention (D-07):** This file is the **append target for Phases 2–6**. Each later phase appends its own `AC-NN` steps using the same schema below (`Cmd:` / `Expect:` / `Confirms:` / `Result:`), so verification accumulates in one place with zero gathering or merge work. **Phase 6 runs the entire accumulated file once, unattended, on a real Bob-enabled machine** and records an unambiguous pass/fail per step.
+
+**Schema (D-05):** Each step has a stable ID (`AC-01`, `AC-02`, …) and four fields in order:
+- `Cmd:` — the exact command to run
+- `Expect:` — the expected output / observable result
+- `Confirms:` — which SPIKE / success criterion it validates
+- `Result: [ ] pass  [ ] fail`
+
+**Safety invariant (T-01-SC):** Every `Cmd:` line in this file MUST be read-only / side-effect-free — directory listing, `echo $VAR`, or a no-side-effect read-only `node gsd-tools.cjs` / `gsd_run query`. No install, write, delete, move, copy, or any state mutation. These commands run unattended on a user's real machine in Phase 6, so they must be safe to execute as-is.
+
+---
+
+## AC-01 — Subagent isolation
+
+Cmd:    Run a GSD stub mode/command under Bob that attempts to spawn an isolated subtask and await a completion signal, then list Bob's available tools (read-only). Example, inside a Bob session: invoke the stub mode, then in its terminal run `node gsd-core/bin/gsd-tools.cjs query state.load` and observe whether any isolated-subagent/`new_task` tool was offered.
+Expect: No isolated-subagent / `new_task` tool is available; the delegated work runs sequentially inline within the session (no parallel completion signal is emitted). Mode switching is in-session only.
+Confirms: SPIKE-01 — conservative default "sequential inline (assume NO isolated subagents)".
+Result: [ ] pass  [ ] fail
+
+## AC-02 — Structured prompt primitive
+
+Cmd:    Run a GSD stub interactive flow under Bob that asks a multiple-choice question, and observe which question tool Bob exposes (read-only observation; type a numbered answer when prompted).
+Expect: Only the conversational `ask_followup_question` text question is available — no structured / multiple-choice suggestion payload. The numbered `text_mode` choices render and a typed answer is captured and validated.
+Confirms: SPIKE-02 — conservative default "conversational text_mode (assume NO structured-choice primitive)".
+Result: [ ] pass  [ ] fail
+
+## AC-03 — command tool group shells out to gsd-tools.cjs
+
+Cmd:    Invoke a GSD stub Bob mode/command whose `groups` include `command`, which runs the read-only query `node gsd-core/bin/gsd-tools.cjs query state.load` in the workspace.
+Expect: The command executes under Bob and its stdout / exit code is captured by Bob (proves `gsd_run` is reachable via the `command` tool group under Bob). No install, write, or other mutation occurs.
+Confirms: SPIKE-03 — conservative default "a GSD mode granted the `command` group CAN shell out to `node gsd-tools.cjs`".
+Result: [ ] pass  [ ] fail
+
+## AC-04 — Config home, env override, IDE-vs-Shell signal
+
+Cmd:    On a real Bob machine, read-only: list the contents of the config home with `ls -la ~/.bob`; test whether a config-home env override exists by reading the resolved path under each candidate var without relocating anything — `echo $BOB_CONFIG_DIR` and `echo $BOB_HOME` (observe whether either is set / honored); and from inside the IDE-integrated terminal run `echo $BOB_SHELL_CLI_IDE_SERVER_PORT`, then again from a plain/headless Shell.
+Expect: `~/.bob` exists as the config home; neither `BOB_CONFIG_DIR` nor `BOB_HOME` is documented/honored to relocate it (or the real override var name is discovered, read-only); `BOB_SHELL_CLI_IDE_SERVER_PORT` is set under the IDE-integrated terminal and unset in a plain Shell. No `.bob` directory is created, moved, or deleted.
+Confirms: SPIKE-04 — config home `~/.bob` fixed (no documented relocation override; override dropped) and IDE-vs-Shell detection via `BOB_SHELL_CLI_IDE_SERVER_PORT`.
+Result: [ ] pass  [ ] fail
+
+## AC-05 — `.planning/` byte-compatibility, Bob vs Claude (RUNTIME-03)
+
+Cmd:    On a real Bob machine, read-only end-to-end byte diff. In two throwaway copies of an identical sample project, run the SAME read-only `.planning/`-rendering query under each runtime config and compare the emitted artifact bytes WITHOUT mutating any tracked state: (1) `BOB_CONFIG_DIR=$(mktemp -d) node gsd-core/bin/gsd-tools.cjs query state.load > /tmp/bob.planning.out` (bob-resolved config home), (2) `CLAUDE_CONFIG_DIR=$(mktemp -d) node gsd-core/bin/gsd-tools.cjs query state.load > /tmp/claude.planning.out` (claude-resolved config home), then `diff /tmp/bob.planning.out /tmp/claude.planning.out`. Only temp dirs and `/tmp` output files are written; no project `.planning/` file is created, moved, or modified.
+Expect: `diff` reports NO differences (exit 0) — the `.planning/` artifact bytes are identical under the bob and claude runtime configs, confirming the write path is runtime-agnostic on real hardware. This is the on-device complement to the hermetic `test/planning-bytecompat.test.cjs` golden diff.
+Confirms: RUNTIME-03 — `.planning/` byte-compatible Claude↔Bob (Phase 2 plan 01; hermetic test proven, on-device pass pending).
+Result: [ ] pass  [ ] fail
+
+## AC-06 — `gsd_run` resolves the Bob config home (default + override) (RUNTIME-01, RUNTIME-02)
+
+Cmd:    On a real Bob machine, read-only confirm the shim resolves the `bob` runtime home. With the env override set: `BOB_CONFIG_DIR=/tmp/xbob node gsd-core/bin/gsd-tools.cjs query state.load` (observe that the resolved config home is the overridden `/tmp/xbob` path, not `~/.bob`). Then with it unset: `unset BOB_CONFIG_DIR; node gsd-core/bin/gsd-tools.cjs query state.load` (observe the resolved home falls back to `~/.bob`). `state.load` is a read-only query; no `.bob` directory or `.planning/` file is created, moved, or deleted.
+Expect: With `BOB_CONFIG_DIR=/tmp/xbob` the shim reads from the overridden path; unset, it reads from `~/.bob`. The query returns the loaded state without mutating any tracked file — proving `gsd_run query` works under Bob (RUNTIME-01) against a descriptor-resolved config home (RUNTIME-02). If `BOB_CONFIG_DIR` is not honored on the real device (SPIKE-04 left the override unverified), record that observation; the fixed `~/.bob` resolution is the required behavior.
+Confirms: RUNTIME-01 (shim resolves a bob runtime home so `gsd_run query` works under Bob), RUNTIME-02 (bob runtime descriptor config home + env override).
+Result: [ ] pass  [ ] fail
+
+## AC-07 — GSD command is recognized under Bob with its description (TRANS-01)
+
+Cmd:    On a real Bob machine, read-only inspect an emitted Bob slash command and confirm Bob recognizes it. List and read (no edits): `ls .bob/commands` then `cat .bob/commands/gsd-plan-phase.md`, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/<name>.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description. The command appears as `/gsd-<name>` (hyphen form). Confirms the emitted slash command is Bob-native and recognized.
+Confirms: TRANS-01 — GSD commands emitted as Bob `.bob/commands/*.md` slash commands (frontmatter + `$1` args).
+Result: [ ] pass  [ ] fail
+
+## AC-08 — GSD skill is recognized under Bob (description present) (TRANS-02)
+
+Cmd:    On a real Bob machine, read-only inspect an emitted Bob Agent Skill and confirm Bob recognizes it. List and read (no edits): `ls .bob/skills` then `cat .bob/skills/<name>/SKILL.md`, and observe whether Bob lists/activates the skill. No file is written, moved, or deleted.
+Expect: `.bob/skills/<name>/SKILL.md` exists with frontmatter reduced to exactly `name:` + `description:` (no `effort`/`allowed-tools`/`argument-hint`); the description is non-empty so Bob does NOT ignore the skill (Pitfall 4). Bob recognizes the skill by its description.
+Confirms: TRANS-02 — GSD skills emitted as Bob `.bob/skills/<name>/SKILL.md` Agent Skills where that is the right surface.
+Result: [ ] pass  [ ] fail
+
+## AC-09 — Interactive flow degrades to numbered text under Bob (TRANS-03)
+
+Cmd:    On a real Bob machine, run a GSD interactive flow (e.g. invoke a `/gsd-*` command that asks a multiple-choice question) and read-only observe the prompt presentation; type a numbered answer when prompted (the typed answer is the only input — no file or state is mutated by the observation).
+Expect: With the bob runtime default `workflow.text_mode:true`, the flow presents a NUMBERED text list (1., 2., …) rather than a structured-choice payload, and a typed numeric choice is captured and validated against the option set. This is the on-device complement to the hermetic `test/text-mode-golden.test.cjs` (TRANS-03 by reuse of the existing config+workflow seam, no converter rewriting).
+Confirms: TRANS-03 — `AskUserQuestion` prompts degrade to `text_mode` (numbered text choices) under Bob so interactive flows can still ask.
+Result: [ ] pass  [ ] fail
+
+## AC-10 — Unsupported skill is omitted AND listed in the support roster (TRANS-04)
+
+Cmd:    On a real Bob machine, read-only confirm an unsupported artifact is absent from the emitted set yet recorded loud. List the emitted set and grep the roster (no edits): `ls .bob/skills .bob/commands` (observe the unsupported skill, e.g. `gsd-autonomous`, is NOT present) then `grep "unsupported on Bob:" SUPPORT-ROSTER.md` (observe it IS recorded with a reason). No file is written, moved, or deleted.
+Expect: The unsupported skill does not appear under `.bob/skills` / `.bob/commands`, AND `SUPPORT-ROSTER.md` contains a matching `unsupported on Bob: <reason>` line — parity-first, never silently broken.
+Confirms: TRANS-04 — skills requiring primitives Bob cannot support are explicitly flagged/skipped (parity-first), never silently broken.
+Result: [ ] pass  [ ] fail
+
+## AC-11 — Idempotent `custom_modes.yaml` merge preserves user modes (TRANS-05)
+
+Cmd:    On a real Bob machine, AFTER a (separate, Phase-3) install has run on a config that already had a user-defined mode, read-only confirm the merge was idempotent and non-destructive. Read and grep (no edits): `cat ~/.bob/custom_modes.yaml` (observe the pre-seeded user mode is still present) then `grep -c "slug: gsd$" ~/.bob/custom_modes.yaml` (observe the `gsd` slug appears exactly once). The install itself is a Phase 3/6 action; THIS command is a read-only `cat`/`grep` only — no file is written, moved, or deleted.
+Expect: The pre-existing user-defined mode is still present (not overwritten), and the `gsd` slug appears exactly once (not duplicated) — proving the merge is idempotent and slug-scoped, never clobbering user modes.
+Confirms: TRANS-05 — `custom_modes.yaml` (and any shared Bob config) merged idempotently; installing gsd-bob never overwrites or duplicates user-defined modes.
+Result: [ ] pass  [ ] fail
+
+## AC-12 — No model-backend literals in the bob core paths (RUNTIME-04)
+
+Cmd:    On a real Bob machine, read-only grep the vendored bob core paths for model-name literals (no edits): `grep -rniE "claude|gemini|granite|gpt" gsd-core/bin/lib/capability-registry.cjs src/bob-adapter.cjs | grep -viE "convertClaudeCommandToBob|generated|comment"` (the filter excludes gsd-core's universal `convertClaudeCommandTo<Runtime>` source-format converter-name prefix and comment/doc lines, matching the hermetic backend-neutrality scan). No file is written, moved, or deleted.
+Expect: The grep returns NO genuine model-backend reference — the bob runtime entry and adapter contain zero model-brand literals; Bob owns model routing. This is the on-device complement to the hermetic `test/backend-neutrality.test.cjs`.
+Confirms: RUNTIME-04 — the GSD core contains no branching on the model backend; gsd-bob never references Claude/Gemini/Granite.
+Result: [ ] pass  [ ] fail
+
+## AC-13 — Single-command install prints the target and produces a working `.bob/` layout (INSTALL-01/02/03)
+
+Cmd:    On a real Bob machine, run ONE install command and observe the printed target, then read back the layout. Install (Phase-3-contributed mutating step, run in the Phase 6 pass): `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local` (or `node bin/gsd-bob.cjs --bob --local` from a checkout). Then read-only confirm: `ls -la .bob`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls .bob/gsd-core/bin/gsd-tools.cjs`. The `cat`/`grep`/`ls` read-backs mutate nothing.
+Expect: BEFORE writing, the command prints the resolved ABSOLUTE target path (e.g. `Installing into: /…/.bob`). After it completes, `.bob/custom_modes.yaml` exists with exactly one `slug: gsd`, and `.bob/gsd-core/bin/gsd-tools.cjs` is present — a working GSD layout at the chosen scope. The user could equally choose global (`--global` → `~/.bob`).
+Confirms: INSTALL-01 (resolved target printed before writing), INSTALL-02 (local/global scope selectable via a single command), INSTALL-03 (clean install produces a working `.bob/` layout) / SC#1 / SC#2.
+Result: [ ] pass  [ ] fail
+
+## AC-14 — Re-run is idempotent and preserves user customizations (INSTALL-04)
+
+Cmd:    On a real Bob machine, AFTER seeding a user mode/command/rule and running the AC-13 install once, run the SAME install command a SECOND time (Phase-6 mutating step), then read-only confirm. Re-run: `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local`. Confirm (read-only): `grep -c "slug: gsd$" .bob/custom_modes.yaml` and `grep -c "slug: my-mode" .bob/custom_modes.yaml`, plus `ls` of any pre-existing user command/rule file.
+Expect: `grep -c "slug: gsd$"` returns exactly `1` (no duplication on re-run), the pre-existing user mode `my-mode` is still present, and the user-authored command/rule files are untouched — the re-run updated in place without clobbering or duplicating anything.
+Confirms: INSTALL-04 — re-running the installer updates idempotently, preserving user-authored commands, rules, and `gsd-*` modes without duplication / SC#3.
+Result: [ ] pass  [ ] fail
+
+## AC-15 — Manifest is the sole source of truth; uninstall touches only tracked entries (INSTALL-05)
+
+Cmd:    On a real Bob machine, AFTER the AC-13/AC-14 install, read-only inspect the manifest, then run the manifest-driven uninstall (Phase-6 mutating step) and read-only confirm what it spared. Inspect: `cat .bob/.gsd-bob-manifest.json` (observe `entries[]`). Uninstall: `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local --uninstall`. Confirm (read-only): `ls .bob/custom_modes.yaml`, `grep -c "slug: my-mode" .bob/custom_modes.yaml`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls -d .planning` (still present).
+Expect: `.gsd-bob-manifest.json` lists the tracked `entries[]` (the sole source of truth). After `--uninstall`: matching tracked `file` entries are gone, `custom_modes.yaml` still exists with `my-mode` and NO `slug: gsd` (un-merged, not deleted), the manifest dotfile is removed, and `.planning/` is still present (never deleted). A user file the manifest does not track is left intact.
+Confirms: INSTALL-05 — the manifest is the sole source of truth; update/uninstall touch only tracked entries; uninstall un-merges slices and never deletes `.planning/` (D-06/D-07) / SC#4.
+Result: [ ] pass  [ ] fail
+
+## AC-16 — `--dry-run` prints the plan and writes nothing
+
+Cmd:    On a real Bob machine, run a dry-run install and confirm zero filesystem change. Snapshot, then dry-run, then re-snapshot (read-only around a no-write command): `find .bob -type f 2>/dev/null | sort > /tmp/before.txt; npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local --dry-run; find .bob -type f 2>/dev/null | sort > /tmp/after.txt; diff /tmp/before.txt /tmp/after.txt`. Only `/tmp` snapshot files are written; the `--dry-run` command itself writes nothing under `.bob/`.
+Expect: The dry-run output carries the `PLAN (dry-run — nothing written)` marker and the full staging plan, and `diff /tmp/before.txt /tmp/after.txt` reports NO differences (exit 0) — the dry-run mutated nothing on disk. Note: for a global install with no project `.planning/`, `text_mode` is a per-project guarantee written into `<project>/.planning/config.json` only — it is NOT enforced at the runtime/descriptor level.
+Confirms: INSTALL-01/05 dry-run safety (D-12) — `--dry-run` prints the plan and writes nothing; the global-scope `text_mode` limitation is surfaced, not hidden (per-project only).
+Result: [ ] pass  [ ] fail
