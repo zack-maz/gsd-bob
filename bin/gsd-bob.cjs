@@ -44,6 +44,7 @@ const {
   SCHEMA_VERSION,
   sha256,
   manifestPath,
+  safeJoin,
   readManifest,
   writeManifest,
   buildManifest,
@@ -193,7 +194,7 @@ function runUninstall({ target, dryRun }) {
     if (entry.kind === 'merged') {
       if (rel === 'custom_modes.yaml') {
         // Un-merge the gsd slice from the home-root custom_modes.yaml (D-06).
-        const abs = path.join(target, rel);
+        const abs = safeJoin(target, rel); // CR-01 containment guard
         let text = '';
         try {
           text = fs.readFileSync(abs, 'utf8');
@@ -210,7 +211,7 @@ function runUninstall({ target, dryRun }) {
       // .planning/config.json — remove ONLY the gsd-owned key (workflow.text_mode),
       // preserve every user key. A tiny inline JSON un-merge (NOT YAML), and the
       // file is NEVER deleted (D-07). Anchored at workspaceRoot, not target.
-      const cfgAbs = path.join(workspaceRoot, rel);
+      const cfgAbs = safeJoin(workspaceRoot, rel); // CR-01 containment guard
       let cfgRaw;
       try {
         cfgRaw = fs.readFileSync(cfgAbs, 'utf8');
@@ -242,7 +243,10 @@ function runUninstall({ target, dryRun }) {
       continue;
     }
     recordDirsFor(rel);
-    const abs = path.join(target, rel);
+    // CR-01: resolve through the containment guard so a poisoned `..`/absolute
+    // entry can never drive an out-of-root delete (defense-in-depth alongside
+    // readManifest's load-time validation).
+    const abs = safeJoin(target, rel);
     const verdict = classifyOrphan(entry, abs);
     if (verdict === 'remove') {
       if (!dryRun && fs.existsSync(abs)) fs.rmSync(abs);

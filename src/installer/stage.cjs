@@ -30,7 +30,7 @@ const {
   gateArtifact,
   buildSupportRoster,
 } = require('../bob-adapter.cjs');
-const { sha256, classifyOnUpdate, classifyOrphan } = require('./manifest.cjs');
+const { sha256, safeJoin, classifyOnUpdate, classifyOrphan } = require('./manifest.cjs');
 
 /**
  * Bob's conservative lower-bound capability declaration (CAPABILITY-MAP §1): no
@@ -255,7 +255,10 @@ function stage({ target, scope, workspaceRoot, dryRun = false, manifest, report,
       survivingEntries.push(entry);
       continue;
     }
-    const abs = path.join(target, entry.path);
+    // CR-01: resolve through the containment guard so a poisoned `..`/absolute
+    // entry can never drive an out-of-root delete (defense-in-depth alongside
+    // readManifest's load-time validation).
+    const abs = safeJoin(target, entry.path);
     const verdict = classifyOrphan(entry, abs);
     if (verdict === 'remove') {
       if (!dryRun && fs.existsSync(abs)) fs.rmSync(abs);

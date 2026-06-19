@@ -53,6 +53,65 @@ function manifestPath(configHome) {
 }
 
 /**
+ * CR-01 lexical guard: assert a manifest entry path is relative and stays inside
+ * the install root. The manifest is the SOLE source of truth and its entries
+ * drive destructive fs ops, so a `..`/absolute entry (corruption, a partial
+ * overwrite, or a manifest carried from a differently-rooted prior install) must
+ * fail LOUD here rather than silently driving an out-of-root delete.
+ * `path.join(target, entry.path)` does NOT neutralise `..`, which is exactly the
+ * adversarial input the "never touch user files / never orphan" promise exists
+ * to defend against.
+ * @param {string} relPath
+ * @param {string} [manifestFile] for a more actionable error
+ * @returns {string} the path, unchanged, when safe
+ */
+function assertSafeRelpath(relPath, manifestFile) {
+  const where = manifestFile ? ` in ${manifestFile}` : '';
+  if (typeof relPath !== 'string' || relPath.length === 0) {
+    throw new Error(`manifest: entry.path must be a non-empty string${where} (CR-01 guard)`);
+  }
+  if (path.isAbsolute(relPath)) {
+    throw new Error(
+      `manifest: entry.path "${relPath}" is absolute${where} — refusing ` +
+        '(an absolute path would drive an out-of-root delete; CR-01 guard)',
+    );
+  }
+  // Fold both separators so a `..\\` segment is caught on POSIX too, then
+  // normalise: any path that still begins with `..` climbs out of the root.
+  const normalized = path.normalize(relPath).replace(/\\/g, '/');
+  if (normalized === '..' || normalized.startsWith('../')) {
+    throw new Error(
+      `manifest: entry.path "${relPath}" escapes the install root after ` +
+        `normalization ("${normalized}")${where} — refusing (CR-01 guard)`,
+    );
+  }
+  return relPath;
+}
+
+/**
+ * CR-01 containment guard: join `rel` onto `base` and assert the resolved path
+ * stays strictly inside `base`. Separator-correct on the running platform
+ * (resolve-based), so it catches `..` climbs AND absolute `rel`. This is the
+ * defense-in-depth applied before every destructive fs op (orphan sweep,
+ * uninstall) even though `readManifest` already validates on load.
+ * @param {string} base  the install root the result must stay within
+ * @param {string} rel   untrusted relative path from the manifest
+ * @returns {string} absolute path guaranteed inside base
+ */
+function safeJoin(base, rel) {
+  const baseResolved = path.resolve(base);
+  const abs = path.resolve(baseResolved, rel);
+  const rootWithSep = baseResolved.endsWith(path.sep) ? baseResolved : baseResolved + path.sep;
+  if (!abs.startsWith(rootWithSep)) {
+    throw new Error(
+      `manifest: path "${rel}" escapes the install root ${baseResolved} ` +
+        `(resolved to ${abs}) — refusing (CR-01 containment guard)`,
+    );
+  }
+  return abs;
+}
+
+/**
  * Read and parse the manifest. Returns `null` when absent (ENOENT). Throws
  * LOUD on a corrupt/non-parseable manifest (T-03-01): silently treating a
  * broken manifest as empty would orphan every tracked file.
@@ -68,14 +127,26 @@ function readManifest(configHome) {
     if (err && err.code === 'ENOENT') return null;
     throw err;
   }
+  let parsed;
   try {
-    return JSON.parse(raw);
+    parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
       `manifest: ${file} is present but is not valid JSON (refusing to treat a ` +
         `corrupt manifest as empty, which would orphan every tracked file): ${err.message}`,
     );
   }
+  // CR-01: validate every entry path stays inside the install root BEFORE any
+  // consumer drives a destructive fs op from it. A poisoned manifest (a `..` or
+  // absolute entry) fails LOUD here rather than silently deleting out-of-root.
+  if (parsed && Array.isArray(parsed.entries)) {
+    for (const entry of parsed.entries) {
+      if (entry && typeof entry === 'object' && 'path' in entry) {
+        assertSafeRelpath(entry.path, file);
+      }
+    }
+  }
+  return parsed;
 }
 
 /**
@@ -163,6 +234,8 @@ module.exports = {
   SCHEMA_VERSION,
   sha256,
   manifestPath,
+  assertSafeRelpath,
+  safeJoin,
   readManifest,
   writeManifest,
   buildManifest,
