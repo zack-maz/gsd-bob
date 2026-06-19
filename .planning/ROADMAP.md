@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Bob Capability Mapping** - Resolve the documented-absent Bob primitives from official docs, record a conservative lower-bound default per primitive, and author device-runnable verification steps (completed 2026-06-18)
 - [x] **Phase 2: Runtime Foundation & Artifact Translation** - The backend-agnostic spine plus the Bob-native emitter that converts GSD artifacts and handles primitive gaps (verified 9/9; gaps closed by 02-04, UAT 10/10, secure-phase threats_open: 0) (completed 2026-06-18)
 - [x] **Phase 3: Installer** - One-line npx installer with local/global scope and manifest-safe clean/update modes (completed 2026-06-18)
-- [ ] **Phase 4: Core-Loop Port** - new-project → plan-phase → execute-phase → verify → progress running natively in Bob
+- [x] **Phase 4: Core-Loop Port** - new-project → plan-phase → execute-phase → verify → progress running natively in Bob (completed 2026-06-19)
 - [ ] **Phase 5: Quality Gates & Upstream Readiness** - code-review, debug, audit ported parity-first, with the adapter audited to upstream-mergeable standard
 - [ ] **Phase 6: On-Device Acceptance Verification** - The consolidated acceptance checklist and the single on-device pass the user runs on a real Bob machine
 
@@ -107,7 +107,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `/gsd-verify` validates the completed phase against its goals — verified by equivalence test, with the in-Bob run on the acceptance checklist (CORE-04).
   5. `/gsd-progress` reports status and advances the workflow, and the produced `.planning/` tree sits at the workspace root next to `.bob/` with no nested second `.planning/` — verified by root-anchoring assertion, with the in-Bob run on the acceptance checklist (CORE-05).
 
-**Plans**: TBD
+**Plans**: 2/2 plans complete
+
+**Wave 1**
+
+- [x] 04-01-PLAN.md — Vendor the 8 core-loop command sources (checkpoint-gated fetch from gsd-core 1.5.0) + wire the convertible loop to the declared bob converters (emit `.bob/commands` + `.bob/skills`) + per-command equivalence/golden suite with the D-05 real-answer guard (CORE-01..05)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [x] 04-02-PLAN.md — End-to-end contract suite (PLAN.md/PROJECT.md structure CORE-02, atomic commits CORE-03) + root-anchoring suite (single root-anchored `.planning/`, CORE-05) + append device-runnable AC-17..AC-21 (CORE-01..05)
 
 ### Phase 5: Quality Gates & Upstream Readiness
 
@@ -147,7 +155,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Bob Capability Mapping | 1/1 | Complete    | 2026-06-18 |
 | 2. Runtime Foundation & Artifact Translation | 4/4 | Complete    | 2026-06-18 |
 | 3. Installer | 4/4 | Complete   | 2026-06-18 |
-| 4. Core-Loop Port | 0/TBD | Not started | - |
+| 4. Core-Loop Port | 2/2 | Complete    | 2026-06-19 |
 | 5. Quality Gates & Upstream Readiness | 0/TBD | Not started | - |
 | 6. On-Device Acceptance Verification | 0/TBD | Not started | - |
 </content>

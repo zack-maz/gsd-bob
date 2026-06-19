@@ -39,11 +39,11 @@ Convert GSD's Claude-native artifacts into Bob-native ones, handling primitive g
 
 The essential planning spine running natively in Bob.
 
-- [ ] **CORE-01**: `new-project` runs natively in Bob, producing PROJECT.md → REQUIREMENTS.md → ROADMAP.md
-- [ ] **CORE-02**: `plan-phase` (and transitive `discuss-phase`) produces a PLAN.md natively in Bob
-- [ ] **CORE-03**: `execute-phase` (and `execute-plan`) executes plans natively in Bob with atomic commits
-- [ ] **CORE-04**: `verify` (`verify-work` / `verify-phase`) runs natively in Bob against phase goals
-- [ ] **CORE-05**: `progress` reports status and advances the workflow natively in Bob
+- [x] **CORE-01**: `new-project` runs natively in Bob, producing PROJECT.md → REQUIREMENTS.md → ROADMAP.md
+- [x] **CORE-02**: `plan-phase` (and transitive `discuss-phase`) produces a PLAN.md natively in Bob
+- [x] **CORE-03**: `execute-phase` (and `execute-plan`) executes plans natively in Bob with atomic commits
+- [x] **CORE-04**: `verify` (`verify-work` / `verify-phase`) runs natively in Bob against phase goals
+- [x] **CORE-05**: `progress` reports status and advances the workflow natively in Bob
 
 ### Quality Gates
 
@@ -135,11 +135,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INSTALL-03 | Phase 3 | Complete |
 | INSTALL-04 | Phase 3 | Complete |
 | INSTALL-05 | Phase 3 | Complete |
-| CORE-01 | Phase 4 | Pending |
-| CORE-02 | Phase 4 | Pending |
-| CORE-03 | Phase 4 | Pending |
-| CORE-04 | Phase 4 | Pending |
-| CORE-05 | Phase 4 | Pending |
+| CORE-01 | Phase 4 | Complete |
+| CORE-02 | Phase 4 | Complete |
+| CORE-03 | Phase 4 | Complete |
+| CORE-04 | Phase 4 | Complete |
+| CORE-05 | Phase 4 | Complete |
 | QUAL-01 | Phase 5 | Pending |
 | QUAL-02 | Phase 5 | Pending |
 | QUAL-03 | Phase 5 | Pending |
