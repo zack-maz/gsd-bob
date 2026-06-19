@@ -19,8 +19,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Runtime Foundation & Artifact Translation** - The backend-agnostic spine plus the Bob-native emitter that converts GSD artifacts and handles primitive gaps (verified 9/9; gaps closed by 02-04, UAT 10/10, secure-phase threats_open: 0) (completed 2026-06-18)
 - [x] **Phase 3: Installer** - One-line npx installer with local/global scope and manifest-safe clean/update modes (completed 2026-06-18)
 - [x] **Phase 4: Core-Loop Port** - new-project → plan-phase → execute-phase → verify → progress running natively in Bob (completed 2026-06-19)
-- [ ] **Phase 5: Quality Gates & Upstream Readiness** - code-review, debug, audit ported parity-first, with the adapter audited to upstream-mergeable standard
-- [ ] **Phase 6: On-Device Acceptance Verification** - The consolidated acceptance checklist and the single on-device pass the user runs on a real Bob machine
+- [x] **Phase 5: Quality Gates & Upstream Readiness** - code-review, debug, audit ported parity-first, with the adapter audited to upstream-mergeable standard (completed 2026-06-19)
+- [x] **Phase 6: On-Device Acceptance Verification** - The consolidated acceptance checklist and the single on-device pass the user runs on a real Bob machine (completed 2026-06-19)
 
 ## Phase Details
 
@@ -130,7 +130,16 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. All Bob-specific code is isolated to one adapter component expressed in gsd-core's descriptor/converter vocabulary, a backend-neutrality grep finds zero model-name literals in core paths, and the targeted gsd-core version is recorded — so the work can be lifted upstream as a move (UP-01).
   5. The package ships a README documenting install, scope/modes, supported skills, and flagged gaps, to a standard a gsd-core maintainer could review (UP-02).
 
-**Plans**: TBD
+**Plans**: 3/3 plans complete
+
+**Wave 1**
+
+- [x] 05-01-PLAN.md — Vendor the 4 quality-gate command sources (code-review, debug, audit-fix, audit-uat) into commands/gsd/ so the unchanged installer auto-converts them; extend the roster generator to the full commands/gsd set + regenerate SUPPORT-ROSTER.md (QUAL-01, QUAL-03)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [x] 05-02-PLAN.md — Backend-agnostic verification suites: equivalence + real-installer contract (QUAL-01/03), debug state-persistence reset→continue→restore round-trip (QUAL-02), roster-vs-capmap inspection (QUAL-03), with frozen golden fixtures (QUAL-01, QUAL-02, QUAL-03)
+- [x] 05-03-PLAN.md — UP-01 isolation audit + UPSTREAM.md 5-artifact move inventory (version 1.5.0); maintainer-standard README.md (roster-sourced skill list, no invented flags); append device-runnable AC-22..AC-26 (UP-01, UP-02)
 
 ### Phase 6: On-Device Acceptance Verification
 
@@ -143,7 +152,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The checklist is structured so the user can run it unattended on their Bob machine and record an unambiguous pass/fail per item without needing to interpret or improvise (VERIFY-02).
   3. A mechanism exists to log any capability assumption that proved wrong on-device (e.g. Bob actually supports isolated subagents, or a structured prompt primitive exists) as a tracked follow-up enhancement rather than a silent gap (VERIFY-02).
 
-**Plans**: TBD
+**Plans**: 1/1 plans complete
+
+- [x] 06-01-PLAN.md — Coverage matrix + hermetic traceability/presence test (VERIFY-01), insert-only run scaffolding (preamble + execution order + results roll-up) on the checklist, and the pre-seeded root-anchored ACCEPTANCE-FOLLOWUPS.md wrong-assumption log (VERIFY-02)
 
 ## Progress
 
@@ -156,7 +167,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Runtime Foundation & Artifact Translation | 4/4 | Complete    | 2026-06-18 |
 | 3. Installer | 4/4 | Complete   | 2026-06-18 |
 | 4. Core-Loop Port | 2/2 | Complete    | 2026-06-19 |
-| 5. Quality Gates & Upstream Readiness | 0/TBD | Not started | - |
-| 6. On-Device Acceptance Verification | 0/TBD | Not started | - |
+| 5. Quality Gates & Upstream Readiness | 3/3 | Complete    | 2026-06-19 |
+| 6. On-Device Acceptance Verification | 1/1 | Complete    | 2026-06-19 |
 </content>
 </invoke>

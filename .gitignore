@@ -6,3 +6,6 @@ npm-debug.log*
 # payload, not a build artifact — so it is deliberately NOT ignored here)
 test/.tmp/
 *.tmp
+
+# npm pack output (build artifact — produced from the tree, never committed)
+*.tgz

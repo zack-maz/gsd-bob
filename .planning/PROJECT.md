@@ -12,7 +12,8 @@ A Bob user can install via a single command and run the full GSD planning loop �
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Port quality-gate skills to Bob: review, debug, audit (the daily-driver subset beyond the core loop) — *Validated in Phase 5: Quality Gates & Upstream Readiness (QUAL-01/02/03)*
+- [x] Keep the adapter contribution-ready so it can later be proposed upstream to open-gsd/gsd-core as a supported Bob runtime — *Validated in Phase 5 (UP-01/UP-02: README + UPSTREAM.md 5-artifact move inventory, backend-neutrality grep green, gsd-core 1.5.0 recorded)*
 
 ### Active
 
@@ -20,12 +21,10 @@ A Bob user can install via a single command and run the full GSD planning loop �
 - [ ] Research and document IBM Bob's extension architecture: how it loads commands, modes, and agents; its manifest/config format; its backend-routing model
 - [ ] Define a backend-agnostic translation layer: GSD logic stays runtime-neutral, emits Bob-native artifacts, lets Bob own model routing
 - [ ] Port the core planning loop to Bob: new-project, plan-phase, execute-phase, verify, progress
-- [ ] Port quality-gate skills to Bob: review, debug, audit (the daily-driver subset beyond the core loop)
 - [ ] Parity-first primitive mapping: only port skills whose primitives Bob fully supports; explicitly flag/skip skills that need primitives Bob lacks
 - [ ] One-line npx/Node installer matching gsd-core's approach, with local vs global scope selection
 - [ ] Installer modes: clean install vs update (and equivalent maintenance operations)
 - [ ] Produce the package as a standalone `gsd-bob` (own installer, own versioning, gsd-core as source of truth)
-- [ ] Keep the adapter contribution-ready so it can later be proposed upstream to open-gsd/gsd-core as a supported Bob runtime
 - [ ] End-to-end success: install one-liner works AND the full planning loop runs natively in Bob AND the adapter is upstream-ready
 
 ### Out of Scope
@@ -83,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-17 after initialization; added no-local-Bob testing constraint (develop test-deferred, verify once on-device)*
+*Last updated: 2026-06-19 after Phase 5 (Quality Gates & Upstream Readiness) complete — quality-gate port (QUAL-01/02/03) and contribution-readiness (UP-01/UP-02) validated; only Phase 6 (on-device acceptance) remains for v1.*

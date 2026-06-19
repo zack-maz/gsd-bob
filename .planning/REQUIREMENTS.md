@@ -49,9 +49,9 @@ The essential planning spine running natively in Bob.
 
 The daily-driver review subset beyond the core loop.
 
-- [ ] **QUAL-01**: `code-review` (including `--fix`) runs natively in Bob
-- [ ] **QUAL-02**: `debug` runs natively in Bob with persistent debug state
-- [ ] **QUAL-03**: `audit` (`audit-fix` / `audit-uat`) runs natively in Bob
+- [x] **QUAL-01**: `code-review` (including `--fix`) runs natively in Bob
+- [x] **QUAL-02**: `debug` runs natively in Bob with persistent debug state
+- [x] **QUAL-03**: `audit` (`audit-fix` / `audit-uat`) runs natively in Bob
 
 ### Installer
 
@@ -67,15 +67,15 @@ One-line npx install matching gsd-core's UX.
 
 Keep the work mergeable into gsd-core.
 
-- [ ] **UP-01**: All Bob-specific code is isolated to one adapter component, expressed in gsd-core's descriptor/converter vocabulary, so it can later be lifted upstream as a move rather than a rewrite
-- [ ] **UP-02**: The package ships a README documenting install, scope/modes, supported skills, and flagged gaps — to a standard a gsd-core maintainer could review
+- [x] **UP-01**: All Bob-specific code is isolated to one adapter component, expressed in gsd-core's descriptor/converter vocabulary, so it can later be lifted upstream as a move rather than a rewrite
+- [x] **UP-02**: The package ships a README documenting install, scope/modes, supported skills, and flagged gaps — to a standard a gsd-core maintainer could review
 
 ### On-Device Verification
 
 Compensate for the absence of a local Bob install by accumulating verification into one acceptance pass run on a real Bob machine.
 
-- [ ] **VERIFY-01**: Each phase contributes concrete, device-runnable verification steps (exact commands + expected outputs) to a consolidated on-device acceptance checklist, so nothing depends on live testing during development
-- [ ] **VERIFY-02**: A final on-device acceptance pass runs the full checklist against a real Bob install, records pass/fail per v1 success criterion, and logs any capability assumption that proved wrong (e.g. Bob actually supports isolated subagents) as a follow-up enhancement
+- [x] **VERIFY-01**: Each phase contributes concrete, device-runnable verification steps (exact commands + expected outputs) to a consolidated on-device acceptance checklist, so nothing depends on live testing during development
+- [x] **VERIFY-02**: A final on-device acceptance pass runs the full checklist against a real Bob install, records pass/fail per v1 success criterion, and logs any capability assumption that proved wrong (e.g. Bob actually supports isolated subagents) as a follow-up enhancement
 
 ## v2 Requirements
 
@@ -140,13 +140,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-03 | Phase 4 | Complete |
 | CORE-04 | Phase 4 | Complete |
 | CORE-05 | Phase 4 | Complete |
-| QUAL-01 | Phase 5 | Pending |
-| QUAL-02 | Phase 5 | Pending |
-| QUAL-03 | Phase 5 | Pending |
-| UP-01 | Phase 5 | Pending |
-| UP-02 | Phase 5 | Pending |
-| VERIFY-01 | Phase 6 | Pending |
-| VERIFY-02 | Phase 6 | Pending |
+| QUAL-01 | Phase 5 | Complete |
+| QUAL-02 | Phase 5 | Complete |
+| QUAL-03 | Phase 5 | Complete |
+| UP-01 | Phase 5 | Complete |
+| UP-02 | Phase 5 | Complete |
+| VERIFY-01 | Phase 6 | Complete |
+| VERIFY-02 | Phase 6 | Complete |
 
 **Coverage:**
 

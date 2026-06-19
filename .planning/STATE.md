@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 5
-current_phase_name: Quality Gates & Upstream Readiness
-status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-06-19T20:44:11.882Z"
+current_phase: 6
+status: verifying
+stopped_at: Phase 6 context gathered
+last_updated: "2026-06-19T22:23:56.544Z"
 last_activity: 2026-06-19
-last_activity_desc: Phase 04 complete, transitioned to Phase 5
+last_activity_desc: Phase 6 complete
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 67
+  completed_phases: 6
+  total_plans: 15
+  completed_plans: 15
+  percent: 100
+current_phase_name: On-Device Acceptance Verification
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-17)
 
 **Core value:** A Bob user installs via a single command and runs the full GSD planning loop (new-project → plan-phase → execute-phase → verify) natively, producing the same `.planning/` artifacts GSD produces in Claude Code.
-**Current focus:** Phase 03 — installer
+**Current focus:** Phase 6 — On-Device Acceptance Verification
 
 ## Current Position
 
-Phase: 5 — Quality Gates & Upstream Readiness
+Phase: 6
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-19 — Phase 04 complete, transitioned to Phase 5
+Status: Phase complete — ready for verification
+Last activity: 2026-06-19 — Phase 6 complete
 
 Progress: [███░░░░░░░] 33%
 
@@ -39,7 +39,7 @@ Progress: [███░░░░░░░] 33%
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 12
 - Average duration: 2 min
 - Total execution time: 0.0 hours
 
@@ -50,6 +50,8 @@ Progress: [███░░░░░░░] 33%
 | 01 | 1 | - | - |
 | 02 | 4 | - | - |
 | 04 | 2 | - | - |
+| 5 | 3 | - | - |
+| 6 | 1 | - | - |
 
 **Recent Trend:**
 
@@ -66,6 +68,10 @@ Progress: [███░░░░░░░] 33%
 | Phase 03 P02 | 6min | 3 tasks | 5 files |
 | Phase 03 P03 | 3min | 2 tasks | 4 files |
 | Phase 03 P04 | 6min | 3 tasks | 7 files |
+| Phase 05 P01 | 3min | 2 tasks | 6 files |
+| Phase 05 P02 | ~6min | 2 tasks | 12 files |
+| Phase 05 P03 | 4min | 2 tasks | 3 files |
+| Phase 06 P01 | 4 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -94,6 +100,12 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 03]: orphan prune only touches installer-created dirs; untracked user paths and .planning/ are never removed
 - [Phase ?]: [Phase 03]: bin/gsd-bob.cjs gates the text_mode merge on an existing workspace .planning/; a global install in a non-project cwd skips the write and emits a KNOWN-LIMITATION note (no stray .planning/, D-14/Q1)
 - [Phase ?]: [Phase 03]: uninstall is manifest-driven — un-merge merged slices (custom_modes via adapter, config.json inline JSON), hash-match delete file entries, never delete .planning/ (D-06/D-07)
+- [Phase 05]: Phase 5 quality gates port by conversion (D-01) — vendor 4 command sources; unchanged installer auto-emits commands+skills
+- [Phase 05]: Roster candidate set derived from commands/gsd/*.md (D-06) — drift-proof, matches installer renderRoster; 4 quality gates Supported, zero new skip (D-03)
+- [Phase ?]: [Phase 05]: UP-01 discharged as audit-not-refactor (D-07); UPSTREAM.md records the 5-artifact move inventory with verified file:line pointers + gsd-core 1.5.0; no code moved
+- [Phase ?]: [Phase 05]: README skill list sourced from generated SUPPORT-ROSTER.md (never hand-typed); AC-22..26 appended one-per-SC in the AC-17..21 schema, AC-01..21 untouched
+- [Phase 06]: Coverage matrix is a standalone phase-dir file (D-01) keeping the frozen checklist untouched; a hermetic acceptance-coverage.test.cjs re-derives REQUIREMENTS v1 IDs + checklist Confirms family-regex tokens at run time and fails on any orphan SC/AC (no frozen ID list).
+- [Phase 06]: AC-15 uninstall ordered LAST as teardown (D-03); FU-03 SPIKE-04 config-home links a descriptive proposed enhancement (no invented v2 ID, Pitfall 5); followups presence test is structural only (does not assert rows stay 'unconfirmed').
 
 ### Pending Todos
 
@@ -118,7 +130,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-19T19:58:59.240Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-core-loop-port/04-CONTEXT.md
+Last session: 2026-06-19T22:12:33.534Z
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-on-device-acceptance-verification/06-CONTEXT.md
 </content>
