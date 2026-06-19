@@ -29,7 +29,6 @@
     "ui_safety_gate": true,
     "ai_integration_phase": true,
     "human_verify_mode": "end-of-phase",
-    "text_mode": true,
     "research_before_questions": false,
     "discuss_mode": "discuss",
     "skip_discuss": false,
@@ -45,7 +44,8 @@
     "security_enforcement": true,
     "security_asvs_level": 1,
     "security_block_on": "high",
-    "_auto_chain_active": true
+    "_auto_chain_active": true,
+    "text_mode": true
   },
   "ship": {
     "pr_body_sections": [
