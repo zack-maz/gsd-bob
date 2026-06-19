@@ -21,6 +21,9 @@ const { repoRoot: pkgRoot } = require('../_helpers/vendor.cjs');
 const { stage } = require(path.join(pkgRoot, 'src', 'installer', 'stage.cjs'));
 const { newReport } = require(path.join(pkgRoot, 'src', 'installer', 'report.cjs'));
 const manifestMod = require(path.join(pkgRoot, 'src', 'installer', 'manifest.cjs'));
+const conv = require(
+  path.join(pkgRoot, 'gsd-core', 'bin', 'lib', 'runtime-artifact-conversion.cjs'),
+);
 
 function scratch(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `gsdbob-${prefix}-`));
@@ -36,6 +39,39 @@ function fixtureRepoRoot() {
   fs.mkdirSync(binDir, { recursive: true });
   fs.writeFileSync(path.join(binDir, 'gsd-tools.cjs'), '// vendored payload marker\n', 'utf8');
   return root;
+}
+
+/**
+ * Seed a `commands/gsd/<stem>.md` Claude source under an existing fixture
+ * repoRoot so the convertible loop has input to convert. Mirrors the canonical
+ * Claude-command shape (frontmatter with unsupported keys + body refs to be
+ * neutralized). Returns the raw source content.
+ */
+function seedConvertibleSource(repoRoot, stem) {
+  const dir = path.join(repoRoot, 'commands', 'gsd');
+  fs.mkdirSync(dir, { recursive: true });
+  // Forbidden tokens (Claude config-home + colon dialect) built programmatically
+  // so this test file's prose cannot self-trip the neutralization assertions.
+  const claudeHome = ['.', 'claude'].join('');
+  const colonDialect = ['gsd', ':'].join('');
+  const content = [
+    '---',
+    `name: ${colonDialect}${stem}`,
+    `description: Demo ${stem} command for the convertible loop`,
+    'argument-hint: <topic>',
+    'effort: low',
+    'allowed-tools: Read, Bash',
+    `agent: ${colonDialect}${stem}`,
+    '---',
+    '',
+    `# ${stem}`,
+    '',
+    `See the workflow at ${claudeHome}/gsd-core/workflows/${stem}.md and run /${colonDialect}${stem}.`,
+    `The user passed $ARGUMENTS to scope ${stem}.`,
+    '',
+  ].join('\n');
+  fs.writeFileSync(path.join(dir, `${stem}.md`), content, 'utf8');
+  return content;
 }
 
 function freshManifest(target) {
@@ -179,6 +215,87 @@ test('empty convertible roster: no commands/gsd/ source → zero convertible art
   assert.doesNotThrow(() => stage(opts), 'completes cleanly with an absent convertible source');
   // No skills/commands dirs are required to exist when the source is empty.
   assert.ok(fs.existsSync(path.join(opts.target, 'custom_modes.yaml')), 'structural pieces still staged');
+});
+
+test('convertible loop: present source emits CONVERTED command (bytes = convertClaudeCommandToBobCommand, NOT raw)', () => {
+  const repoRoot = fixtureRepoRoot();
+  const source = seedConvertibleSource(repoRoot, 'demo');
+  const opts = baseOpts({ repoRoot });
+  stage(opts);
+
+  const cmdAbs = path.join(opts.target, 'commands', 'gsd-demo.md');
+  assert.ok(fs.existsSync(cmdAbs), 'flat command emitted at commands/gsd-demo.md');
+  const emitted = fs.readFileSync(cmdAbs, 'utf8');
+  const expected = conv.convertClaudeCommandToBobCommand(source, 'gsd-demo');
+  assert.equal(emitted, expected, 'emitted command bytes equal the converter output');
+  assert.notEqual(emitted, source, 'emitted command is NOT the raw source (it was converted)');
+});
+
+test('convertible loop: present source ALSO emits the nested SKILL.md (bytes = convertClaudeCommandToBobSkill)', () => {
+  const repoRoot = fixtureRepoRoot();
+  const source = seedConvertibleSource(repoRoot, 'demo');
+  const opts = baseOpts({ repoRoot });
+  stage(opts);
+
+  const skillAbs = path.join(opts.target, 'skills', 'gsd-demo', 'SKILL.md');
+  assert.ok(fs.existsSync(skillAbs), 'nested skill emitted at skills/gsd-demo/SKILL.md');
+  const emitted = fs.readFileSync(skillAbs, 'utf8');
+  const expected = conv.convertClaudeCommandToBobSkill(source, 'gsd-demo');
+  assert.equal(emitted, expected, 'emitted skill bytes equal the converter output');
+});
+
+test('convertible loop: emitted command frontmatter keeps description+argument-hint, strips effort/allowed-tools/agent', () => {
+  const repoRoot = fixtureRepoRoot();
+  seedConvertibleSource(repoRoot, 'demo');
+  const opts = baseOpts({ repoRoot });
+  stage(opts);
+
+  const out = fs.readFileSync(path.join(opts.target, 'commands', 'gsd-demo.md'), 'utf8');
+  const fmEnd = out.indexOf('---', 3);
+  assert.ok(fmEnd > 0, 'frontmatter block present');
+  const fm = out.substring(3, fmEnd);
+  assert.match(fm, /^description:/m);
+  assert.match(fm, /^argument-hint:/m);
+  assert.doesNotMatch(fm, /^effort:/m);
+  assert.doesNotMatch(fm, /^allowed-tools:/m);
+  assert.doesNotMatch(fm, /^agent:/m);
+});
+
+test('convertible loop: emitted command + skill bodies are neutralized (no .claude / no colon dialect)', () => {
+  const repoRoot = fixtureRepoRoot();
+  seedConvertibleSource(repoRoot, 'demo');
+  const opts = baseOpts({ repoRoot });
+  stage(opts);
+
+  const claudeHome = ['.', 'claude'].join('');
+  const colonDialect = ['gsd', ':'].join('');
+  const bobHome = ['.', 'bob'].join('');
+  const hyphenForm = ['gsd', '-'].join('');
+
+  for (const rel of ['commands/gsd-demo.md', 'skills/gsd-demo/SKILL.md']) {
+    const out = fs.readFileSync(path.join(opts.target, rel), 'utf8');
+    assert.ok(!out.includes(claudeHome), `${rel}: no Claude config-home path ref`);
+    assert.ok(!out.includes(colonDialect), `${rel}: no colon-dialect command ref`);
+    assert.ok(out.includes(bobHome), `${rel}: carries the .bob home`);
+    assert.ok(out.includes(hyphenForm), `${rel}: carries the hyphen command form`);
+  }
+});
+
+test('convertible loop: both emitted artifacts are recorded as manifest file entries', () => {
+  const repoRoot = fixtureRepoRoot();
+  seedConvertibleSource(repoRoot, 'demo');
+  const opts = baseOpts({ repoRoot });
+  stage(opts);
+
+  const paths = opts.manifest.entries.filter((e) => e.kind === 'file').map((e) => e.path);
+  assert.ok(
+    paths.includes(path.join('commands', 'gsd-demo.md')),
+    'command tracked as a manifest file entry',
+  );
+  assert.ok(
+    paths.includes(path.join('skills', 'gsd-demo', 'SKILL.md')),
+    'skill tracked as a manifest file entry',
+  );
 });
 
 test('orphan sweep: hash-match orphan removed + dropped; diverged orphan kept+warned; .planning untouched', () => {
