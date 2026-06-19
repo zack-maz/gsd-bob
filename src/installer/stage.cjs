@@ -225,17 +225,41 @@ function stage({ target, scope, workspaceRoot, dryRun = false, manifest, report,
   stageFile('SUPPORT-ROSTER.md', Buffer.from(renderRoster()));
 
   // ---- Convertible-artifact loop (D-08, roster-agnostic) -------------------
-  // v1 vendors NO commands/gsd/ source (RESEARCH Pitfall 1). Guard with
-  // existsSync and treat absence as zero artifacts — completes cleanly and
-  // scales automatically when Phases 4-5 vendor the source under repoRoot.
+  // Each Claude command source under repoRoot/commands/gsd/ is run through the
+  // bob artifactLayout converters (D-01 port-by-conversion — reuse the built
+  // converters, never raw-copy and never hand-rewrite). For a supported source
+  // `<stem>` we emit TWO Bob-conformant artifacts, matching the bob
+  // artifactLayout exactly:
+  //   - flat command  commands/gsd-<stem>.md   (convertClaudeCommandToBobCommand)
+  //   - nested skill   skills/gsd-<stem>/SKILL.md (convertClaudeCommandToBobSkill)
+  // Absence of the source is a clean no-op (existsSync guard) — the empty-roster
+  // regression stays green. gateArtifact remains the sole support authority
+  // (D-03 gate, don't break); no core-loop skip entries are added (A3 — all
+  // degrade cleanly). No new converter or degrade*.cjs is introduced.
   const convertibleSrc = path.join(repoRoot, 'commands', 'gsd');
   if (fs.existsSync(convertibleSrc)) {
+    // Require the converters lazily — only when there IS a source to convert —
+    // so the absent-source path never depends on the vendored conversion lib.
+    const {
+      convertClaudeCommandToBobCommand,
+      convertClaudeCommandToBobSkill,
+    } = require(path.join(repoRoot, 'gsd-core', 'bin', 'lib', 'runtime-artifact-conversion.cjs'));
     for (const rel of listFilesRel(convertibleSrc)) {
-      const name = path.basename(rel, path.extname(rel));
+      const stem = path.basename(rel, path.extname(rel));
+      const name = `gsd-${stem}`;
       const candidate = { name, requires: [] };
       if (gateArtifact(candidate, BOB_CAPABILITY_DECL).supported) {
-        const destRel = path.join('commands', rel);
-        stageFile(destRel, fs.readFileSync(path.join(convertibleSrc, rel)));
+        const content = fs.readFileSync(path.join(convertibleSrc, rel), 'utf8');
+        // Flat command (gsd- prefix), per the bob artifactLayout.
+        stageFile(
+          path.join('commands', `${name}.md`),
+          Buffer.from(convertClaudeCommandToBobCommand(content, name)),
+        );
+        // Nested skill (gsd- prefix) at skills/<name>/SKILL.md.
+        stageFile(
+          path.join('skills', name, 'SKILL.md'),
+          Buffer.from(convertClaudeCommandToBobSkill(content, name)),
+        );
       }
       // Unsupported candidates are surfaced through the roster (already rendered
       // from the gate above); nothing is emitted broken.

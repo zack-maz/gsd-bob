@@ -48,6 +48,21 @@ function fixtureRepoRoot() {
  * neutralized). Returns the raw source content.
  */
 function seedConvertibleSource(repoRoot, stem) {
+  // The convertible loop lazily requires the vendored converter lib from the
+  // fixture repoRoot; that lib pulls in sibling libs and reaches up into the
+  // repoRoot's scripts/ + package.json. Rather than deep-copy the 5MB payload,
+  // symlink the real pkgRoot's gsd-core/, scripts/ and package.json into the
+  // fixture so every transitive require resolves against the genuine vendored
+  // tree. (fixtureRepoRoot pre-creates gsd-core/bin/gsd-tools.cjs as a real
+  // file, so remove that stub dir first before linking the real tree.)
+  fs.rmSync(path.join(repoRoot, 'gsd-core'), { recursive: true, force: true });
+  for (const link of ['gsd-core', 'scripts', 'package.json']) {
+    const linkPath = path.join(repoRoot, link);
+    if (!fs.existsSync(linkPath)) {
+      fs.symlinkSync(path.join(pkgRoot, link), linkPath);
+    }
+  }
+
   const dir = path.join(repoRoot, 'commands', 'gsd');
   fs.mkdirSync(dir, { recursive: true });
   // Forbidden tokens (Claude config-home + colon dialect) built programmatically
