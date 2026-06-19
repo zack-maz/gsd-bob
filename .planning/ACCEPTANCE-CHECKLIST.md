@@ -127,3 +127,38 @@ Cmd:    On a real Bob machine, run a dry-run install and confirm zero filesystem
 Expect: The dry-run output carries the `PLAN (dry-run — nothing written)` marker and the full staging plan, and `diff /tmp/before.txt /tmp/after.txt` reports NO differences (exit 0) — the dry-run mutated nothing on disk. Note: for a global install with no project `.planning/`, `text_mode` is a per-project guarantee written into `<project>/.planning/config.json` only — it is NOT enforced at the runtime/descriptor level.
 Confirms: INSTALL-01/05 dry-run safety (D-12) — `--dry-run` prints the plan and writes nothing; the global-scope `text_mode` limitation is surfaced, not hidden (per-project only).
 Result: [ ] pass  [ ] fail
+
+## AC-17 — `new-project` runs natively under Bob and lands a real `.planning/PROJECT.md` (CORE-01)
+
+Cmd:    On a real Bob machine, AFTER the AC-13 install, run the in-Bob new-project loop step (Phase-6 mutating step): invoke `/gsd-new-project` and answer its prompts. Then read-only confirm the emitted command + skill and the produced artifact: `ls .bob/commands/gsd-new-project.md .bob/skills/gsd-new-project/SKILL.md`, `cat .planning/PROJECT.md`, and `grep -cE '^## (What This Is|Core Value|Requirements)' .planning/PROJECT.md`. The `/gsd-new-project` run is the mutating step (allowed, like AC-13's install); the `ls`/`cat`/`grep` read-backs mutate nothing.
+Expect: `.bob/commands/gsd-new-project.md` and `.bob/skills/gsd-new-project/SKILL.md` exist (the converted core-loop entry is Bob-native); `.planning/PROJECT.md` was produced with its documented top-level headers (`## What This Is`, `## Core Value`, `## Requirements`) holding the real answers you typed — no unfilled `{{`/`TODO`/placeholder markers. This is the on-device complement to the hermetic `test/core-loop-equivalence.test.cjs` (D-05 real-answer guard).
+Confirms: CORE-01 — new-project runs natively under Bob and produces a contract-conformant `.planning/PROJECT.md` / SC#1. (on-device complement to test/core-loop-equivalence.test.cjs)
+Result: [ ] pass  [ ] fail
+
+## AC-18 — `plan-phase` (incl. transitive `discuss-phase`) produces a contract-conformant PLAN.md (CORE-02)
+
+Cmd:    On a real Bob machine, AFTER AC-17, run the in-Bob plan-phase loop step (Phase-6 mutating step): invoke `/gsd-plan-phase` (which threads through discuss-phase) and answer its prompts. Then read-only confirm the emitted commands and the produced PLAN.md: `ls .bob/commands/gsd-plan-phase.md .bob/commands/gsd-discuss-phase.md`, `ls .planning/phases/*/[0-9]*-PLAN.md`, and `grep -cE '^<(objective|tasks|success_criteria)>' .planning/phases/*/*-PLAN.md`. The `/gsd-plan-phase` run is the mutating step; the `ls`/`grep` read-backs mutate nothing.
+Expect: `.bob/commands/gsd-plan-phase.md` and `.bob/commands/gsd-discuss-phase.md` both exist; a `*-PLAN.md` is produced under `.planning/phases/<phase>/` carrying the documented frontmatter fence (`phase:`/`plan:`) and section markers (`<objective>`, `<tasks>`, `<success_criteria>`). This is the on-device complement to the hermetic `test/core-loop-contract.test.cjs` (CORE-02 PLAN.md structural contract).
+Confirms: CORE-02 — plan-phase (with transitive discuss-phase) produces a PLAN.md matching the documented section/frontmatter contract / SC#2. (on-device complement to test/core-loop-contract.test.cjs)
+Result: [ ] pass  [ ] fail
+
+## AC-19 — `execute-phase` (incl. `execute-plan`) commits atomically per task (CORE-03)
+
+Cmd:    On a real Bob machine, AFTER AC-18, run the in-Bob execute-phase loop step (Phase-6 mutating step): invoke `/gsd-execute-phase`, which runs the execute-plan workflow sequentially inline and commits each task. Then read-only confirm the emitted command, the staged workflow, and the commit shapes: `ls .bob/commands/gsd-execute-phase.md`, `ls .bob/gsd-core/workflows/execute-plan.md`, and `git log --format='%s' -n 20 | grep -cE '^\w+\(\d+-\d+\)'` (count atomic-shaped subjects). The `/gsd-execute-phase` run is the mutating step; the `ls`/`git log` read-backs mutate nothing.
+Expect: `.bob/commands/gsd-execute-phase.md` exists and `.bob/gsd-core/workflows/execute-plan.md` is staged as a workflow (CORE-03 is reached transitively via execute-phase→execute-plan, not as a separate slash command); the recent `git log` subjects all match the atomic `{type}({phase}-{plan})` shape `/^\w+\(\d+-\d+\)/` — one commit per task, under the sequential-inline model. This is the on-device complement to the hermetic `test/core-loop-contract.test.cjs` (CORE-03 atomic-commit contract).
+Confirms: CORE-03 — execute-phase (with execute-plan) produces one atomic `{type}({phase}-{plan})` commit per task under sequential-inline / SC#3. (on-device complement to test/core-loop-contract.test.cjs)
+Result: [ ] pass  [ ] fail
+
+## AC-20 — `verify-work` (incl. transitive `verify-phase`) runs natively under Bob (CORE-04)
+
+Cmd:    On a real Bob machine, AFTER AC-19, run the in-Bob verify loop step (Phase-6 mutating step): invoke `/gsd-verify-work`, which threads through the verify-phase workflow. Then read-only confirm the emitted command, the staged workflow, and the verification artifact: `ls .bob/commands/gsd-verify-work.md`, `ls .bob/gsd-core/workflows/verify-phase.md`, and `ls .planning/phases/*/*VERIFICATION*.md .planning/phases/*/*SUMMARY*.md 2>/dev/null`. The `/gsd-verify-work` run is the mutating step; the `ls` read-backs mutate nothing.
+Expect: `.bob/commands/gsd-verify-work.md` exists and `.bob/gsd-core/workflows/verify-phase.md` is staged as a workflow (CORE-04 is reached transitively via verify-work→verify-phase, not as a separate slash command); the verify flow runs under Bob and produces/updates its verification artifact in `.planning/phases/<phase>/`. This is the on-device complement to the hermetic `test/core-loop-contract.test.cjs` workflow-staging assertion (verify-phase staged, not a command).
+Confirms: CORE-04 — verify-work (with transitive verify-phase) runs natively under Bob / SC#4. (on-device complement to test/core-loop-contract.test.cjs)
+Result: [ ] pass  [ ] fail
+
+## AC-21 — `progress` runs natively and `.planning/` stays root-anchored, none nested (CORE-05)
+
+Cmd:    On a real Bob machine, AFTER a full loop run (AC-17..AC-20), run the in-Bob progress step (Phase-6 mutating step): invoke `/gsd-progress`. Then read-only confirm the emitted command and the root-anchoring invariant: `ls .bob/commands/gsd-progress.md`, `find . -type d -name .planning | sort` (count and locate every `.planning/`), and `test ! -d .bob/.planning && echo "no nested .planning under scope"`. The `/gsd-progress` run is the mutating step; the `ls`/`find`/`test` read-backs mutate nothing.
+Expect: `.bob/commands/gsd-progress.md` exists; `find . -type d -name .planning` lists EXACTLY ONE `.planning/`, located at the workspace root next to `.bob/` (not under the scope dir); no nested `.bob/.planning` exists. This is the on-device complement to the hermetic `test/core-loop-root-anchor.test.cjs` (single root-anchored `.planning/`, no nesting).
+Confirms: CORE-05 — progress runs natively and the loop keeps exactly one root-anchored `.planning/` with no nested second / SC#5. (on-device complement to test/core-loop-root-anchor.test.cjs)
+Result: [ ] pass  [ ] fail
