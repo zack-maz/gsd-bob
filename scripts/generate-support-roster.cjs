@@ -6,9 +6,10 @@
  *
  * The roster is GENERATED from `gateArtifact`/`buildSupportRoster` in
  * src/bob-adapter.cjs, never hand-maintained (T-02-10): a stale/silent roster
- * would hide a parity gap. The installer/emitter regenerates it for the full
- * skill set in Phases 4-5; for Phase 2 it proves the mechanism on a
- * representative candidate set.
+ * would hide a parity gap. As of Phase 5 the candidate set is DERIVED from the
+ * emitted `commands/gsd/*.md` source set — the same source `src/installer/stage.cjs`
+ * iterates — so the standalone script and the installer's `renderRoster()` agree
+ * and the list cannot drift (full-roster generation, D-06).
  *
  * Each unsupported candidate is recorded as a loud `unsupported on Bob: <reason>`
  * line (D-10). Run: `node scripts/generate-support-roster.cjs`.
@@ -24,17 +25,34 @@ const adapter = require(path.join(__dirname, '..', 'src', 'bob-adapter.cjs'));
 // by the installer in Phase 3; this is the representative Phase-2 declaration.
 const bobCapabilityDecl = { isolatedSubagents: false, structuredPrompts: false };
 
-// Representative candidate set proving the gate mechanism for Phase 2. Full-roster
-// generation across every GSD skill rides with Phases 4-5 (per RESEARCH).
-const candidates = [
-  { name: 'gsd-help', requires: [] },
-  { name: 'gsd-plan-phase', requires: [] },
-  { name: 'gsd-execute-phase', requires: [] },
-  // Curated skip-list entry — a hard dependency skill metadata cannot self-describe.
+// Candidate set DERIVED from `commands/gsd/*.md` — the same source the installer
+// iterates (`src/installer/stage.cjs` L239-266) — so the standalone script and the
+// installer's `renderRoster()` agree and the list cannot drift (D-06, full-roster).
+// Each `<stem>.md` maps to `{ name: 'gsd-' + stem, requires: [] }`.
+const commandsDir = path.join(__dirname, '..', 'commands', 'gsd');
+const derivedCandidates = fs.existsSync(commandsDir)
+  ? fs
+      .readdirSync(commandsDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => ({ name: `gsd-${path.basename(f, '.md')}`, requires: [] }))
+  : [];
+
+// Preserve the two curated edge-case entries that exercise the gate's skip paths
+// so the roster keeps proving the mechanism:
+//   - gsd-autonomous: curated BOB_SKIP_LIST entry (hard dependency metadata can't self-describe).
+//   - gsd-parallel-fanout: unmet hard dependency — requires a primitive Bob lacks (isolated subagents).
+const curatedEdgeCases = [
   { name: 'gsd-autonomous', requires: [] },
-  // Unmet hard dependency — requires a primitive Bob lacks (isolated subagents).
   { name: 'gsd-parallel-fanout', requires: ['isolatedSubagents'] },
 ];
+
+// De-duplicate by name (curated entries win if a derived source shares the name).
+const candidates = (() => {
+  const byName = new Map();
+  for (const c of derivedCandidates) byName.set(c.name, c);
+  for (const c of curatedEdgeCases) byName.set(c.name, c);
+  return [...byName.values()];
+})();
 
 const supported = candidates
   .filter((c) => adapter.gateArtifact(c, bobCapabilityDecl).supported)
@@ -55,17 +73,18 @@ const header = `# Bob Support Roster
 > fidelity. Any comments a user placed in \`~/.bob/custom_modes.yaml\` are not preserved
 > across a gsd-bob merge.
 >
-> **Scope:** Phase 2 proves the mechanism on a representative candidate set; full-roster
-> generation across the whole GSD skill set rides with Phases 4-5.
+> **Scope:** the candidate set is now DERIVED from the emitted \`commands/gsd/*.md\` source
+> set (the same source the installer iterates), plus the two curated edge cases that exercise
+> the gate's skip paths — full-roster generation (Phase 5, D-06).
 `;
 
 const supportedSection = supported.length
   ? supported.map((n) => `- ${n}`).join('\n')
-  : '_(none in the representative set)_';
+  : '_(none in the candidate set)_';
 
 const unsupportedSection = unsupportedLines.length
   ? unsupportedLines.map((l) => `- ${l}`).join('\n')
-  : '_(none unsupported in the representative set)_';
+  : '_(none unsupported in the candidate set)_';
 
 const body = `
 ## Supported (emitted to \`.bob/commands\` / \`.bob/skills\`)

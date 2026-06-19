@@ -12,14 +12,22 @@
 > fidelity. Any comments a user placed in `~/.bob/custom_modes.yaml` are not preserved
 > across a gsd-bob merge.
 >
-> **Scope:** Phase 2 proves the mechanism on a representative candidate set; full-roster
-> generation across the whole GSD skill set rides with Phases 4-5.
+> **Scope:** the candidate set is now DERIVED from the emitted `commands/gsd/*.md` source
+> set (the same source the installer iterates), plus the two curated edge cases that exercise
+> the gate's skip paths — full-roster generation (Phase 5, D-06).
 
 ## Supported (emitted to `.bob/commands` / `.bob/skills`)
 
-- gsd-help
-- gsd-plan-phase
+- gsd-audit-fix
+- gsd-audit-uat
+- gsd-code-review
+- gsd-debug
+- gsd-discuss-phase
 - gsd-execute-phase
+- gsd-new-project
+- gsd-plan-phase
+- gsd-progress
+- gsd-verify-work
 
 ## Unsupported on Bob (omitted from the loadable set, recorded loud)
 
