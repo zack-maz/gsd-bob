@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 03-installer
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md, 03-04-SUMMARY.md]
 started: 2026-06-19T19:36:17Z
-updated: 2026-06-19T19:40:00Z
+updated: 2026-06-19T19:42:00Z
 ---
 
 ## Current Test
 
-[testing paused — 1 item outstanding: AC-13..AC-16 live-Bob on-device pass, deferred to Phase 6]
+[testing complete]
 
 ## Tests
 
@@ -38,9 +38,8 @@ result: pass
 
 ### 7. AC-13..AC-16 on a real Bob machine
 expected: On a live Bob runtime with a real ~/.bob, AC-13..AC-16 pass on-device (print-before-write install, idempotent re-run, manifest-as-truth uninstall, dry-run writes nothing). Deferred to Phase 6 per VERIFY-01/02 — no live Bob on the dev device.
-result: blocked
-blocked_by: other
-reason: "Requires a live Bob runtime; no live Bob on the dev device. Intentionally deferred to the Phase 6 on-device acceptance pass per VERIFY-01/02. The installer mechanics (AC-13..AC-16) are all green locally against a simulated .bob/ target (Tests 1-6); only Bob actually loading the resulting .bob/ layout remains to confirm on-device."
+result: skipped
+reason: "Deferred by user decision to the end-of-project / Phase 6 on-device acceptance pass (VERIFY-01/02). Not run on-device here — no live Bob on the dev machine. The installer mechanics behind AC-13..AC-16 are all verified green locally against a simulated .bob/ target (Tests 1-6); the only unconfirmed item is Bob actually loading the generated .bob/ layout, which will be exercised at the end via the AC-13..AC-16 script. Recorded as skipped-deferred (not pass) because it has not yet been executed on a device."
 
 ## Summary
 
@@ -48,8 +47,8 @@ total: 7
 passed: 6
 issues: 0
 pending: 0
-skipped: 0
-blocked: 1
+skipped: 1
+blocked: 0
 
 ## Gaps
 
