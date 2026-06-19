@@ -221,6 +221,30 @@ function stage({ target, scope, workspaceRoot, dryRun = false, manifest, report,
     stageFile(destRel, bytes);
   }
 
+  // ---- Structural piece 2b: gsd-core SIBLINGS the vendored shim eagerly needs -
+  // The vendored gsd-core eagerly requires two files that resolve to SIBLINGS of
+  // gsd-core/ (three `../` up from gsd-core/bin/lib/): scripts/fix-slash-commands.cjs
+  // (command-roster.cjs) and package.json (runtime-artifact-conversion.cjs, read as
+  // pkg.version). Without them, `node .bob/gsd-core/bin/gsd-tools.cjs query …` crashes
+  // out of tree with `Cannot find module '../../../scripts/fix-slash-commands.cjs'`.
+  // Both are sourced from repoRoot (the SAME root as the gsd-core/ payload, NEVER
+  // cwd/workspaceRoot) and staged through stageFile() so they are manifest-tracked
+  // (sha256 + path), obey the D-04 collision policy, and are swept on uninstall
+  // (INSTALL-05) — no special-casing outside the manifest.
+  stageFile(
+    path.join('scripts', 'fix-slash-commands.cjs'),
+    fs.readFileSync(path.join(repoRoot, 'scripts', 'fix-slash-commands.cjs')),
+  );
+  // Synthesize a MINIMAL package.json stamping the VENDORED gsd-core version
+  // (gsd-core/VERSION → 1.5.0), NOT gsd-bob's own 0.1.0. This is the file
+  // runtime-artifact-conversion.cjs reads as pkg.version to write `version:` into
+  // converted-artifact frontmatter, so it must reflect the vendored payload.
+  const vendoredVersion = fs.readFileSync(path.join(repoRoot, 'gsd-core', 'VERSION'), 'utf8').trim();
+  stageFile(
+    'package.json',
+    Buffer.from(`${JSON.stringify({ name: '@opengsd/gsd-core', version: vendoredVersion }, null, 2)}\n`),
+  );
+
   // ---- Structural piece 3: SUPPORT-ROSTER.md (regenerated via the gate) -----
   stageFile('SUPPORT-ROSTER.md', Buffer.from(renderRoster()));
 

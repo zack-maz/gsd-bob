@@ -31,13 +31,27 @@ function scratch(prefix) {
 
 /**
  * Build a fixture gsd-bob PACKAGE root with a minimal vendored gsd-core/ payload
- * (just enough that <repoRoot>/gsd-core/bin/gsd-tools.cjs exists to be copied).
+ * (just enough that <repoRoot>/gsd-core/bin/gsd-tools.cjs exists to be copied),
+ * plus the two gsd-core SIBLINGS the staging engine now stages so the shim is
+ * runnable out of tree: gsd-core/VERSION (source of the stamped package.json
+ * version) and scripts/fix-slash-commands.cjs (eagerly required by the shim).
+ * These siblings are part of the vendored package contract — a package missing
+ * them is broken and stage() correctly throws.
  */
 function fixtureRepoRoot() {
   const root = scratch('repo');
   const binDir = path.join(root, 'gsd-core', 'bin');
   fs.mkdirSync(binDir, { recursive: true });
   fs.writeFileSync(path.join(binDir, 'gsd-tools.cjs'), '// vendored payload marker\n', 'utf8');
+  // gsd-core/VERSION — single token, no trailing newline (mirrors the real file).
+  fs.writeFileSync(path.join(root, 'gsd-core', 'VERSION'), '1.5.0', 'utf8');
+  // scripts/fix-slash-commands.cjs sibling (verbatim-copied by stage()).
+  fs.mkdirSync(path.join(root, 'scripts'), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, 'scripts', 'fix-slash-commands.cjs'),
+    '// vendored fix-slash-commands marker\n',
+    'utf8',
+  );
   return root;
 }
 
