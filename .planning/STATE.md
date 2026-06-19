@@ -120,6 +120,12 @@ None yet.
 - No live Bob on the dev device: three primitives (subagent isolation, structured-choice prompts, config-home env-override + IDE-vs-Shell signal) cannot be empirically confirmed during development. Phase 1 resolves them from docs with conservative lower-bound defaults; empirical confirmation is deferred to the Phase 6 on-device acceptance pass, and any assumption proven wrong on hardware becomes a logged follow-up.
 - Backend-neutrality, the flag-gap contract, and `.planning/` root-anchoring are cross-cutting constraints established in Phase 2 and enforced through every later phase.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260619-ncs | Fix installer to stage gsd-core siblings (scripts/fix-slash-commands.cjs + synthesized package.json) so the staged `.bob/` shim loads out-of-tree; out-of-tree regression test added. On-device find during the Phase 6 acceptance pass. | 2026-06-19 | be4002a | [260619-ncs](./quick/260619-ncs-fix-gsd-bob-installer-to-stage-gsd-core-/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
