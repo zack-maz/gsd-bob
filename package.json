@@ -6,6 +6,15 @@
   "bin": {
     "gsd-bob": "bin/gsd-bob.cjs"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "gsd-core/",
+    "commands/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.15.0",
     "npm": ">=10.0.0"
