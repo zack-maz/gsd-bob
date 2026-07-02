@@ -8,24 +8,36 @@ A standalone, installable adapter package that makes **open-gsd** — the GSD ("
 
 A Bob user can install via a single command and run the full GSD planning loop — new-project → plan-phase → execute-phase → verify — natively, producing the same `.planning/` artifacts GSD produces in Claude Code.
 
+## Current Milestone: v2.0 — 1.6.1 Sync & Command Expansion
+
+**Goal:** Bring gsd-bob up to gsd-core 1.6.1 on one consistent vendored version, make every emitted artifact fully model-neutral, roughly triple the emitted command surface (10 → 28) to cover the daily-driver GSD workflow, and document the adapter to a maintainer standard — including a repeatable runbook for future gsd-core version bumps.
+
+**Target features:**
+- Full re-vendor of the `gsd-core/` payload from 1.5.0 → 1.6.1, with the Bob descriptor + converters re-validated against the new bin layer
+- A model-neutralization converter pass so zero `opus`/`sonnet`/`haiku` (or model directives) reach emitted `.bob/` artifacts — Bob owns model routing
+- Curated expansion of the emitted command set from 10 to 28, each vetted through the capability-map gate
+- Documentation: expanded README, per-command reference, Bob-vs-open-gsd architecture doc, and a maintainer runbook for gsd-core version bumps
+- On-device acceptance delta covering the new commands and the model-neutrality invariant
+
 ## Requirements
 
 ### Validated
 
 - [x] Port quality-gate skills to Bob: review, debug, audit (the daily-driver subset beyond the core loop) — *Validated in Phase 5: Quality Gates & Upstream Readiness (QUAL-01/02/03)*
 - [x] Keep the adapter contribution-ready so it can later be proposed upstream to open-gsd/gsd-core as a supported Bob runtime — *Validated in Phase 5 (UP-01/UP-02: README + UPSTREAM.md 5-artifact move inventory, backend-neutrality grep green, gsd-core 1.5.0 recorded)*
+- [x] Audit open-gsd/gsd-core primitives and define a backend-agnostic translation layer — *Validated across Phases 1–2 (SPIKE/RUNTIME/TRANS)*
+- [x] Port the core planning loop to Bob (new-project, plan-phase, execute-phase, verify, progress) — *Validated in Phase 4 (CORE-01..05)*
+- [x] Parity-first primitive mapping with explicit flag/skip for unsupported primitives — *Validated in Phase 2 (TRANS-04) and enforced through Phase 5*
+- [x] One-line npx/Node installer with local/global scope and clean/update modes; standalone `gsd-bob` package with own versioning — *Validated in Phase 3 (INSTALL-01..05)*
+- [x] End-to-end: install one-liner + full planning loop native in Bob + upstream-ready — *v1.0 milestone complete (Phases 1–6, 15 plans); on-device acceptance checklist assembled in Phase 6 (VERIFY-01/02)*
 
-### Active
+### Active (v2.0)
 
-- [ ] Audit open-gsd/gsd-core: catalogue all slash commands, subagents, workflows, templates, and the Claude-specific primitives they depend on (AskUserQuestion, subagent/Agent spawning, skills)
-- [ ] Research and document IBM Bob's extension architecture: how it loads commands, modes, and agents; its manifest/config format; its backend-routing model
-- [ ] Define a backend-agnostic translation layer: GSD logic stays runtime-neutral, emits Bob-native artifacts, lets Bob own model routing
-- [ ] Port the core planning loop to Bob: new-project, plan-phase, execute-phase, verify, progress
-- [ ] Parity-first primitive mapping: only port skills whose primitives Bob fully supports; explicitly flag/skip skills that need primitives Bob lacks
-- [ ] One-line npx/Node installer matching gsd-core's approach, with local vs global scope selection
-- [ ] Installer modes: clean install vs update (and equivalent maintenance operations)
-- [ ] Produce the package as a standalone `gsd-bob` (own installer, own versioning, gsd-core as source of truth)
-- [ ] End-to-end success: install one-liner works AND the full planning loop runs natively in Bob AND the adapter is upstream-ready
+- [ ] Re-vendor the gsd-core payload to 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer
+- [ ] Neutralize all model references in emitted artifacts (structural directives + inline prose), verified by an invariant assertion
+- [ ] Expand the curated emitted command set from 10 to 28, each capability-map-gated
+- [ ] Document the adapter to a maintainer standard: README, per-command reference, architecture (Bob vs open-gsd), and a gsd-core version-bump runbook
+- [ ] Extend the on-device acceptance checklist to cover the new commands and the model-neutrality invariant
 
 ### Out of Scope
 
@@ -63,6 +75,10 @@ A Bob user can install via a single command and run the full GSD planning loop �
 | Parity-first; flag gaps rather than degrade | Keep a high "native" fidelity bar for v1; defer rich Bob-native re-modeling | — Pending |
 | npx/Node installer (local/global, clean/update) | Matches existing GSD install UX; lowest friction for current users | — Pending |
 | Develop test-deferred against docs + conservative defaults; verify once on-device | No Bob on the dev device; assume the constrained lower bound (no isolated subagents, no structured prompts) so it runs anywhere, then validate on a Bob machine | — Pending |
+| (v2.0) Full re-vendor to gsd-core 1.6.1 rather than cherry-picking content | One consistent payload version; curated commands and bin layer stay in lockstep; avoids a franken-version | — Pending |
+| (v2.0) Verify model-neutrality by invariant assertion (zero model literals in emitted `.bob/`), not byte-golden | Prose rewriting is fuzzy; absence-of-X is a cleaner, more durable contract than exact bytes | — Pending |
+| (v2.0) Expand emitted commands 10 → 28 via curated high-value tier, not emit-all | Keeps the roster meaningful and lets each command earn a hand-written doc entry; parity-first gate preserved | — Pending |
+| (v2.0) Author a MAINTAINING runbook sourced from Phase-1's real re-vendor | The vendoring model requires this dance every gsd-core release; a battle-tested playbook beats aspirational docs | — Pending |
 
 ## Evolution
 
@@ -82,4 +98,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-19 after Phase 5 (Quality Gates & Upstream Readiness) complete — quality-gate port (QUAL-01/02/03) and contribution-readiness (UP-01/UP-02) validated; only Phase 6 (on-device acceptance) remains for v1.*
+*Last updated: 2026-07-02 — v1.0 milestone complete (Phases 1–6, 15 plans); starting milestone v2.0 (1.6.1 Sync & Command Expansion).*

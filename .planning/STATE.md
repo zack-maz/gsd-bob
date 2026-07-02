@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 6
-status: verifying
-stopped_at: Phase 6 context gathered
-last_updated: "2026-06-19T22:23:56.544Z"
-last_activity: 2026-06-19
-last_activity_desc: Phase 6 complete
+milestone: v2.0
+milestone_name: 1.6.1 Sync & Command Expansion
+status: planning
+last_updated: "2026-07-02T22:48:59.475Z"
+last_activity: 2026-07-02
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
-current_phase_name: On-Device Acceptance Verification
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,12 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-17)
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-06-19 — Phase 6 complete
-
-Progress: [███░░░░░░░] 33%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-02 — Milestone v2.0 started
 
 ## Performance Metrics
 
