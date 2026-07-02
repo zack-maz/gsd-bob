@@ -10,7 +10,7 @@ of which model backend Bob routes to.
 ## Install
 
 ```bash
-npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local
+npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local
 ```
 
 This stages GSD as Bob `.bob/commands/*.md` slash commands and `.bob/skills/<name>/SKILL.md`
@@ -41,8 +41,8 @@ There are **no dedicated update or clean flags** — gsd-bob mirrors gsd-core's 
 - **Clean:** run `--uninstall` and then install again:
 
   ```bash
-  npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local --uninstall
-  npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local
+  npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local --uninstall
+  npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local
   ```
 
 Uninstall is manifest-driven: it un-merges merged slices (the `gsd` custom mode, inline
