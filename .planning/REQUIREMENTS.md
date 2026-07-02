@@ -77,14 +77,58 @@ Compensate for the absence of a local Bob install by accumulating verification i
 - [x] **VERIFY-01**: Each phase contributes concrete, device-runnable verification steps (exact commands + expected outputs) to a consolidated on-device acceptance checklist, so nothing depends on live testing during development
 - [x] **VERIFY-02**: A final on-device acceptance pass runs the full checklist against a real Bob install, records pass/fail per v1 success criterion, and logs any capability assumption that proved wrong (e.g. Bob actually supports isolated subagents) as a follow-up enhancement
 
-## v2 Requirements
+## Milestone v2.0 Requirements
 
-Deferred to future releases. Tracked but not in the current roadmap.
+The active milestone: bring gsd-bob to gsd-core 1.6.1 on one consistent version, make every emitted artifact model-neutral, expand the emitted command set 10 → 28, and document the adapter to a maintainer standard. Cross-cutting v1 principles carry forward: test-deferred (no live Bob — doc-conformance / golden / Claude-equivalence), backend-neutral, `.planning/` root-anchored, capability-map flag-gap contract.
+
+### gsd-core 1.6.1 Sync
+
+Bring the vendored payload and the Bob integration to 1.6.1 on one consistent version.
+
+- [ ] **SYNC-01**: The vendored `gsd-core/` payload is fully replaced at 1.6.1 (workflows, templates, references, bin) — one consistent version, not a mixed 1.5.0/1.6.1 payload
+- [ ] **SYNC-02**: The Bob runtime descriptor and converter suites are re-validated against the 1.6.1 bin layer — existing golden/equivalence tests pass, or diffs are updated with a recorded justification, and the shim still resolves the `bob` home
+- [ ] **SYNC-03**: `UPSTREAM.md` records gsd-core 1.6.1 as the targeted version, with the 5-artifact move-inventory pointers re-verified against the new source
+
+### Model Neutralization
+
+Emitted artifacts carry zero model references — Bob owns model routing.
+
+- [ ] **NEUTRAL-01**: The converter strips machine-readable model directives (frontmatter `model:`/`effort:`, `model_profile`/`resolve_model_ids`) from emitted `.bob/` artifacts
+- [ ] **NEUTRAL-02**: The converter rewrites inline model prose (`opus`/`sonnet`/`haiku` and equivalent) in emitted `.bob/` artifacts
+- [ ] **NEUTRAL-03**: An invariant test asserts zero model literals (per a defined regex) across the entire emitted `.bob/` output set, guarding against regressions
+
+### Command Expansion
+
+Grow the curated emitted command surface from 10 to 28.
+
+- [ ] **CMD-01**: The 18 curated commands (`new-milestone`, `complete-milestone`, `milestone-summary`, `quick`, `fast`, `ship`, `explore`, `spec-phase`, `mvp-phase`, `map-codebase`, `ui-phase`, `secure-phase`, `extract-learnings`, `docs-update`, `health`, `stats`, `resume-work`, `pause-work`) are vendored into `commands/gsd/` and auto-emitted (10 → 28 total)
+- [ ] **CMD-02**: Each added command passes the capability-map gate (supported, or flagged-skip with an explicit reason), and the generated `SUPPORT-ROSTER.md` reflects the full 28-command set
+- [ ] **CMD-03**: The expanded set holds the `.planning/` artifact contract (per-command equivalence/golden with the real-answer guard) and emits model-neutral output
+
+### Documentation
+
+Document the adapter to a standard a gsd-core maintainer could review.
+
+- [ ] **DOCS-01**: `README.md` is expanded (install, scope/modes, the full 28-command list, flagged gaps) to maintainer standard, with the command list sourced from the generated roster
+- [ ] **DOCS-02**: A per-command reference doc briefly explains each of the 28 emitted commands
+- [ ] **DOCS-03**: An architecture doc explains the Bob adapter design versus traditional open-gsd (converter/descriptor model, capability-map gate, backend-neutrality, `.planning/` interchange)
+- [ ] **DOCS-04**: A `MAINTAINING` runbook documents the repeatable gsd-core version-bump procedure, sourced from the actual 1.5.0 → 1.6.1 re-vendor performed in the Sync phase
+
+### On-Device Acceptance Delta
+
+Extend the single acceptance pass to cover the new surface.
+
+- [ ] **ACCEPT-01**: The on-device acceptance checklist gains device-runnable steps (exact commands + expected outputs) for the newly added commands
+- [ ] **ACCEPT-02**: The acceptance checklist gains a device-runnable model-neutrality verification step (the NEUTRAL-03 invariant, runnable against a real Bob install)
+
+## Future Requirements
+
+Deferred beyond v2.0. Tracked but not in the current roadmap.
 
 ### Broader Skill Coverage
 
-- **LIFE-01**: Lifecycle cluster (`new-milestone`, `complete-milestone`, `transition`) ported to Bob
-- **SHAPE-01**: Phase-shaping cluster (`spec-phase`, `mvp-phase`, `ui-phase`, `ai-integration-phase`) ported to Bob
+- **LIFE-01**: Lifecycle cluster ported to Bob — *partially pulled into v2.0 CMD-01 (`new-milestone`, `complete-milestone`, `milestone-summary`); `transition` still deferred*
+- **SHAPE-01**: Phase-shaping cluster ported to Bob — *partially pulled into v2.0 CMD-01 (`spec-phase`, `mvp-phase`, `ui-phase`); `ai-integration-phase` still deferred*
 - **AUTO-01**: Autonomy cluster (`autonomous`, `manager`, `workstreams`) ported to Bob
 - **PARITY-01**: Full ~70-skill parity with Claude Code GSD
 
@@ -108,7 +152,7 @@ Explicitly excluded for v1. Documented to prevent scope creep.
 | Rich Bob-native re-modeling of subagents/prompts | Deferred to v2 NATIVE-01; v1 flags these gaps |
 | Full ~70-skill parity | v1 = core loop + quality gates only; long tail deferred |
 | Merging upstream during v1 | Ships standalone first; the upstream PR is a follow-on (MERGE-01) |
-| Knowledge graph / mempalace / map-codebase | Subagent-heavy, off the core loop; deferred |
+| Knowledge graph / mempalace | Subagent-heavy, off the core loop; deferred (note: `map-codebase` pulled into v2.0 CMD-01) |
 | Live-Bob testing during development | No Bob on the dev device; all dev-time verification is doc-conformance / golden / equivalence, consolidated into one on-device acceptance pass (VERIFY-01/02) |
 
 ## Traceability
@@ -150,11 +194,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 
-- v1 requirements: 30 total (SPIKE 4 + RUNTIME 4 + TRANS 5 + CORE 5 + QUAL 3 + INSTALL 5 + UP 2 + VERIFY 2 = 30)
-- Mapped to phases: 30 ✓
-- Unmapped: 0 ✓
+- v1 requirements: 30 total (SPIKE 4 + RUNTIME 4 + TRANS 5 + CORE 5 + QUAL 3 + INSTALL 5 + UP 2 + VERIFY 2 = 30) — all Complete
+- v2.0 requirements: 15 total (SYNC 3 + NEUTRAL 3 + CMD 3 + DOCS 4 + ACCEPT 2 = 15) — mapping filled by the v2.0 roadmap (Phases 7–11)
 
 ---
 *Requirements defined: 2026-06-17*
-*Last updated: 2026-06-17 after test-deferred revision (added VERIFY-01/02 → Phase 6; v1 count 28 → 30; Phase 1 reframed to documentation-grounded capability mapping)*
+*Last updated: 2026-07-02 — added Milestone v2.0 requirements (SYNC/NEUTRAL/CMD/DOCS/ACCEPT, 15 total); renamed the old "v2 Requirements" deferred block to "Future Requirements" and annotated items pulled into v2.0.*
 </content>
