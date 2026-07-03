@@ -6,6 +6,8 @@ gsd-bob makes the runtime-neutral GSD planning framework run natively inside IBM
 
 **Test-deferred cross-cutting principle:** No live Bob exists on the development device, and none ever will. Therefore every phase's success criteria must be verifiable WITHOUT a live Bob during development — via documentation conformance against Bob's official docs, unit/golden tests against the `.planning/` artifact contract, or Claude-runtime equivalence checks. Where a primitive is documented-absent, the design assumes the conservative lower bound (no isolated subagents → sequential inline; no structured prompts → `text_mode`) so it runs even on Bob's most constrained documented behavior. Every phase must additionally contribute its own device-runnable verification steps (exact commands + expected outputs) to a single consolidated on-device acceptance checklist, which the user runs once on a Bob-enabled machine in the final phase. Capability discovered to be richer than assumed on-device is logged as a follow-up enhancement, never a development prerequisite.
 
+**Milestone v2.0 — 1.6.1 Sync & Command Expansion (Phases 7–11):** With the v1.0 core loop shipping, v2.0 brings the vendored payload to one consistent gsd-core 1.6.1, makes every emitted artifact fully model-neutral, roughly triples the emitted command surface (10 → 28) to cover the daily-driver GSD workflow, documents the adapter to a maintainer standard, and extends the single on-device acceptance pass to the new surface. The dependency chain is strict: the 1.6.1 re-vendor (Phase 7) is the foundation everything downstream builds on; model neutralization (Phase 8) lands before command expansion so every newly emitted command is born clean; command expansion (Phase 9) grows the roster through the same capability-map gate; documentation (Phase 10) is written only once the final command set and neutralization behavior exist, and its MAINTAINING runbook is sourced from Phase 7's real re-vendor; the acceptance delta (Phase 11) appends device-runnable steps for the new commands and the neutrality invariant. All v1 cross-cutting principles carry forward unchanged — test-deferred (no live Bob; every criterion verifiable via doc-conformance, golden/unit tests against the `.planning/` artifact contract, or Claude-runtime equivalence, with device-runnable steps accruing to the acceptance checklist), backend-neutral, `.planning/` root-anchored, and the capability-map flag-gap contract enforced throughout.
+
 ## Phases
 
 **Phase Numbering:**
@@ -15,12 +17,22 @@ gsd-bob makes the runtime-neutral GSD planning framework run natively inside IBM
 
 Decimal phases appear between their surrounding integers in numeric order.
 
+**Milestone v1.0 — Bob Runtime & Core Loop (Phases 1–6, complete):**
+
 - [x] **Phase 1: Bob Capability Mapping** - Resolve the documented-absent Bob primitives from official docs, record a conservative lower-bound default per primitive, and author device-runnable verification steps (completed 2026-06-18)
 - [x] **Phase 2: Runtime Foundation & Artifact Translation** - The backend-agnostic spine plus the Bob-native emitter that converts GSD artifacts and handles primitive gaps (verified 9/9; gaps closed by 02-04, UAT 10/10, secure-phase threats_open: 0) (completed 2026-06-18)
 - [x] **Phase 3: Installer** - One-line npx installer with local/global scope and manifest-safe clean/update modes (completed 2026-06-18)
 - [x] **Phase 4: Core-Loop Port** - new-project → plan-phase → execute-phase → verify → progress running natively in Bob (completed 2026-06-19)
 - [x] **Phase 5: Quality Gates & Upstream Readiness** - code-review, debug, audit ported parity-first, with the adapter audited to upstream-mergeable standard (completed 2026-06-19)
 - [x] **Phase 6: On-Device Acceptance Verification** - The consolidated acceptance checklist and the single on-device pass the user runs on a real Bob machine (completed 2026-06-19)
+
+**Milestone v2.0 — 1.6.1 Sync & Command Expansion (Phases 7–11):**
+
+- [ ] **Phase 7: gsd-core 1.6.1 Sync** - Fully re-vendor the `gsd-core/` payload from 1.5.0 → 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer
+- [ ] **Phase 8: Model Neutralization** - Add a converter pass so zero model references (structural directives + inline prose) reach emitted `.bob/` artifacts, guarded by a zero-literal invariant assertion
+- [ ] **Phase 9: Command Expansion** - Grow the curated emitted command set from 10 to 28 by vendoring 18 capability-map-gated command sources, each emitting model-neutral output
+- [ ] **Phase 10: Documentation** - Document the adapter to a maintainer standard: expanded README, per-command reference, Bob-vs-open-gsd architecture doc, and a gsd-core version-bump runbook
+- [ ] **Phase 11: On-Device Acceptance Delta** - Extend the acceptance checklist with device-runnable steps for the new commands and the model-neutrality invariant (insert-only; v1 AC-01..AC-26 frozen)
 
 ## Phase Details
 
@@ -156,10 +168,79 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] 06-01-PLAN.md — Coverage matrix + hermetic traceability/presence test (VERIFY-01), insert-only run scaffolding (preamble + execution order + results roll-up) on the checklist, and the pre-seeded root-anchored ACCEPTANCE-FOLLOWUPS.md wrong-assumption log (VERIFY-02)
 
+### Phase 7: gsd-core 1.6.1 Sync
+
+**Goal**: Fully re-vendor the `gsd-core/` payload from 1.5.0 → 1.6.1 on one consistent version — the foundation everything downstream builds on — and re-validate the Bob descriptor and converter suites against the new bin layer, all without a live Bob. Between 1.5.0 and 1.6.1 the payload changes are substantial: 24 workflow files changed + 1 new workflow (`list-seeds.md`), 5 templates and 6 references changed + 5 new references, and 61 bin files changed + 14 new bin files.
+**Depends on**: Phase 6 (v1.0 complete)
+**Requirements**: SYNC-01, SYNC-02, SYNC-03
+**Success Criteria** (what must be TRUE):
+
+  1. The vendored `gsd-core/` payload is replaced wholesale at 1.6.1 — the 24 changed workflows plus the new `list-seeds.md`, the 5 changed templates, the 6 changed + 5 new references, and the 61 changed + 14 new bin files are all present — on a single consistent version with no residual 1.5.0/1.6.1 mix, verified by a payload version-consistency check (SYNC-01).
+  2. The Bob runtime descriptor and converter suites re-run green against the 1.6.1 bin layer — existing golden/equivalence tests pass, or each diff is updated with a recorded justification — and `gsd_run query` still resolves the `bob` home under the new bin, verified in the Claude/Node runtime with the live-Bob run captured as an acceptance-checklist step (SYNC-02).
+  3. `UPSTREAM.md` records gsd-core 1.6.1 as the targeted version and its 5-artifact move-inventory pointers are re-verified (file:line) against the 1.6.1 source (SYNC-03).
+
+**Plans**: TBD
+**Note**: The concrete re-vendor steps performed here (fetch, diff, stage, re-validate) are captured as raw notes to seed the Phase 10 MAINTAINING runbook (DOCS-04) — the runbook must reflect the real dance, not an aspirational one.
+
+### Phase 8: Model Neutralization
+
+**Goal**: Add a converter pass so zero model references reach emitted `.bob/` artifacts — Bob owns model routing. It must land before command expansion so every command added in Phase 9 is born model-neutral. The ~231 model mentions live in the vendored 1.6.1 payload and flow through the converter (gsd-bob's own code already carries zero model literals). Neutrality is verified by a zero-literal invariant assertion, not byte-golden, because prose rewriting is fuzzy and absence-of-X is the cleaner, more durable contract.
+**Depends on**: Phase 7 (operates on the 1.6.1 payload)
+**Requirements**: NEUTRAL-01, NEUTRAL-02, NEUTRAL-03
+**Success Criteria** (what must be TRUE):
+
+  1. The converter strips machine-readable model directives — frontmatter `model:`/`effort:` and the `model_profile`/`resolve_model_ids` structural keys — from every emitted `.bob/` artifact, verified by unit/golden tests on converter output (NEUTRAL-01).
+  2. The converter rewrites inline model prose (`opus`/`sonnet`/`haiku` and equivalents) in emitted `.bob/` artifacts to model-neutral wording, verified by before/after converter tests over payload samples drawn from the ~231 known mentions (NEUTRAL-02).
+  3. An invariant test asserts zero model literals (per a defined regex) across the entire emitted `.bob/` output set and fails loudly on any regression, passing against the full 1.6.1-derived emission — with this same invariant authored as a device-runnable acceptance step for Phase 11 (NEUTRAL-03).
+
+**Plans**: TBD
+
+### Phase 9: Command Expansion
+
+**Goal**: Grow the curated emitted command set from 10 to 28 by vendoring 18 command sources into `commands/gsd/` (`new-milestone`, `complete-milestone`, `milestone-summary`, `quick`, `fast`, `ship`, `explore`, `spec-phase`, `mvp-phase`, `map-codebase`, `ui-phase`, `secure-phase`, `extract-learnings`, `docs-update`, `health`, `stats`, `resume-work`, `pause-work`). Each is vetted through the capability-map gate (subagent-heavy commands degrade to sequential-inline; prompts to `text_mode`); the existing roster + installer auto-emit; `SUPPORT-ROSTER.md` is regenerated; and the expanded set holds the `.planning/` artifact contract with model-neutral output.
+**Depends on**: Phase 8 (new commands must emit model-neutral) and Phase 7 (operate on the 1.6.1 payload)
+**Requirements**: CMD-01, CMD-02, CMD-03
+**Success Criteria** (what must be TRUE):
+
+  1. All 18 curated command sources are vendored into `commands/gsd/` and auto-emitted by the unchanged installer, bringing the emitted surface to 28 commands total, verified by counting emitted `.bob/commands` against the expected roster (CMD-01).
+  2. Each added command passes the capability-map gate — Supported, or flagged-skip with an explicit reason (subagent-heavy → sequential-inline, prompts → `text_mode`) — and the regenerated `SUPPORT-ROSTER.md` reflects the full 28-command set (CMD-02).
+  3. The expanded set holds the `.planning/` artifact contract, verified by per-command equivalence/golden tests with the real-answer guard, and every newly emitted command passes the Phase 8 model-neutrality invariant (CMD-03).
+
+**Plans**: TBD
+
+### Phase 10: Documentation
+
+**Goal**: Document the adapter to a standard a gsd-core maintainer could review — written only once the final command set and neutralization behavior exist. Deliver an expanded README (install/scope/modes/full 28-command list sourced from the generated roster + flagged gaps), a per-command reference for all 28 commands, an architecture doc (Bob adapter vs traditional open-gsd), and a MAINTAINING runbook for the repeatable gsd-core version-bump procedure sourced from Phase 7's actual re-vendor.
+**Depends on**: Phases 7, 8, 9 (documents the final command set, neutralization behavior, and the re-vendor procedure)
+**Requirements**: DOCS-01, DOCS-02, DOCS-03, DOCS-04
+**Success Criteria** (what must be TRUE):
+
+  1. `README.md` is expanded to maintainer standard — install, scope/modes, the full 28-command list, and flagged gaps — with the command list sourced from the generated `SUPPORT-ROSTER.md` (no hand-invented commands or flags), verified by doc-conformance against the roster (DOCS-01).
+  2. A per-command reference doc briefly explains each of the 28 emitted commands, verified to cover exactly the roster set with no missing or extra entries (DOCS-02).
+  3. An architecture doc explains the Bob adapter design versus traditional open-gsd — converter/descriptor model, capability-map gate, backend-neutrality, and `.planning/` interchange — reviewable as a standalone maintainer artifact (DOCS-03).
+  4. A `MAINTAINING` runbook documents the repeatable gsd-core version-bump procedure with concrete steps, sourced from the actual 1.5.0 → 1.6.1 re-vendor performed in Phase 7 (DOCS-04).
+
+**Plans**: TBD
+
+### Phase 11: On-Device Acceptance Delta
+
+**Goal**: Extend the existing `.planning/ACCEPTANCE-CHECKLIST.md` (v1's contribute-then-run-once-on-hardware pattern) with device-runnable steps for the newly added commands and a model-neutrality verification step — insert-only, without disturbing the frozen v1 AC-01..AC-26 items.
+**Depends on**: Phases 8, 9 (covers the new commands and the neutrality invariant)
+**Requirements**: ACCEPT-01, ACCEPT-02
+**Success Criteria** (what must be TRUE):
+
+  1. The acceptance checklist gains insert-only device-runnable steps (exact commands + expected outputs) for each newly added Phase 9 command, appended after the frozen AC-01..AC-26, verified by a presence/traceability test over the checklist (ACCEPT-01).
+  2. The checklist gains a device-runnable model-neutrality verification step — the NEUTRAL-03 zero-literal invariant runnable against a real Bob install — with an exact command and expected zero-match output (ACCEPT-02).
+  3. The frozen v1 items AC-01..AC-26 remain byte-unchanged (insert-only guarantee), verified by an anchor/diff assertion against the prior checklist.
+
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
+
+**Milestone v1.0 (complete):**
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -169,5 +250,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Core-Loop Port | 2/2 | Complete    | 2026-06-19 |
 | 5. Quality Gates & Upstream Readiness | 3/3 | Complete    | 2026-06-19 |
 | 6. On-Device Acceptance Verification | 1/1 | Complete    | 2026-06-19 |
-</content>
-</invoke>
+
+**Milestone v2.0 (in progress):**
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 7. gsd-core 1.6.1 Sync | 0/TBD | Not started | - |
+| 8. Model Neutralization | 0/TBD | Not started | - |
+| 9. Command Expansion | 0/TBD | Not started | - |
+| 10. Documentation | 0/TBD | Not started | - |
+| 11. On-Device Acceptance Delta | 0/TBD | Not started | - |

@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 1.6.1 Sync & Command Expansion
 status: planning
-last_updated: "2026-07-02T22:48:59.475Z"
+last_updated: "2026-07-02T23:15:00.000Z"
 last_activity: 2026-07-02
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-17)
+See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** A Bob user installs via a single command and runs the full GSD planning loop (new-project → plan-phase → execute-phase → verify) natively, producing the same `.planning/` artifacts GSD produces in Claude Code.
-**Current focus:** Phase 6 — On-Device Acceptance Verification
+**Current focus:** Phase 7 — gsd-core 1.6.1 Sync (v2.0 roadmap approved; Phases 7–11 mapped)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 7 — gsd-core 1.6.1 Sync (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-02 — Milestone v2.0 started
+Status: v2.0 roadmap created; ready to plan Phase 7
+Last activity: 2026-07-02 — Milestone v2.0 roadmap created (Phases 7–11)
 
 ## Performance Metrics
 
@@ -74,6 +74,8 @@ Last activity: 2026-07-02 — Milestone v2.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [Roadmap v2.0]: v2.0 continues phase numbering at 7 (does NOT reset) — Phases 7–11 map one REQ-category each: SYNC→7, NEUTRAL→8, CMD→9, DOCS→10, ACCEPT→11. Strict dependency chain: 1.6.1 re-vendor (7) is the foundation; model neutralization (8) lands before command expansion so new commands emit clean; expansion (9) grows the roster through the same capability-map gate; docs (10) are written only once the final command set + neutralization exist (MAINTAINING runbook sourced from Phase 7's real re-vendor); the acceptance delta (11) is insert-only over the frozen v1 AC-01..AC-26. All v1 cross-cutting principles carry forward unchanged.
+- [Roadmap v2.0]: Model-neutrality is verified by a zero-literal INVARIANT assertion (zero model literals per regex across the whole emitted `.bob/` set), NOT byte-golden — absence-of-X is a cleaner, more durable contract than exact bytes. The ~231 model mentions live in the vendored 1.6.1 payload and flow through the converter; gsd-bob's own code already carries zero model literals.
 - [Roadmap]: Test-deferred model — no live Bob exists on the dev device (and never will). Every phase's success criteria must be verifiable WITHOUT a live Bob (doc-conformance, golden/unit tests against the artifact contract, or Claude-runtime equivalence), and every phase contributes device-runnable steps to one consolidated acceptance checklist run once on hardware in Phase 6.
 - [Roadmap]: Phase 1 reframed from an empirical "Bob Capability Spike" to a documentation-grounded "Bob Capability Mapping" — it can no longer demonstrate anything against a live Bob, so for each primitive it reviews the docs, records a conservative lower-bound default (assume NO isolated subagents → sequential inline; assume NO structured prompts → text_mode), and authors a device-runnable verification step.
 - [Roadmap]: New final Phase 6 "On-Device Acceptance Verification" owns VERIFY-01/02 — the consolidated acceptance checklist plus the single unattended pass the user runs on a real Bob machine, including a mechanism to log assumptions that proved wrong as follow-ups.
@@ -111,8 +113,9 @@ None yet.
 
 [Issues that affect future work]
 
-- No live Bob on the dev device: three primitives (subagent isolation, structured-choice prompts, config-home env-override + IDE-vs-Shell signal) cannot be empirically confirmed during development. Phase 1 resolves them from docs with conservative lower-bound defaults; empirical confirmation is deferred to the Phase 6 on-device acceptance pass, and any assumption proven wrong on hardware becomes a logged follow-up.
-- Backend-neutrality, the flag-gap contract, and `.planning/` root-anchoring are cross-cutting constraints established in Phase 2 and enforced through every later phase.
+- No live Bob on the dev device: three primitives (subagent isolation, structured-choice prompts, config-home env-override + IDE-vs-Shell signal) cannot be empirically confirmed during development. Phase 1 resolves them from docs with conservative lower-bound defaults; empirical confirmation is deferred to the Phase 6 on-device acceptance pass, and any assumption proven wrong on hardware becomes a logged follow-up. v2.0 extends this same pass (Phase 11) with device-runnable steps for the new commands and the model-neutrality invariant.
+- Backend-neutrality, the flag-gap contract, and `.planning/` root-anchoring are cross-cutting constraints established in Phase 2 and enforced through every later phase — including all of v2.0.
+- v2.0 dependency risk: Phase 7's 1.6.1 re-vendor is the foundation for Phases 8–11; a mixed 1.5.0/1.6.1 payload (SYNC-01) would undermine neutralization (8), command expansion (9), the docs roster (10), and the acceptance delta (11). Keep the payload on one consistent version.
 
 ### Quick Tasks Completed
 
@@ -131,7 +134,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-19T22:12:33.534Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-on-device-acceptance-verification/06-CONTEXT.md
-</content>
+Last session: 2026-07-02T23:15:00.000Z
+Stopped at: Milestone v2.0 roadmap created (Phases 7–11); ready to plan Phase 7
+Resume file: .planning/ROADMAP.md (Phase 7 — gsd-core 1.6.1 Sync)

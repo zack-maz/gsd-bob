@@ -191,13 +191,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UP-02 | Phase 5 | Complete |
 | VERIFY-01 | Phase 6 | Complete |
 | VERIFY-02 | Phase 6 | Complete |
+| SYNC-01 | Phase 7 | Pending |
+| SYNC-02 | Phase 7 | Pending |
+| SYNC-03 | Phase 7 | Pending |
+| NEUTRAL-01 | Phase 8 | Pending |
+| NEUTRAL-02 | Phase 8 | Pending |
+| NEUTRAL-03 | Phase 8 | Pending |
+| CMD-01 | Phase 9 | Pending |
+| CMD-02 | Phase 9 | Pending |
+| CMD-03 | Phase 9 | Pending |
+| DOCS-01 | Phase 10 | Pending |
+| DOCS-02 | Phase 10 | Pending |
+| DOCS-03 | Phase 10 | Pending |
+| DOCS-04 | Phase 10 | Pending |
+| ACCEPT-01 | Phase 11 | Pending |
+| ACCEPT-02 | Phase 11 | Pending |
 
 **Coverage:**
 
 - v1 requirements: 30 total (SPIKE 4 + RUNTIME 4 + TRANS 5 + CORE 5 + QUAL 3 + INSTALL 5 + UP 2 + VERIFY 2 = 30) — all Complete
-- v2.0 requirements: 15 total (SYNC 3 + NEUTRAL 3 + CMD 3 + DOCS 4 + ACCEPT 2 = 15) — mapping filled by the v2.0 roadmap (Phases 7–11)
+- v2.0 requirements: 15 total (SYNC 3 + NEUTRAL 3 + CMD 3 + DOCS 4 + ACCEPT 2 = 15) — all mapped to Phases 7–11 (SYNC→7, NEUTRAL→8, CMD→9, DOCS→10, ACCEPT→11); 15/15 mapped, no orphans
 
 ---
 *Requirements defined: 2026-06-17*
-*Last updated: 2026-07-02 — added Milestone v2.0 requirements (SYNC/NEUTRAL/CMD/DOCS/ACCEPT, 15 total); renamed the old "v2 Requirements" deferred block to "Future Requirements" and annotated items pulled into v2.0.*
-</content>
+*Last updated: 2026-07-02 — mapped all 15 Milestone v2.0 requirements to Phases 7–11 (SYNC→7, NEUTRAL→8, CMD→9, DOCS→10, ACCEPT→11); v1 rows (Phases 1–6) left intact.*
