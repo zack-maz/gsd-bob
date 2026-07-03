@@ -236,7 +236,7 @@ function stage({ target, scope, workspaceRoot, dryRun = false, manifest, report,
     fs.readFileSync(path.join(repoRoot, 'scripts', 'fix-slash-commands.cjs')),
   );
   // Synthesize a MINIMAL package.json stamping the VENDORED gsd-core version
-  // (gsd-core/VERSION → 1.5.0), NOT gsd-bob's own 0.1.0. This is the file
+  // (gsd-core/VERSION → 1.6.1), NOT gsd-bob's own 0.1.0. This is the file
   // runtime-artifact-conversion.cjs reads as pkg.version to write `version:` into
   // converted-artifact frontmatter, so it must reflect the vendored payload.
   const vendoredVersion = fs.readFileSync(path.join(repoRoot, 'gsd-core', 'VERSION'), 'utf8').trim();

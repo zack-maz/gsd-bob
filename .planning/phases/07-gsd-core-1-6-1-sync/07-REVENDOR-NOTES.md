@@ -247,3 +247,52 @@ moves; the converters are a small parameterized rewrite of gsd-core's
 `convertClaudeCommandTo<Runtime>{Skill,Command}` family a maintainer would fold upstream. The
 inventory grew **5 → 6 artifacts** (added the name-policy alias, artifact #5). The
 backend-neutrality guarantee section was left accurate (unchanged).
+
+---
+
+## Plan 03 — Task 3: final 1.5.0 sweep outside the payload (2026-07-03)
+
+The payload itself was cleared in Plan 02 (VERSION=1.6.1; no version-marker residue). This task
+swept the last 1.5.0 references OUTSIDE `gsd-core/`:
+
+```bash
+# README.md L93: "gsd-core 1.5.0" → "gsd-core 1.6.1" (+ reconciled the one-line move summary
+#   to the corrected 6-artifact / two-converter framing)
+# src/installer/stage.cjs L239: comment "gsd-core/VERSION → 1.5.0" → "→ 1.6.1"
+#   (cosmetic only — L242 reads VERSION dynamically at runtime, so non-functional)
+grep -n '1\.5\.0' README.md src/installer/stage.cjs   # → (none)
+```
+
+**SYNC-01 full assertion (scoped per Plan 02 deviation):**
+```bash
+cat gsd-core/VERSION                                        # → 1.6.1 ✅
+grep -rn '1\.5\.0' gsd-core/ | grep -v 'legacy-cleanup.cjs:225:'   # → empty ✅
+grep -q '1\.5\.0' README.md UPSTREAM.md src/installer/stage.cjs    # → no match ✅
+```
+
+**Remaining 1.5.0 mentions — INTENTIONALLY out of scope (a reviewer should NOT treat these as residue):**
+
+| Location | Why it stays |
+|----------|--------------|
+| `gsd-core/bin/lib/legacy-cleanup.cjs:225` | Stock upstream historical comment (`// When Codex upgrades to gsd-core 1.5.0 …`), byte-identical in the 1.6.1 tarball. Editing it = an undocumented 7th delta that breaks `apply-bob-patches.cjs` idempotency + nuke-and-restage integrity (Plan 02 deviation / T-07-03). **LEAVE ALONE.** |
+| `test/installer/stage.test.cjs:47` | Hermetic self-written VERSION fixture (`fs.writeFileSync(... 'VERSION'), '1.5.0')`) — the test synthesizes its OWN sandbox tree; NOT drift, NOT the real payload version. |
+| `.claude/CLAUDE.md` (L28/L125/L141/L142) | Point-in-time research context ("gsd-core latest was 1.5.0 at research time") — a historical provenance note, not a live version marker. Out of the SYNC-01 sweep scope. |
+| Root `*.tgz` publish artifacts + archived `.planning/` phase docs (e.g. ROADMAP historical PLAN lines) | Immutable historical artifacts / narrative history (RESEARCH Open Question 2). |
+
+---
+
+## Runbook seed — the replayable recipe (for Phase 10 / DOCS-04)
+
+This is the executed dance, distilled to the exact replayable sequence a future gsd-core bump follows:
+
+1. **Pack (immutable, D-04):** `npm pack @opengsd/gsd-core@<new>` into a scratch tmp dir; `tar -xzf`; confirm payload root `package/gsd-core/{bin,contexts,references,templates,workflows}` by `ls` BEFORE copying (never assume).
+2. **Nuke (D-05):** `rm -rf gsd-core/{bin,contexts,references,templates,workflows}` (the tracked curated subset; VERSION is NOT in the tarball — the patch script writes it).
+3. **Restage (D-06):** `cp -R` the identical 5 subdirs from the extracted tarball; keep the curated-subset boundary unchanged.
+4. **Re-inject the six local deltas:** `node scripts/apply-bob-patches.cjs` (colon→hyphen, ~/.claude→$HOME, bob registry block, ~105-line converter block + 3 exports, both aliases, VERSION=<new>). Prove idempotency: `git add gsd-core/`, run the script a 2nd time (all no-ops), `git diff --quiet gsd-core/`.
+5. **Run suites + apply the drift policy (D-08/D-09):** run the invariants FIRST (`node --test test/backend-neutrality.test.cjs test/descriptor.test.cjs` — must pass unmodified); then `npm test`, subtract the recorded baseline, and classify each non-baseline failure (expected-drift → regenerate that fixture + one-line justification keyed by fixture name; regression → fix). The guaranteed drift is the staged package.json version fixture.
+6. **Update UPSTREAM.md (SYNC-03):** bump targeted version, re-verify all 6 pointers against the new source (never copy stale line numbers), keep the honest "converters are a vendored hand-edit, not stock" framing.
+7. **Version-consistency check (SYNC-01):** `gsd-core/VERSION`=<new>; `grep -rn '<old>' gsd-core/` empty except the stock `legacy-cleanup.cjs` historical line; no `<old>` in README.md / UPSTREAM.md / stage.cjs comment.
+
+**Gotchas carried forward for the runbook:** (a) the stock `legacy-cleanup.cjs` historical `1.5.0` comment is a permanent expected exception — scope every version grep to exclude it; (b) `npm pack` requires network; (c) the converters are LOCAL hand-edits, so a "does the function still exist upstream?" check is meaningless — the re-injection contract (grep-absent in tarball, present post-script) is what matters; (d) the 3 baseline `npm test` failures are pre-existing environmental noise (archived `.planning/` fixtures) — never in scope.
+
+**Status:** Phase 07 re-vendor COMPLETE — payload at 1.6.1, six deltas re-injected + idempotent, suites at the 186/3 baseline (invariants 10/10 unmodified), UPSTREAM.md re-verified to 1.6.1, version-consistency clean.

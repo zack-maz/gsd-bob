@@ -90,9 +90,10 @@ payload. These are conservative, documented lower-bound defaults.
 
 ## Targeted gsd-core version
 
-gsd-bob vendors and targets **gsd-core `1.5.0`**. See [`UPSTREAM.md`](./UPSTREAM.md) for the
-file:line inventory of what lifts upstream as a clean move (one registry entry, one alias,
-and the single `src/bob-adapter.cjs` adapter module).
+gsd-bob vendors and targets **gsd-core `1.6.1`**. See [`UPSTREAM.md`](./UPSTREAM.md) for the
+file:line inventory of what lifts upstream as a mostly-mechanical move (one registry entry,
+two aliases, a small pair of vendored Bob converters, and the single `src/bob-adapter.cjs`
+adapter module).
 
 ## Verification posture (test-deferred)
 
