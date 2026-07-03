@@ -165,7 +165,56 @@ One-line recorded justification per regenerated golden fixture. Invariants
 (`test/backend-neutrality.test.cjs`, `test/descriptor.test.cjs`) are NOT drift-eligible (D-09).
 Expected guaranteed drift: `test/installer/staged-shim-loads.test.cjs` version `1.5.0` → `1.6.1`.
 
-_(to be filled live during Plan 03)_
+### Plan 03 — Task 1: suite re-run + drift classification (2026-07-03)
+
+**Step 1 — D-09 invariants FIRST (unmodified):**
+```bash
+node --test test/backend-neutrality.test.cjs test/descriptor.test.cjs
+#   → tests 10  pass 10  fail 0   ✅ (both files UNMODIFIED)
+```
+backend-neutrality brace-walked the re-injected bob registry block (zero brand literals survived
+the 1.6.1 re-injection); descriptor confirmed the shim resolves the `.bob` home under the 1.6.1
+bin (RUNTIME-01/02, the SYNC-02 shim path). **No regression — invariants pass 10/10 unmodified.**
+
+**Step 2 — full suite UNCHANGED against 1.6.1 (before any fixture edit):**
+```bash
+npm test
+#   → tests 189  pass 185  fail 4
+```
+Diffed against the recorded **186 pass / 3 fail** baseline. The 4 failures decompose as **the 3
+pre-existing baseline failures + exactly 1 new failure**:
+
+| Failing test | Baseline? | Classification |
+|--------------|-----------|----------------|
+| `acceptance-coverage.test.cjs` :114 (VERIFY-01 SC coverage) | YES (noise #1) | pre-existing — NOT touched (Pitfall 5) |
+| `acceptance-coverage.test.cjs` :128 (VERIFY-01 AC refs) | YES (noise #2) | pre-existing — NOT touched (Pitfall 5) |
+| `core-loop-contract.test.cjs` :126 (CORE-02 PLAN.md markers, ENOENT archived fixture) | YES (noise #3) | pre-existing — NOT touched (Pitfall 5) |
+| `installer/staged-shim-loads.test.cjs` :65 (`'1.6.1' !== '1.5.0'`) | **NO — new** | **EXPECTED DRIFT** (the one guaranteed golden) |
+
+**No unexpected regressions.** The single new failure is the guaranteed version drift the RESEARCH
+Drift Map predicted. The three converter/text goldens (`skill-golden`, `command-golden`,
+`text-mode-golden`) stayed **GREEN** — confirming the converters + their helpers (`yamlQuote`,
+`transformContentToHyphen`, `readCmdNames`) survived the verbatim re-injection into 1.6.1's
+`runtime-artifact-conversion.cjs` (D-03 output byte-equivalence holds). `stage.test.cjs` writes its
+own hermetic VERSION fixture and stayed green (not drift).
+
+**Step 3 — apply the ONE guaranteed expected-drift + re-verify:**
+```bash
+# test/installer/staged-shim-loads.test.cjs L65: '1.5.0' → '1.6.1'
+node --test test/installer/staged-shim-loads.test.cjs   # → pass 1
+npm test                                                 # → tests 189  pass 186  fail 3
+```
+Post-fixture the suite is back to **exactly the 186/3 baseline** — the remaining 3 failures are the
+identical pre-existing environmental-noise test IDs (same assertions), so the re-vendor introduced
+**zero regressions**.
+
+**Drift justification (keyed by fixture name):**
+
+| Fixture | Old → New | Justification |
+|---------|-----------|---------------|
+| `test/installer/staged-shim-loads.test.cjs` (L65) | asserts `pkg.version` `1.5.0` → `1.6.1` | Vendored gsd-core version legitimately bumped 1.5.0→1.6.1 (SYNC-01); the staged `package.json` now stamps 1.6.1. Pure version-marker drift, not a converter/behavior change. |
+
+No other golden was regenerated — no blanket regeneration (D-08 respected; T-07-05 mitigated).
 
 ---
 

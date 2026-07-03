@@ -62,7 +62,7 @@ test('real install: staged gsd-core shim loads OUT OF TREE (exit 0 + JSON) with 
   assert.ok(fs.existsSync(pkgAbs), 'package.json staged under .bob/');
   const pkg = JSON.parse(fs.readFileSync(pkgAbs, 'utf8'));
   assert.equal(pkg.name, '@opengsd/gsd-core', 'package.json stamps the vendored payload name');
-  assert.equal(pkg.version, '1.5.0', 'package.json stamps the vendored gsd-core version (not gsd-bob 0.1.0)');
+  assert.equal(pkg.version, '1.6.1', 'package.json stamps the vendored gsd-core version (not gsd-bob 0.1.0)');
 
   // ---- 3. both siblings recorded in the WRITTEN manifest --------------------
   const manifest = JSON.parse(
