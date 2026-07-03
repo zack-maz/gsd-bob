@@ -12,16 +12,21 @@
  * Two sources of truth, both derived at run time (anti-drift — never freeze an
  * ID list):
  *   1. canonical SCs — the v1 requirement IDs in .planning/REQUIREMENTS.md ABOVE
- *      the `## v2 Requirements` boundary, minus this phase's own `VERIFY-*` reqs.
+ *      the `## Milestone v2.0 Requirements` boundary, minus this phase's own
+ *      `VERIFY-*` reqs.
  *   2. checklist refs — every requirement ID on each `Confirms:` line in
  *      .planning/ACCEPTANCE-CHECKLIST.md, paired to its `## AC-NN` header.
+ *   3. declared reqs — every requirement ID across the v1 AND v2.0 milestone
+ *      sections (everything ABOVE `## Future Requirements`) — the phantom-ref
+ *      validity set, so a real v2 id (e.g. `NEUTRAL-03`) is admitted while a
+ *      typo/unknown family still fails.
  *
  * Three assertions:
  *   (VERIFY-01a) every canonical v1 SC is referenced by >=1 AC step (no orphan SC).
- *   (VERIFY-01b) every AC step references >=1 canonical requirement ID AND every
- *      ID it references is a real canonical v1 SC — a typo'd or unrecognised
- *      token (e.g. `RUNTIME-99`, a new `DOCS-01` family) fails loudly, not
- *      silently (no orphan AC, no phantom ref).
+ *   (VERIFY-01b) every AC step references >=1 requirement ID AND every ID it
+ *      references is a real DECLARED requirement (v1 or v2.0) — a typo'd or
+ *      unrecognised token (e.g. `RUNTIME-99`, `NEUTRAL-99`, an undeclared family)
+ *      fails loudly, not silently (no orphan AC, no phantom ref).
  *   (VERIFY-02 / D-06) the root-anchored follow-up log exists with the required
  *      columns IN ORDER and the watch-list rows — STRUCTURAL/presence only (the
  *      runner flips `Status` post-pass; the SPIKE-04 config-home row links a
@@ -64,15 +69,37 @@ const FOLLOWUPS = path.join(repoRoot, '.planning', 'ACCEPTANCE-FOLLOWUPS.md');
  */
 function canonicalSCs() {
   const md = fs.readFileSync(REQUIREMENTS, 'utf8');
-  const v2Idx = md.indexOf('## v2 Requirements');
+  const v2Idx = md.indexOf('## Milestone v2.0 Requirements');
   assert.ok(
     v2Idx >= 0,
-    'REQUIREMENTS.md must contain the "## v2 Requirements" boundary — the v1/v2 split is load-bearing for canonical SC derivation',
+    'REQUIREMENTS.md must contain the "## Milestone v2.0 Requirements" boundary — the v1/v2 split is load-bearing for canonical SC derivation',
   );
   const v1Section = md.slice(0, v2Idx);
   return new Set([...v1Section.matchAll(ID_RE)].map((m) => m[0]));
   // VERIFY-* is not in the (SPIKE|RUNTIME|TRANS|INSTALL|CORE|QUAL|UP) family,
   // so it is excluded by construction; no extra filter needed.
+}
+
+/**
+ * Source of truth #3: the full set of DECLARED requirement IDs across the v1 AND
+ * v2.0 milestone sections — everything ABOVE the `## Future Requirements`
+ * boundary. This is the phantom-ref validity set: a v2-family `Confirms:` token
+ * (e.g. `NEUTRAL-03`) is admitted iff it is a real declared requirement, while a
+ * typo (`NEUTRAL-99`) or an undeclared family still fails loudly. Uses the
+ * generic UPPER-family ID shape so any declared family (SYNC/NEUTRAL/CMD/DOCS/
+ * ACCEPT + the v1 families) is captured. Derived, never frozen; fails CLOSED on
+ * a missing boundary (a reworded heading must not silently widen the set to the
+ * deferred Future section).
+ */
+function declaredRequirementIds() {
+  const md = fs.readFileSync(REQUIREMENTS, 'utf8');
+  const futureIdx = md.indexOf('## Future Requirements');
+  assert.ok(
+    futureIdx >= 0,
+    'REQUIREMENTS.md must contain the "## Future Requirements" boundary — needed to bound the declared (v1 + v2.0) requirement-id set',
+  );
+  const declaredSection = md.slice(0, futureIdx);
+  return new Set([...declaredSection.matchAll(GENERIC_ID_RE)].map((m) => m[0]));
 }
 
 /**
@@ -125,8 +152,8 @@ test('VERIFY-01: every v1 SC (Phases 1-5) is referenced by >=1 AC Confirms line 
 
 // ---- VERIFY-01: no orphan AC (and no phantom ref) ----------------------------
 
-test('VERIFY-01: every AC step references only real canonical requirement IDs, >=1 each (no orphan AC, no phantom ref)', () => {
-  const canonical = canonicalSCs();
+test('VERIFY-01: every AC step references only real declared requirement IDs, >=1 each (no orphan AC, no phantom ref)', () => {
+  const declared = declaredRequirementIds();
   const pairs = checklistRefs();
   const headers = acHeaderCount();
 
@@ -145,9 +172,9 @@ test('VERIFY-01: every AC step references only real canonical requirement IDs, >
     assert.ok(tokens.length > 0, `orphan AC: ${ac} references no requirement ID`);
     for (const tok of tokens) {
       assert.ok(
-        canonical.has(tok),
-        `AC ${ac} references "${tok}", which is not a canonical v1 SC — typo or unrecognised family. ` +
-          `Fix the Confirms line or add the requirement to REQUIREMENTS.md (v1).`,
+        declared.has(tok),
+        `AC ${ac} references "${tok}", which is not a declared requirement (v1 or v2.0) — ` +
+          `typo or unrecognised family. Fix the Confirms line or add the requirement to REQUIREMENTS.md.`,
       );
     }
   }
