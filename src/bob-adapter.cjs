@@ -14,12 +14,118 @@
  *   - mergeCustomModes(existingText, entry)  idempotent, slug-scoped merge
  *   - gateArtifact(candidate, capabilityDecl) unsupported-primitive flag/skip
  *   - buildSupportRoster(candidates, capabilityDecl)  loud "unsupported on Bob"
+ *   - MODEL_TIER_RE_SOURCE                    SOURCE string: word-boundary tier tokens
+ *   - MODEL_DIRECTIVE_RE_SOURCE               SOURCE string: line-anchored model directive
+ *   - MODEL_TIER_REPLACEMENTS                 tier -> capability-neutral wording map
+ *   - neutralizeModelReferences(content)      emit-time model-routing neutralization pass
+ *   - scanModelLiterals(content)              detector shared with the NEUTRAL-03 invariant
  */
 
 const yaml = require('js-yaml');
 
 /** The exact marker recorded for every primitive Bob cannot support (D-10). */
 const UNSUPPORTED_MARKER = 'unsupported on Bob:';
+
+/**
+ * Shared model-literal single source of truth (D-03). BOTH the emit-time
+ * neutralization pass (neutralizeModelReferences) and the invariant's detector
+ * (scanModelLiterals) are built from these SOURCE strings so they can never
+ * drift. SOURCE strings are exported, NEVER a shared `/g` RegExp instance — a
+ * global RegExp carries `lastIndex` state and mis-behaves when reused.
+ *
+ * The capability-tier token set is assembled PROGRAMMATICALLY from a base64
+ * array so this backend-neutral adapter never embeds a bare model-brand literal
+ * (mirrors test/backend-neutrality.test.cjs's forbidden-token trick). The three
+ * decoded tokens are the capability tiers, in descending-capability order.
+ */
+const MODEL_TIER_TOKENS = ['b3B1cw==', 'c29ubmV0', 'aGFpa3U='].map((b) =>
+  Buffer.from(b, 'base64').toString('utf8'),
+);
+
+/**
+ * `\b(<tier>|<tier>|<tier>)\b` — word-boundary tier alternation. Case is handled
+ * at RegExp construction with the `i` flag. Linear-time / ReDoS-safe (T-08-02).
+ */
+const MODEL_TIER_RE_SOURCE = `\\b(${MODEL_TIER_TOKENS.join('|')})\\b`;
+
+/**
+ * Line-anchored machine-readable model directive. The `^…key:` anchor + colon
+ * means a PROSE mention of a config key (e.g. "set the model_profile in config")
+ * never trips — only a literal directive LINE does (defense-in-depth; the
+ * vendored converter already omits frontmatter per F-02). ReDoS-safe.
+ */
+const MODEL_DIRECTIVE_RE_SOURCE =
+  '^[ \\t]*(model|effort|model_profile|resolve_model_ids)[ \\t]*:.*$';
+
+/**
+ * Brand-agnostic vendor-prefixed model-ID pre-collapse (Pitfall 1): an
+ * alphabetic vendor prefix + `-` + a tier token + trailing id chars. Matches a
+ * full model id (e.g. `<vendor>-<tier>-4-1`) WITHOUT embedding the vendor name
+ * here, so this adapter stays brand-literal-free (backend-neutral invariant).
+ */
+const MODEL_ID_RE_SOURCE = `[A-Za-z]+-(${MODEL_TIER_TOKENS.join('|')})[\\w.-]*`;
+
+/** Neutral collapse phrase for a full vendor-prefixed model id. */
+const MODEL_ID_REPLACEMENT = 'the configured model';
+
+/**
+ * Tier token -> capability-neutral wording (D-03): preserves the author's
+ * RELATIVE intent without a brand. Built programmatically, keyed on the
+ * lowercased decoded tier token, in the same descending-capability order as
+ * MODEL_TIER_TOKENS — so no brand literal appears in this source file.
+ * @type {Record<string,string>}
+ */
+const MODEL_TIER_REPLACEMENTS = MODEL_TIER_TOKENS.reduce((map, tok, i) => {
+  map[tok.toLowerCase()] = ['a higher-capability model', 'a balanced model', 'a faster model'][i];
+  return map;
+}, {});
+
+/**
+ * Emit-time model-routing neutralization pass (D-02, NEUTRAL-01/02). Pure
+ * string -> string, applied in stage.cjs as a post-pass wrapping each converter
+ * output. THREE ordered, ReDoS-safe replacements:
+ *   (1) Pitfall 1 — collapse a full vendor-prefixed model id to a neutral phrase
+ *       BEFORE the bare-tier rewrite, so an inner tier token is never mangled.
+ *   (2) NEUTRAL-01 defense-in-depth — strip any residual model-directive LINE.
+ *   (3) NEUTRAL-02 — rewrite bare tier prose to capability-neutral wording.
+ * Idempotent: the neutral replacements carry no tier token or directive line, so
+ * a second pass is a no-op.
+ *
+ * @param {string} content  converted artifact text
+ * @returns {string} neutralized text
+ */
+function neutralizeModelReferences(content) {
+  let c = content;
+  c = c.replace(new RegExp(MODEL_ID_RE_SOURCE, 'gi'), MODEL_ID_REPLACEMENT);
+  c = c.replace(new RegExp(`${MODEL_DIRECTIVE_RE_SOURCE}\\r?\\n?`, 'gim'), '');
+  c = c.replace(
+    new RegExp(MODEL_TIER_RE_SOURCE, 'gi'),
+    (m) => MODEL_TIER_REPLACEMENTS[m.toLowerCase()],
+  );
+  return c;
+}
+
+/**
+ * The zero-literal detector the NEUTRAL-03 invariant reuses so the pass and the
+ * test share ONE definition (D-03). Constructs fresh per-line RegExps (resetting
+ * `lastIndex`) so no shared `/g` state can cause an intermittent missed match.
+ *
+ * @param {string} content  artifact text to scan
+ * @returns {Array<{line:number, token:string}>} one hit per surviving literal, 1-based line
+ */
+function scanModelLiterals(content) {
+  const hits = [];
+  const lines = content.split('\n');
+  const tier = new RegExp(MODEL_TIER_RE_SOURCE, 'gi');
+  const directive = new RegExp(MODEL_DIRECTIVE_RE_SOURCE, 'i'); // per-line, no /g state
+  lines.forEach((line, i) => {
+    let m;
+    tier.lastIndex = 0;
+    while ((m = tier.exec(line)) !== null) hits.push({ line: i + 1, token: m[0] });
+    if (directive.test(line)) hits.push({ line: i + 1, token: line.trim().slice(0, 40) });
+  });
+  return hits;
+}
 
 /**
  * The single gsd custom mode (D-01). Groups are locked to
@@ -253,4 +359,9 @@ module.exports = {
   unmergeCustomModes,
   gateArtifact,
   buildSupportRoster,
+  MODEL_TIER_RE_SOURCE,
+  MODEL_DIRECTIVE_RE_SOURCE,
+  MODEL_TIER_REPLACEMENTS,
+  neutralizeModelReferences,
+  scanModelLiterals,
 };
