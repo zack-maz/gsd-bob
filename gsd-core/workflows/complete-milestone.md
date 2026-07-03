@@ -52,7 +52,7 @@ Display the full audit report to the user.
 Then ask:
 ```
 These items are open. Choose an action:
-[R] Resolve — stop and fix items, then re-run /gsd-complete-milestone
+[R] Resolve — stop and fix items, then re-run /gsd:complete-milestone
 [A] Acknowledge all — document as deferred and proceed with close
 [C] Cancel — exit without closing
 ```
@@ -72,26 +72,43 @@ If user chooses [A] (Acknowledge):
    ...
    ```
    Sanitize all slug and status values via `sanitizeForDisplay()` before writing. Never inject raw file content into STATE.md.
-3. Record in MILESTONES.md entry: `Known deferred items at close: {count} (see STATE.md Deferred Items)`
+3. Set `closeout_type=override_closeout` and record `Known verification overrides: {count} (see STATE.md Deferred Items)` in the MILESTONES.md entry.
 4. Proceed with milestone close.
 
-If output shows all clear (no open items): print `All artifact types clear.` and proceed.
+If output shows all clear (no open items): set `closeout_type=verified_closeout`, print `All artifact types clear.`, and proceed.
 
 SECURITY: Audit JSON output is structured data from the `audit-open` query handler (same JSON contract as legacy `gsd-tools.cjs audit-open`) — validated and sanitized at source. When writing to STATE.md, item slugs and descriptions are sanitized via `sanitizeForDisplay()` before inclusion. Never inject raw user-supplied content into STATE.md without sanitization.
 </step>
 
 <step name="verify_readiness">
 
-**Use `roadmap analyze` for comprehensive readiness check:**
+**Use `init.manager` for canonical readiness check:**
 
 ```bash
-ROADMAP=$(gsd_run query roadmap.analyze)
+INIT_MANAGER=$(gsd_run query init.manager)
+if [[ "$INIT_MANAGER" == @file:* ]]; then INIT_MANAGER=$(cat "${INIT_MANAGER#@file:}"); fi
 ```
 
-This returns all phases with plan/summary counts and disk status. Use this to verify:
+This returns all phases with implementation and verification projection. Use this to verify:
 - Which phases belong to this milestone?
-- All phases complete (all plans have summaries)? Check `disk_status === 'complete'` for each.
+- `all_phases_verified`: all milestone phases have `phase_complete === true` and `verification_status === 'passed'`.
 - `progress_percent` should be 100%.
+
+Compute readiness from `INIT_MANAGER`, not from roadmap counts:
+
+```bash
+ALL_PHASES_VERIFIED=$(printf '%s' "$INIT_MANAGER" | jq -r '[
+  .phases[] | select((.number | tostring | test("^999(\\.|$)") | not))
+  | (.phase_complete == true and .verification_status == "passed")
+] | all')
+```
+
+If not all_phases_verified, verified_closeout must not proceed. Set `closeout_type=override_closeout`, show each phase whose `phase_complete !== true` or `verification_status !== 'passed'`, and require an explicit user choice:
+1. **Proceed anyway** — record verification overrides in MILESTONES.md/STATE.md
+2. **Run verification first** — `/gsd:verify-work {phase}` or `/gsd:execute-phase {phase}`
+3. **Abort** — return to development
+
+Only set `closeout_type=verified_closeout` when `ALL_PHASES_VERIFIED` is `true`.
 
 **Requirements completion check (REQUIRED before presenting):**
 
@@ -110,7 +127,9 @@ Includes:
 - Phase 3: Core Features (3/3 plans complete)
 - Phase 4: Polish (1/1 plan complete)
 
-Total: {phase_count} phases, {total_plans} plans, all complete
+Total: {phase_count} phases, {total_plans} plans
+Verification: {all_phases_verified ? "all phases verified" : "override needed"}
+Closeout type: {closeout_type}
 Requirements: {N}/{M} v1 requirements checked off
 ```
 
@@ -125,10 +144,10 @@ Requirements: {N}/{M} v1 requirements checked off
 
 MUST present 3 options:
 1. **Proceed anyway** — mark milestone complete with known gaps
-2. **Run audit first** — `/gsd-audit-milestone` to assess gap severity
+2. **Run audit first** — `/gsd:audit-milestone` to assess gap severity
 3. **Abort** — return to development
 
-If user selects "Proceed anyway": note incomplete requirements in MILESTONES.md under `### Known Gaps` with REQ-IDs and descriptions.
+If user selects "Proceed anyway": set `closeout_type=override_closeout`; note incomplete requirements in MILESTONES.md under `### Known Gaps` with REQ-IDs and descriptions.
 
 <config-check>
 
@@ -448,7 +467,7 @@ mv .planning/phases/{phase-dir} .planning/milestones/v[X.Y]-phases/
 ```
 Verify: `✅ Phase directories archived to .planning/milestones/v[X.Y]-phases/`
 
-If "Skip": Phase directories remain in `.planning/phases/` as raw execution history. Use `/gsd-cleanup` later to archive retroactively.
+If "Skip": Phase directories remain in `.planning/phases/` as raw execution history. Use `/gsd:cleanup` later to archive retroactively.
 
 After archival, the AI still handles:
 - Reorganizing ROADMAP.md with milestone grouping (requires judgment) — overwrite in place after extracting Backlog section
@@ -525,7 +544,7 @@ ls .planning/RETROSPECTIVE.md 2>/dev/null || true
 
 **If exists:** Read the file, append new milestone section before the "## Cross-Milestone Trends" section.
 
-**If doesn't exist:** Create from template at `$HOME/.claude/gsd-core/templates/retrospective.md`.
+**If doesn't exist:** Create from template at `~/.claude/gsd-core/templates/retrospective.md`.
 
 **Gather retrospective data:**
 
@@ -796,7 +815,7 @@ Tag: v[X.Y]
 
 `/clear` then:
 
-`/gsd-new-milestone`
+`/gsd:new-milestone`
 
 ---
 ```
@@ -852,6 +871,6 @@ Milestone completion is successful when:
 - [ ] Known gaps recorded in MILESTONES.md if user proceeded with incomplete requirements
 - [ ] RETROSPECTIVE.md updated with milestone section
 - [ ] Cross-milestone trends updated
-- [ ] User knows next step (/gsd-new-milestone)
+- [ ] User knows next step (/gsd:new-milestone)
 
 </success_criteria>

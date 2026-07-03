@@ -44,24 +44,24 @@ Parse current values (default to `true` if not present):
 - `workflow.nyquist_validation` — validation architecture research during plan-phase (default: true if absent)
 - `workflow.pattern_mapper` — run gsd-pattern-mapper between research and planning (default: true if absent)
 - `workflow.ui_phase` — generate UI-SPEC.md design contracts for frontend phases (default: true if absent)
-- `workflow.ui_safety_gate` — prompt to run /gsd-ui-phase before planning frontend phases (default: true if absent)
+- `workflow.ui_safety_gate` — prompt to run /gsd:ui-phase before planning frontend phases (default: true if absent)
 - `workflow.ai_integration_phase` — framework selection + eval strategy for AI phases (default: true if absent)
 - `workflow.tdd_mode` — enforce RED/GREEN/REFACTOR gate sequence during execute-phase (default: false if absent)
-- `workflow.code_review` — enable /gsd-code-review and /gsd-code-review --fix commands (default: true if absent)
-- `workflow.code_review_depth` — default depth for /gsd-code-review: `quick`, `standard`, or `deep` (default: `"standard"` if absent; only relevant when `code_review` is on)
-- `workflow.ui_review` — run visual quality audit (/gsd-ui-review) in autonomous mode (default: true if absent)
+- `workflow.code_review` — enable /gsd:code-review and /gsd:code-review --fix commands (default: true if absent)
+- `workflow.code_review_depth` — default depth for /gsd:code-review: `quick`, `standard`, or `deep` (default: `"standard"` if absent; only relevant when `code_review` is on)
+- `workflow.ui_review` — run visual quality audit (/gsd:ui-review) in autonomous mode (default: true if absent)
 - `commit_docs` — whether `.planning/` files are committed to git (default: true if absent)
-- `intel.enabled` — enable queryable codebase intelligence (/gsd-map-codebase --query) (default: false if absent)
-- `graphify.enabled` — enable project knowledge graph (/gsd-graphify) (default: false if absent)
+- `intel.enabled` — enable queryable codebase intelligence (/gsd:map-codebase --query) (default: false if absent)
+- `graphify.enabled` — enable project knowledge graph (/gsd:graphify) (default: false if absent)
 - `graphify.auto_update` — opt-in: auto-rebuild graph after main HEAD advances (#3347) (default: `false`)
 - `model_profile` — which model each agent uses (default: `balanced`)
 - `git.branching_strategy` — branching approach (default: `"none"`)
 - `workflow.use_worktrees` — whether parallel executor agents run in worktree isolation (default: `true`)
-- `model_policy.provider` — provider slug for model policy (default: `null`; known values: anthropic, openai, google, qwen; set via /gsd-config --advanced)
-- `model_policy.budget` — budget level for model policy (default: `null`; known values: high, medium, low; set via /gsd-config --advanced)
-- `model_policy.high` — model ID for high-cost tier (default: `null`; set via /gsd-config --advanced)
-- `model_policy.medium` — model ID for medium-cost tier (default: `null`; set via /gsd-config --advanced)
-- `model_policy.low` — model ID for low-cost tier (default: `null`; set via /gsd-config --advanced)
+- `model_policy.provider` — provider slug for model policy (default: `null`; known values: anthropic, openai, google, qwen; set via /gsd:config --advanced)
+- `model_policy.budget` — budget level for model policy (default: `null`; known values: high, medium, low; set via /gsd:config --advanced)
+- `model_policy.high` — model ID for high-cost tier (default: `null`; set via /gsd:config --advanced)
+- `model_policy.medium` — model ID for medium-cost tier (default: `null`; set via /gsd:config --advanced)
+- `model_policy.low` — model ID for low-cost tier (default: `null`; set via /gsd:config --advanced)
 </step>
 
 <step name="present_settings">
@@ -201,11 +201,11 @@ AskUserQuestion([
     ]
   },
   {
-    question: "Enable Code Review? (/gsd-code-review and /gsd-code-review --fix commands)",
+    question: "Enable Code Review? (/gsd:code-review and /gsd:code-review --fix commands)",
     header: "Code Review",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Enable /gsd-code-review commands for reviewing source files changed during a phase." },
+      { label: "Yes (Recommended)", description: "Enable /gsd:code-review commands for reviewing source files changed during a phase." },
       { label: "No", description: "Commands exit with a configuration gate message. Use when code review is handled externally." }
     ]
   },
@@ -213,7 +213,7 @@ AskUserQuestion([
   // chosen code_review value is "Yes". If code_review is "No", omit this question from
   // the AskUserQuestion call and do not touch the existing workflow.code_review_depth value.
   {
-    question: "Code Review Depth? (default depth for /gsd-code-review — override per-run with --depth=)",
+    question: "Code Review Depth? (default depth for /gsd:code-review — override per-run with --depth=)",
     header: "Review Depth",
     multiSelect: false,
     options: [
@@ -223,7 +223,7 @@ AskUserQuestion([
     ]
   },
   {
-    question: "Enable UI Review? (visual quality audit via /gsd-ui-review in autonomous mode)",
+    question: "Enable UI Review? (visual quality audit via /gsd:ui-review in autonomous mode)",
     header: "UI Review",
     multiSelect: false,
     options: [
@@ -270,11 +270,11 @@ AskUserQuestion([
     ]
   },
   {
-    question: "Enable UI Safety Gate? (prompts to run /gsd-ui-phase before planning frontend phases)",
+    question: "Enable UI Safety Gate? (prompts to run /gsd:ui-phase before planning frontend phases)",
     header: "UI Gate",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "plan-phase asks to run /gsd-ui-phase first when frontend indicators detected." },
+      { label: "Yes (Recommended)", description: "plan-phase asks to run /gsd:ui-phase first when frontend indicators detected." },
       { label: "No", description: "No prompt — plan-phase proceeds without UI-SPEC check." }
     ]
   },
@@ -283,7 +283,7 @@ AskUserQuestion([
     header: "AI Phase",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Run /gsd-ai-integration-phase before planning AI system phases. Surfaces the right framework, researches its docs, and designs the evaluation strategy." },
+      { label: "Yes (Recommended)", description: "Run /gsd:ai-integration-phase before planning AI system phases. Surfaces the right framework, researches its docs, and designs the evaluation strategy." },
       { label: "No", description: "Skip AI design contract. Good for non-AI phases or when framework is already decided." }
     ]
   },
@@ -339,7 +339,7 @@ AskUserQuestion([
     multiSelect: false,
     options: [
       { label: "No (Recommended)", description: "Run smart discuss before each phase — surfaces gray areas and captures decisions." },
-      { label: "Yes", description: "Skip discuss in /gsd-autonomous — chain directly to plan. Best for backend/pipeline work where phase descriptions are the spec." }
+      { label: "Yes", description: "Skip discuss in /gsd:autonomous — chain directly to plan. Best for backend/pipeline work where phase descriptions are the spec." }
     ]
   },
   {
@@ -352,21 +352,21 @@ AskUserQuestion([
     ]
   },
   {
-    question: "Enable Intel? (queryable codebase intelligence via /gsd-map-codebase --query — builds a JSON index in .planning/intel/)",
+    question: "Enable Intel? (queryable codebase intelligence via /gsd:map-codebase --query — builds a JSON index in .planning/intel/)",
     header: "Intel",
     multiSelect: false,
     options: [
       { label: "No (Recommended)", description: "Skip intel indexing. Use when codebase is small or intel queries are not needed." },
-      { label: "Yes", description: "Enable /gsd-map-codebase --query commands. Builds and queries a JSON index of the codebase." }
+      { label: "Yes", description: "Enable /gsd:map-codebase --query commands. Builds and queries a JSON index of the codebase." }
     ]
   },
   {
-    question: "Enable Graphify? (project knowledge graph via /gsd-graphify — builds a graph in .planning/graphs/)",
+    question: "Enable Graphify? (project knowledge graph via /gsd:graphify — builds a graph in .planning/graphs/)",
     header: "Graphify",
     multiSelect: false,
     options: [
       { label: "No (Recommended)", description: "Skip knowledge graph. Use when dependency graphs are not needed." },
-      { label: "Yes", description: "Enable /gsd-graphify commands. Builds and queries a project knowledge graph." }
+      { label: "Yes", description: "Enable /gsd:graphify commands. Builds and queries a project knowledge graph." }
     ]
   },
   {
@@ -374,7 +374,7 @@ AskUserQuestion([
     header: "Graph auto-update",
     multiSelect: false,
     options: [
-      { label: "No (Recommended)", description: "Manual /gsd-graphify build only. Conservative default — opt in if you want fresh context on every /gsd-quick or /gsd-plan-phase." },
+      { label: "No (Recommended)", description: "Manual /gsd:graphify build only. Conservative default — opt in if you want fresh context on every /gsd:quick or /gsd:plan-phase." },
       { label: "Yes", description: "Auto-rebuild the graph in a detached background process after git commit/merge/pull/rebase --continue/cherry-pick on the default branch. Hook returns instantly; rebuild runs out-of-band. No-op if Graphify is disabled." }
     ]
   }
@@ -430,7 +430,7 @@ Merge new settings into existing config.json:
     "workflow_guard": true/false
   },
   "model_policy": {
-    // Read-only in this flow — written only by /gsd-config --advanced (Section 8).
+    // Read-only in this flow — written only by /gsd:config --advanced (Section 8).
     // Listed here so safe-merge never clobbers an existing model_policy object.
     "provider": <existing|null>,
     "budget": <existing|null>,
@@ -569,15 +569,15 @@ Display:
 | Context Warnings     | {On/Off} |
 | Saved as Defaults    | {Yes/No} |
 
-These settings apply to future /gsd-plan-phase and /gsd-execute-phase runs.
+These settings apply to future /gsd:plan-phase and /gsd:execute-phase runs.
 
 Quick commands:
-- /gsd-config --integrations — configure API keys (Brave/Firecrawl/Exa), review.models CLI routing, and agent_skills injection
-- /gsd-config --profile <profile> — switch model profile
-- /gsd-plan-phase --research — force research
-- /gsd-plan-phase --skip-research — skip research
-- /gsd-plan-phase --skip-verify — skip plan check
-- /gsd-config --advanced — power-user tuning (plan bounce, timeouts, branch templates, cross-AI, context window, model policy)
+- /gsd:config --integrations — configure API keys (Brave/Firecrawl/Exa), review.models CLI routing, and agent_skills injection
+- /gsd:config --profile <profile> — switch model profile
+- /gsd:plan-phase --research — force research
+- /gsd:plan-phase --skip-research — skip research
+- /gsd:plan-phase --skip-verify — skip plan check
+- /gsd:config --advanced — power-user tuning (plan bounce, timeouts, branch templates, cross-AI, context window, model policy)
 ```
 </step>
 

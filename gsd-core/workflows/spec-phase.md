@@ -68,7 +68,7 @@ Parse JSON for: `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `phase
 **If `phase_found` is false:**
 ```
 Phase [X] not found in roadmap.
-Use /gsd-progress to see available phases.
+Use /gsd:progress to see available phases.
 ```
 Exit.
 
@@ -90,7 +90,7 @@ If SPEC.md already exists:
   - "Skip" — Exit (use existing spec as-is)
 
 If "View": Display SPEC.md, then offer Update/Skip.
-If "Skip": Exit with message: "Existing SPEC.md unchanged. Run /gsd-discuss-phase [X] to continue."
+If "Skip": Exit with message: "Existing SPEC.md unchanged. Run /gsd:discuss-phase [X] to continue."
 If "Update": Load existing SPEC.md, continue to Step 3.
 
 ## Step 2: Scout Codebase
@@ -190,7 +190,7 @@ If gate passes (ambiguity ≤ 0.20 AND all minimums met):
 ## Step 5.5: Edge-Completeness Probe
 
 Run AFTER the ambiguity gate passes (you probe edges of clear requirements, not vague
-ones). Reference: @$HOME/.claude/gsd-core/references/edge-probe.md.
+ones). Reference: @~/.claude/gsd-core/references/edge-probe.md.
 
 **Runtime coverage compute — resolve and invoke edge-probe.cjs:**
 
@@ -235,7 +235,9 @@ fi
 # canonical coverage compute. Populate the heredoc from the SPEC's Requirements — one object
 # per requirement: {"id","text","shapes"?}. This is the load-bearing step: an empty file makes
 # the probe a no-op, so the guard below fails loud rather than silently skipping (RR-04).
-REQS_JSON=$(mktemp "${TMPDIR:-/tmp}/edge-probe-reqs-XXXXXX.json")
+# BSD/macOS mktemp only randomizes XXXXXX when it is the final path component, so make a
+# suffixless temp then append the extension — portable across BSD + GNU (#1520).
+REQS_JSON=$(mktemp "${TMPDIR:-/tmp}/edge-probe-reqs-XXXXXX") && mv "$REQS_JSON" "${REQS_JSON}.json" && REQS_JSON="${REQS_JSON}.json" || exit 1
 cat > "$REQS_JSON" <<'JSON'
 [
   { "id": "R1", "text": "<replace: requirement text from the SPEC>" }
@@ -326,7 +328,7 @@ Populate the `## Edge Coverage` section of SPEC.md from the resolved edges.
 ## Step 5.6: Prohibition-Completeness Probe (must-NOT)
 
 Run AFTER Step 5.5 (you probe the must-NOT axis of clear requirements, over the same
-requirement list). Reference: @$HOME/.claude/gsd-core/references/prohibition-probe.md — the
+requirement list). Reference: @~/.claude/gsd-core/references/prohibition-probe.md — the
 portable two-stage protocol, the canon-referral rule, and the status×verification schema
 live there (size-cap discipline; keep this step lean).
 
@@ -349,8 +351,8 @@ For each Requirement gathered so far, run the two-stage recall→precision pass:
 3. **Canon-referral (ADR-550 D6, PROB-13).** A kept candidate that is canon security/compliance
    (OWASP / prototype-pollution / path-traversal / injection / GDPR / generic fairness) is
    NOT minted here — emit a one-line breadcrumb (*"prototype-pollution is canon — owned by
-   /gsd-secure-phase + eslint; not minted here"*) and DROP it. Minting canon items duplicates
-   /gsd-secure-phase and drowns the bespoke signal.
+   /gsd:secure-phase + eslint; not minted here"*) and DROP it. Minting canon items duplicates
+   /gsd:secure-phase and drowns the bespoke signal.
 4. **Resolve each surfaced (non-canon) prohibition** (AskUserQuestion; text mode → numbered list):
    - **Keep it** → write a NEGATIVE acceptance criterion (a must-NOT line) into Acceptance
      Criteria AND mark the prohibition `resolved` with a verification tier: `test` (a
@@ -365,10 +367,15 @@ For each Requirement gathered so far, run the two-stage recall→precision pass:
        - `check_target` — the negative-test file path (for `node-test`), or the path to lint
          (for `lint-rule`).
        - `check_rule` — the eslint rule id (e.g. `local/no-source-grep`); `lint-rule` only.
-       - `check_violation_fixture` (#1346) — path to a KNOWN-BAD subject the wired check is run
+       - `check_violation_fixture` (#1279) — path to a KNOWN-BAD subject the wired check is run
          against to **machine-prove fail-first**; rides BOTH kinds. Capture it to let the item green
          end-to-end with zero hand-authoring at verify time; for `node-test` the negative test should
          read its subject from the `GSD_PROHIB_SUBJECT` env var so the prover can inject this fixture.
+       - `check_clean_fixture` (#1346) — **optional** path to a KNOWN-CLEAN control subject. When
+         captured, the `node-test` prover also runs the check against it and requires GREEN — proving
+         the violation's RED is caused by the subject's *content*, not by `GSD_PROHIB_SUBJECT` merely
+         being set. Capture it for a stronger guarantee; omit it and the check still proves fail-first
+         on the violation alone (the content-causation residual stays documented for that case).
        This is a **SOFT capture (CHK-04): a `test`-tier prohibition WITHOUT a descriptor is still
        allowed** — if the author cannot yet name the wired check, leave the descriptor empty and
        proceed. It is NOT a hard authoring block; the item simply stays fail-closed/flagged
@@ -395,7 +402,7 @@ For each Requirement gathered so far, run the two-stage recall→precision pass:
 written (test or judgment tier); otherwise leave `unresolved`. **`--auto` NEVER auto-dismisses
 a prohibition** — a wrong dismissal is the exact silent failure this probe eliminates (PROB-06,
 the load-bearing safety property). On a `test`-tier auto-resolution, capture the `check_kind` /
-`check_target` / `check_rule` / `check_violation_fixture` descriptor **only when a wired check is unambiguous**; otherwise
+`check_target` / `check_rule` / `check_violation_fixture` / `check_clean_fixture` descriptor **only when a wired check is unambiguous**; otherwise
 leave it empty — `--auto` NEVER fabricates a check path or fixture (a wrong locate is re-validated and
 fails closed at the producer, but a fabricated path is still noise to avoid). Log:
 `[auto] prohibitions: R resolved, U unresolved`.
@@ -408,13 +415,13 @@ Populate the `## Prohibitions` section of SPEC.md from the resolved prohibitions
 `resolved`/`test` row is a checkable negative acceptance criterion; `resolved`/`judgment`
 rows route to judgment review; `⚠ UNRESOLVED` rows are flagged as assumptions). A
 `resolved`/`test` row ALSO carries its captured `check_kind` / `check_target` / `check_rule` /
-`check_violation_fixture` descriptor when present (so the projection feeds `verify-phase`'s deterministic locate + machine-proof, #1278 + #1346);
+`check_violation_fixture` / `check_clean_fixture` descriptor when present (so the projection feeds `verify-phase`'s deterministic locate + machine-proof + causation control, #1278 + #1279 + #1346);
 a `test` row with no captured descriptor is still valid — it stays fail-closed/flagged
 downstream rather than blocking authoring.
 
 ## Step 6: Generate SPEC.md
 
-Use the SPEC.md template from @$HOME/.claude/gsd-core/templates/spec.md.
+Use the SPEC.md template from @~/.claude/gsd-core/templates/spec.md.
 
 - Populate the **Edge Coverage** section from Step 5.5 (covered/dismissed/backstop/unresolved rows).
 - Populate the **Prohibitions** section from Step 5.6 (resolved/dismissed/unresolved rows with the test|judgment tier).
@@ -462,7 +469,7 @@ SPEC.md written — {N} requirements locked.
   Phase {X}: {name}
   Ambiguity: {final_score} (gate: ≤ 0.20)
 
-Next: /gsd-discuss-phase {X}
+Next: /gsd:discuss-phase {X}
   discuss-phase will detect SPEC.md and focus on implementation decisions only.
 ```
 
@@ -489,7 +496,7 @@ Next: /gsd-discuss-phase {X}
 - Boundaries are explicit (in scope / out of scope with reasoning)
 - Acceptance criteria are pass/fail checkboxes
 - SPEC.md committed atomically (when commit_docs is true)
-- User directed to /gsd-discuss-phase as next step
+- User directed to /gsd:discuss-phase as next step
 - Edge-completeness probe run; Edge Coverage section populated; unresolved edges flagged as assumptions
 - Prohibition-completeness probe run; Prohibitions section populated; unresolved prohibitions flagged as assumptions
 </success_criteria>

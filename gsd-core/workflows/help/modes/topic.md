@@ -9,28 +9,28 @@ Emit a section from the full reference for the topic in `$ARGUMENTS`. Read `work
 |---|---|
 | `workflow`, `core`, `core-workflow` | `## Core Workflow` (entire section through end of `### Quick Mode`) |
 | `init`, `new-project` | `### Project Initialization` |
-| `map`, `map-codebase` | The `/gsd-map-codebase` block under `### Project Initialization` |
-| `discuss`, `discuss-phase` | The `/gsd-discuss-phase` block under `### Phase Planning` |
+| `map`, `map-codebase` | The `/gsd:map-codebase` block under `### Project Initialization` |
+| `discuss`, `discuss-phase` | The `/gsd:discuss-phase` block under `### Phase Planning` |
 | `plan`, `planning`, `plan-phase` | `### Phase Planning` |
 | `execute`, `exec`, `execute-phase` | `### Execution` |
 | `progress`, `route` | `### Progress Tracking` plus `### Smart Router` |
 | `quick`, `quick-mode` | `### Quick Mode` |
-| `fast` | The `/gsd-fast` block under `### Quick Mode` |
+| `fast` | The `/gsd:fast` block under `### Quick Mode` |
 | `phase`, `phases`, `roadmap` | `### Roadmap Management` |
 | `milestone`, `milestones` | `### Milestone Management` plus `### Milestone Auditing` |
 | `session`, `pause`, `resume` | `### Session Management` |
 | `debug`, `debugging` | `### Debugging` |
-| `spike` | The `/gsd-spike` and `/gsd-spike --wrap-up` blocks under `### Spiking & Sketching` |
-| `sketch` | The `/gsd-sketch` and `/gsd-sketch --wrap-up` blocks under `### Spiking & Sketching` |
+| `spike` | The `/gsd:spike` and `/gsd:spike --wrap-up` blocks under `### Spiking & Sketching` |
+| `sketch` | The `/gsd:sketch` and `/gsd:sketch --wrap-up` blocks under `### Spiking & Sketching` |
 | `spike-sketch`, `experiments` | `### Spiking & Sketching` |
 | `capture`, `notes`, `todos` | `### Capturing Ideas, Notes, and Todos` |
-| `verify`, `verify-work`, `uat` | `### User Acceptance Testing` plus the `/gsd-audit-uat` block |
-| `ship`, `pr` | `### Ship Work` plus the `/gsd-pr-branch` block |
-| `review`, `peer-review` | The `/gsd-review` block under `### Ship Work` |
+| `verify`, `verify-work`, `uat` | `### User Acceptance Testing` plus the `/gsd:audit-uat` block |
+| `ship`, `pr` | `### Ship Work` plus the `/gsd:pr-branch` block |
+| `review`, `peer-review` | The `/gsd:review` block under `### Ship Work` |
 | `audit`, `auditing`, `audit-milestone` | `### Milestone Auditing` |
 | `config`, `settings`, `configuration` | `### Configuration` |
-| `cleanup` | The `/gsd-cleanup` block under `### Utility Commands` |
-| `update` | The `/gsd-update` block under `### Utility Commands` |
+| `cleanup` | The `/gsd:cleanup` block under `### Utility Commands` |
+| `update` | The `/gsd:update` block under `### Utility Commands` |
 | `files`, `structure`, `layout` | `## Files & Structure` |
 | `modes`, `interactive`, `yolo` | `## Workflow Modes` |
 | `planning-config` | `## Planning Configuration` |
@@ -41,7 +41,7 @@ Emit a section from the full reference for the topic in `$ARGUMENTS`. Read `work
 
 1. Parse `$ARGUMENTS`: detect a `--brief` (or `-b`) flag — this selects **compact scope**. Otherwise scope is **full**. Strip the flag, then take the remaining token (with a single leading `--` stripped) as the topic alias.
 2. Resolve the alias against the table.
-3. If no match: emit a one-line error followed by a comma-separated list of the canonical topic names from the leftmost column (one per row, deduplicated). Suggest `/gsd-help --full` for the complete reference. Stop.
+3. If no match: emit a one-line error followed by a comma-separated list of the canonical topic names from the leftmost column (one per row, deduplicated). Suggest `/gsd:help --full` for the complete reference. Stop.
 4. If matched: emit a single resolved-routing preamble line so the user sees what was matched:
 
    ```text
@@ -67,7 +67,7 @@ Emit a section from the full reference for the topic in `$ARGUMENTS`. Read `work
 6. After the section content, emit a single closing line:
 
    ```text
-   More: /gsd-help --full · /gsd-help <topic> · /gsd-help --brief <topic>
+   More: /gsd:help --full · /gsd:help <topic> · /gsd:help --brief <topic>
    ```
 
 7. No project-specific commentary, no follow-up questions.

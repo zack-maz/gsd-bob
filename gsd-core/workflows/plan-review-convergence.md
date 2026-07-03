@@ -58,7 +58,7 @@ Enable it with:
 
   gsd config-set workflow.plan_review_convergence true
 
-Then re-run: /gsd-plan-review-convergence {PHASE}
+Then re-run: /gsd:plan-review-convergence {PHASE}
 ```
 
 ## 2. Initialize
@@ -134,7 +134,7 @@ Display: `◆ Cycle {cycle}/{MAX_CYCLES} — spawning review agent... (runs in a
 ```text
 Agent(
   description="Cross-AI review Phase {PHASE} cycle {cycle}",
-  prompt="Run /gsd-review for Phase {PHASE}.
+  prompt="Run /gsd:review for Phase {PHASE}.
 
 Execute: Skill(skill='gsd-review', args='--phase {PHASE} {REVIEWER_FLAGS} {GSD_WS}')
 
@@ -163,7 +163,7 @@ Counting rules:
 Definitions:
   PARTIALLY RESOLVED — concern acknowledged and mitigation is in progress but not yet verified/completed (e.g., open ticket exists but fix not landed).
   FULLY RESOLVED — concern addressed with verification complete (closed ticket, verification log, or explicit reviewer sign-off confirming closure).
-  ACTIONABLE — a non-HIGH review finding that would be invisible to /gsd-execute-phase unless it is incorporated into PLAN.md or explicitly deferred/rejected in PLAN.md.
+  ACTIONABLE — a non-HIGH review finding that would be invisible to /gsd:execute-phase unless it is incorporated into PLAN.md or explicitly deferred/rejected in PLAN.md.
 
 Your final response MUST also include this section immediately after the CYCLE_SUMMARY line:
 
@@ -271,7 +271,7 @@ Display:
  No actionable MEDIUM/LOW review findings remain outside PLAN.md.
 
  REVIEWS.md: {REVIEWS_FILE}
- Next: /gsd-execute-phase {PHASE}
+ Next: /gsd:execute-phase {PHASE}
 ```
 
 Exit — convergence achieved.
@@ -327,8 +327,8 @@ If "Manual review":
 ```text
 Review the concerns in: {REVIEWS_FILE}
 
-To replan manually:  /gsd-plan-phase {PHASE} --reviews
-To restart loop:     /gsd-plan-review-convergence {PHASE} {REVIEWER_FLAGS}
+To replan manually:  /gsd:plan-phase {PHASE} --reviews
+To restart loop:     /gsd:plan-review-convergence {PHASE} {REVIEWER_FLAGS}
 ```
 Exit workflow.
 

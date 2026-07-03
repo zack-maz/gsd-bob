@@ -7,10 +7,10 @@ There is no `/gsd-transition` command. This workflow is invoked automatically by
 verification. Users should never be told to run `/gsd-transition`.
 
 **Valid user commands for phase progression:**
-- `/gsd-discuss-phase {N}` — discuss a phase before planning
-- `/gsd-plan-phase {N}` — plan a phase
-- `/gsd-execute-phase {N}` — execute a phase
-- `/gsd-progress` — see roadmap progress
+- `/gsd:discuss-phase {N}` — discuss a phase before planning
+- `/gsd:plan-phase {N}` — plan a phase
+- `/gsd:execute-phase {N}` — execute a phase
+- `/gsd:progress` — see roadmap progress
 
 </internal_workflow>
 
@@ -77,26 +77,28 @@ cat .planning/config.json 2>/dev/null || true
 **Check for verification debt in this phase:**
 
 ```bash
-# Count outstanding items in current phase
-OUTSTANDING=""
-for f in .planning/phases/XX-current/*-UAT.md .planning/phases/XX-current/*-VERIFICATION.md; do
-  [ -f "$f" ] || continue
-  grep -q "result: pending\|result: blocked\|status: partial\|status: human_needed\|status: diagnosed" "$f" && OUTSTANDING="$OUTSTANDING\n$(basename $f)"
-done
+# Run a preliminary frontmatter check via awk — the runtime launcher is not yet
+# defined at this step, so avoid any runtime tool calls here.
+# awk extracts only the status: field between the two --- fences to avoid
+# false positives from historical body text (e.g. previous_status: gaps_found).
+VERIFY_STATUS=$(awk 'NR==1&&/^---$/{in_fm=1;next}in_fm&&/^---$/{exit}in_fm&&/^status: /{print $2}' \
+  .planning/phases/XX-current/*-VERIFICATION.md 2>/dev/null | head -1)
 ```
 
-**If OUTSTANDING is not empty:**
+**If VERIFY_STATUS is not `passed`:**
 
-Append to the completion confirmation message (regardless of mode):
+Stop before confirming:
 
 ```
-Outstanding verification items in this phase:
-{list filenames}
+Verification incomplete: ${VERIFY_STATUS:-missing}
 
-These will carry forward as debt. Review: `/gsd-audit-uat`
+Resolve before transition. Review: `/gsd:audit-uat`
 ```
 
-This does NOT block transition — it ensures the user sees the debt before confirming.
+This preliminary check blocks obviously unresolved verification before the
+launcher is available. `gsd-tools.cjs query phase.complete` remains the
+authoritative stale-aware gate and fail-closes unless canonical verification
+status is `passed`.
 
 **If all plans complete:**
 
@@ -279,7 +281,7 @@ Scan LEARNINGS.md files from recent phases for recurring patterns and surface pr
 **Invoke the graduation helper:**
 
 ```text
-@$HOME/.claude/gsd-core/workflows/graduation.md
+@~/.claude/gsd-core/workflows/graduation.md
 ```
 
 This step is fully delegated to `graduation.md`. It handles guard checks (feature flag, window size, threshold), clustering, backlog filtering, HITL prompting, promotion writes, and STATE.md updates.
@@ -469,7 +471,7 @@ Next: Phase [X+1] — [Name]
 ⚡ Auto-continuing: Plan Phase [X+1] in detail
 ```
 
-Exit skill and invoke SlashCommand("/gsd-plan-phase [X+1] --auto ${GSD_WS}")
+Exit skill and invoke SlashCommand("/gsd:plan-phase [X+1] --auto ${GSD_WS}")
 
 **If CONTEXT.md does NOT exist:**
 
@@ -481,7 +483,7 @@ Next: Phase [X+1] — [Name]
 ⚡ Auto-continuing: Discuss Phase [X+1] first
 ```
 
-Exit skill and invoke SlashCommand("/gsd-discuss-phase [X+1] --auto ${GSD_WS}")
+Exit skill and invoke SlashCommand("/gsd:discuss-phase [X+1] --auto ${GSD_WS}")
 
 </if>
 
@@ -500,13 +502,13 @@ Exit skill and invoke SlashCommand("/gsd-discuss-phase [X+1] --auto ${GSD_WS}")
 
 `/clear` then:
 
-`/gsd-discuss-phase [X+1] ${GSD_WS}` — gather context and clarify approach
+`/gsd:discuss-phase [X+1] ${GSD_WS}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd-plan-phase [X+1] ${GSD_WS}` — skip discussion, plan directly
-- `/gsd-plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+- `/gsd:plan-phase [X+1] ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
 
 ---
 ```
@@ -525,13 +527,13 @@ Exit skill and invoke SlashCommand("/gsd-discuss-phase [X+1] --auto ${GSD_WS}")
 
 `/clear` then:
 
-`/gsd-plan-phase [X+1] ${GSD_WS}`
+`/gsd:plan-phase [X+1] ${GSD_WS}`
 
 ---
 
 **Also available:**
-- `/gsd-discuss-phase [X+1] ${GSD_WS}` — revisit context
-- `/gsd-plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+- `/gsd:discuss-phase [X+1] ${GSD_WS}` — revisit context
+- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
 
 ---
 ```
@@ -577,18 +579,18 @@ This workstream's phases are complete. Other workstreams are still active:
 
 Archive this workstream:
 
-`/gsd-workstreams complete {current_ws_name} ${GSD_WS}`
+`/gsd:workstreams complete {current_ws_name} ${GSD_WS}`
 
 See overall milestone progress:
 
-`/gsd-workstreams progress ${GSD_WS}`
+`/gsd:workstreams progress ${GSD_WS}`
 
 <sub>Milestone completion will be available once all workstreams finish.</sub>
 
 ---
 ```
 
-Do NOT suggest `/gsd-complete-milestone` or `/gsd-new-milestone`.
+Do NOT suggest `/gsd:complete-milestone` or `/gsd:new-milestone`.
 Do NOT auto-invoke any further slash commands.
 
 **Stop here.** The user must explicitly decide what to do next.
@@ -616,7 +618,7 @@ Phase {X} marked complete.
 ⚡ Auto-continuing: Complete milestone and archive
 ```
 
-Exit skill and invoke SlashCommand("/gsd-complete-milestone {version} ${GSD_WS}")
+Exit skill and invoke SlashCommand("/gsd:complete-milestone {version} ${GSD_WS}")
 
 </if>
 
@@ -635,7 +637,7 @@ Exit skill and invoke SlashCommand("/gsd-complete-milestone {version} ${GSD_WS}"
 
 `/clear` then:
 
-`/gsd-complete-milestone {version} ${GSD_WS}`
+`/gsd:complete-milestone {version} ${GSD_WS}`
 
 ---
 

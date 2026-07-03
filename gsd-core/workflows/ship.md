@@ -97,12 +97,12 @@ Verify the work is ready to ship:
    - **`SECURITY_FILE` is empty** → block with `SECURITY_SHIP_GATE_NO_REVIEW`:
      ```
      ⚠ Security enforcement is enabled but no SECURITY.md exists for this phase.
-     Run /gsd-secure-phase {phase} and resolve findings before shipping.
+     Run /gsd:secure-phase {phase} and resolve findings before shipping.
      ```
    - **`SECURITY_FILE` exists** → read its frontmatter `threats_open`. The gate passes **only** when `threats_open` is exactly `0`. For any other value — `threats_open` > 0, or a missing / non-numeric / unparsable field — **fail closed and block** with `SECURITY_SHIP_GATE_OPEN_THREATS` (the predicate is strict equality to `0`; never ship on an ambiguous value):
      ```
      ⚠ Security ship gate: SECURITY.md does not assert threats_open == 0 (found: {threats_open|unset}).
-     Resolve open threats (or re-run /gsd-secure-phase {phase}) before shipping.
+     Resolve open threats (or re-run /gsd:secure-phase {phase}) before shipping.
      ```
 
    If no active security `ship:pre` gate hook is present (security enforcement off), skip this check silently.
@@ -188,7 +188,7 @@ CUSTOM_PR_SECTIONS=$(gsd_run query config-get ship.pr_body_sections --default '[
 
 `ship.pr_body_sections` is an onboarding-time extension point for teams that need extra PRD-style sections such as `User Stories & Acceptance Criteria`, `Risks & Dependencies`, `Success Metrics`, `Release Criteria`, or `Stakeholder Review & Approval`.
 
-Use these sections for lean/agile PRD material that should travel with the PR without making the core `/gsd-ship` body configurable:
+Use these sections for lean/agile PRD material that should travel with the PR without making the core `/gsd:ship` body configurable:
 
 - User stories and acceptance criteria that explain the functional increment from the user's point of view.
 - Definition of Done or release criteria that make the completion standard explicit.
@@ -280,7 +280,9 @@ Use the exact key order `skill=`, `fallback=`, `exempt=`, `missing=` so downstre
 Create the PR using the generated body. Write the body to a temp file first so large generated PRD sections do not hit shell argument limits:
 
 ```bash
-PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/gsd-pr-body.XXXXXX.md")
+# BSD/macOS mktemp only randomizes XXXXXX when it is the final path component, so make a
+# suffixless temp then append the extension — portable across BSD + GNU (#1520).
+PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/gsd-pr-body-XXXXXX") && mv "$PR_BODY_FILE" "${PR_BODY_FILE}.md" && PR_BODY_FILE="${PR_BODY_FILE}.md" || exit 1
 trap 'rm -f "${PR_BODY_FILE:-}"' EXIT
 printf '%s\n' "${PR_BODY}" > "${PR_BODY_FILE}"
 
@@ -439,8 +441,8 @@ Requirements: {N} REQ-IDs addressed
 Next steps:
 - Review/approve PR
 - Merge when CI passes
-- /gsd-complete-milestone (if last phase in milestone)
-- /gsd-progress (to see what's next)
+- /gsd:complete-milestone (if last phase in milestone)
+- /gsd:progress (to see what's next)
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -451,9 +453,9 @@ Next steps:
 <offer_next>
 After shipping:
 
-- /gsd-complete-milestone — if all phases in milestone are done
-- /gsd-progress — see overall project state
-- /gsd-execute-phase {next} — continue to next phase
+- /gsd:complete-milestone — if all phases in milestone are done
+- /gsd:progress — see overall project state
+- /gsd:execute-phase {next} — continue to next phase
 </offer_next>
 
 <success_criteria>

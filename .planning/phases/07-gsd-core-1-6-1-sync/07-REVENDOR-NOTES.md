@@ -61,7 +61,48 @@ Each gotcha and dead-end recorded in the moment.
 <!-- Plan 02 appends: npm pack, extract, nuke, restage, run apply-bob-patches.cjs, version-consistency check -->
 <!-- Plan 03 appends: suite run, drift classification, UPSTREAM.md pointer re-verification -->
 
-_(empty — to be filled live during Plans 02/03)_
+### Plan 02 — Task 1: pack + nuke + restage (2026-07-03)
+
+**Pre-restage tracked count:** `git ls-files gsd-core/ | wc -l` → **382** (1.5.0 tree).
+
+```bash
+# 1) Immutable pack (D-04) into a scratch tmp dir
+SCRATCH=$(mktemp -d /tmp/gsd161.XXXXXX)   # → /tmp/gsd161.INiYEs
+cd "$SCRATCH"
+npm pack @opengsd/gsd-core@1.6.1
+#   → opengsd-gsd-core-1.6.1.tgz
+#   → total files: 707  shasum: b68686cc04e654f449546010bb0d6dfa4dc2e464
+#   → integrity: sha512-0SyHK3qGoIFgN...==
+
+# 2) Extract + confirm payload root BEFORE copying (do not assume)
+tar -xzf opengsd-gsd-core-1.6.1.tgz
+ls package/gsd-core/       # → bin contexts references templates workflows  (5 subdirs, identical structure)
+test -f package/gsd-core/VERSION           # → ABSENT (tarball ships no VERSION — RESEARCH §2, written in Task 2)
+test -f package/gsd-core/workflows/list-seeds.md   # → PRESENT (1.6.1-only new file, proves wholesale replace)
+
+# 3) NUKE the five curated tracked subdirs (D-05 — the only mechanic guaranteeing SYNC-01 no-mix)
+cd <repo-root>
+for d in bin contexts references templates workflows; do rm -rf "gsd-core/$d"; done
+
+# 4) RESTAGE the identical curated subset from the extracted tarball (D-06 — boundary unchanged, 5 subdirs)
+SRC="$SCRATCH/package/gsd-core"
+for d in bin contexts references templates workflows; do cp -R "$SRC/$d" "gsd-core/$d"; done
+#   NOTE: gsd-core/VERSION deliberately NOT restaged (tarball ships none; Task-2 script writes 1.6.1).
+```
+
+**Confirmed payload root path:** `package/gsd-core/{bin,contexts,references,templates,workflows}` (verified by `ls` before copy — no `package/` double-nesting, no new top-level dir; RESEARCH §5 structure-identical confirmed).
+
+**Post-restage working-tree file count:** `find gsd-core -type f | wc -l` → **402** (+20 new 1.6.1 files land inside existing dirs, picked up by the recursive copy).
+
+**Restage verify one-liner:** `test -f gsd-core/workflows/list-seeds.md && for d in bin contexts references templates workflows; do test -d "gsd-core/$d"; done` → `restage ok`.
+
+**Pristine-state confirmation (BEFORE the Task-2 patch run — all expected):**
+- `grep -c convertClaudeCommandToBobSkill gsd-core/bin/lib/runtime-artifact-conversion.cjs` → **0** (Bob converters absent in pristine — re-injected in Task 2).
+- `grep -c '"id": "bob"' gsd-core/bin/lib/capability-registry.cjs` → **0** (bob registry absent — re-injected in Task 2).
+- Colon command form still present (e.g. `gsd-core/workflows/autonomous.md`, `list-phase-assumptions.md`, `validate-phase.md`) — normalized in Task 2.
+- `gsd-core/VERSION` still reads `1.5.0` (untouched by restage; overwritten to 1.6.1 by apply-bob-patches.cjs in Task 2).
+
+**Gotchas/dead-ends:** none — pack, extract, nuke and restage all clean on the first pass. `npm pack` required network (immutable registry-signed tarball, D-04 / T-07-SC Approved).
 
 ---
 

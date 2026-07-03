@@ -74,7 +74,7 @@ done
 ```
 error: source skills root not found: <path>
        Is GSD installed globally for the '<runtime>' runtime?
-       Run: node $HOME/.claude/gsd-core/bin/install.js --global --<runtime>
+       Run: node ~/.claude/gsd-core/bin/install.js --global --<runtime>
 ```
 Then exit.
 

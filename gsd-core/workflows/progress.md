@@ -28,18 +28,18 @@ If `project_exists` is false (no `.planning/` directory):
 ```
 No planning structure found.
 
-Run /gsd-new-project to start a new project.
+Run /gsd:new-project to start a new project.
 ```
 
 Exit.
 
-If missing STATE.md: suggest `/gsd-new-project`.
+If missing STATE.md: suggest `/gsd:new-project`.
 
 **If ROADMAP.md missing but PROJECT.md exists:**
 
 This means a milestone was completed and archived. Go to **Route F** (between milestones).
 
-If missing both ROADMAP.md and PROJECT.md: suggest `/gsd-new-project`.
+If missing both ROADMAP.md and PROJECT.md: suggest `/gsd:new-project`.
 </step>
 
 <step name="load">
@@ -129,10 +129,10 @@ CONTEXT: [✓ if has_context | - if not]
 - [e.g. jq -r '.blockers[].text' from state-snapshot]
 
 ## Pending Todos
-- [count] pending — /gsd-capture --list to review
+- [count] pending — /gsd:capture --list to review
 
 ## Active Debug Sessions
-- [count] active — /gsd-debug to continue
+- [count] active — /gsd:debug to continue
 (Only show this section if count > 0)
 
 ## What's Next
@@ -198,7 +198,7 @@ else
 fi
 ```
 
-**If `INCOMPLETE_PHASE` is non-empty:** emit a one-line resume notice in the routing output and route to `/gsd-execute-phase ${INCOMPLETE_PHASE}` instead of running Step 1's current-phase routing. The progress report (already displayed by the `report` step above) gives the user full project status before this routing decision is shown.
+**If `INCOMPLETE_PHASE` is non-empty:** emit a one-line resume notice in the routing output and route to `/gsd:execute-phase ${INCOMPLETE_PHASE}` instead of running Step 1's current-phase routing. The progress report (already displayed by the `report` step above) gives the user full project status before this routing decision is shown.
 
 ```
 ---
@@ -207,7 +207,7 @@ fi
 
 `/clear` then:
 
-`/gsd-execute-phase ${INCOMPLETE_PHASE} ${GSD_WS}`
+`/gsd:execute-phase ${INCOMPLETE_PHASE} ${GSD_WS}`
 
 (plans without summaries detected; use --no-resume to skip this check and route by current_phase instead; --force to skip all gates)
 
@@ -265,15 +265,15 @@ Track: `outstanding_debt` — `summary.total_items` from the audit.
 | {phase} | {filename} | {pending_count} pending, {skipped_count} skipped, {blocked_count} blocked |
 | {phase} | {filename} | human_needed — {count} items |
 
-Review: `/gsd-audit-uat ${GSD_WS}` — full cross-phase audit
-Resume testing: `/gsd-verify-work {phase} ${GSD_WS}` — retest specific phase
+Review: `/gsd:audit-uat ${GSD_WS}` — full cross-phase audit
+Resume testing: `/gsd:verify-work {phase} ${GSD_WS}` — retest specific phase
 ```
 
 This is a WARNING, not a blocker — routing proceeds normally. The debt is visible so the user can make an informed choice.
 
 **Step 1.7: Check verification status for the current phase**
 
-A phase whose verification ended `gaps_found` or `human_needed` is NOT complete, even when every PLAN.md has a matching SUMMARY.md. The count-based status (`roadmap.analyze`) only sees plans/summaries, so without this check such a phase is reported complete and routing skips straight to the next phase. When the phase appears count-complete (`summaries = plans AND plans > 0`), consult the verification report (the same `verification.status` gate `ship` and `execute-phase` use, from #651):
+A phase whose verification is missing, unknown, `gaps_found`, or `human_needed` is NOT complete, even when every PLAN.md has a matching SUMMARY.md. The count-based status (`roadmap.analyze`) only sees plans/summaries, so without this check such a phase is reported complete and routing skips straight to the next phase. When the phase appears count-complete (`summaries = plans AND plans > 0`), consult the verification report (the same `verification.status` gate `ship` and `execute-phase` use, from #651):
 
 ```bash
 PHASE_DIR=".planning/phases/[current-phase-dir]"
@@ -282,7 +282,7 @@ VERIFICATION_STATUS=$(printf '%s' "$VERIFICATION" | jq -r '.status' 2>/dev/null 
 VERIFICATION_NEXT_ACTION=$(printf '%s' "$VERIFICATION" | jq -r '.next_action' 2>/dev/null || echo "")
 ```
 
-Track: `verification_status` — the `.status` field (`passed | gaps_found | human_needed | missing | unknown`). The query already handles a missing VERIFICATION.md (returns `missing`) and unexpected values, so no per-status file probing is needed. `passed`, `missing` (not yet verified), and `unknown` route as complete (Step 3) — `missing` with an advisory that the phase is unverified; `gaps_found` and `human_needed` route back to close the verification debt (Step 2).
+Track: `verification_status` — the `.status` field (`passed | stale | gaps_found | human_needed | missing | unknown`). The query/projection handles a missing VERIFICATION.md (`missing`), unexpected values, and stale verification (`stale`, when summaries are newer than verification). Only `passed` routes as phase complete (Step 3); every other status routes back to close verification debt (Step 2).
 
 **Step 2: Route based on counts**
 
@@ -291,12 +291,15 @@ Track: `verification_status` — the `.status` field (`passed | gaps_found | hum
 | uat_partial > 0 | UAT testing incomplete | Go to **Route E.2** |
 | uat_with_gaps > 0 | UAT gaps need fix plans | Go to **Route E** |
 | summaries < plans | Unexecuted plans exist | Go to **Route A** |
+| summaries = plans AND plans > 0 AND verification_status = missing | Phase executed; verification report missing | Go to **Route V.missing** |
+| summaries = plans AND plans > 0 AND verification_status = unknown | Phase executed; verification status unknown | Go to **Route V.unknown** |
+| summaries = plans AND plans > 0 AND verification_status = stale | Phase executed; verification is stale | Go to **Route V.stale** |
 | summaries = plans AND plans > 0 AND verification_status = gaps_found | Phase executed; verification found gaps | Go to **Route V.gaps** |
 | summaries = plans AND plans > 0 AND verification_status = human_needed | Phase executed; awaiting human verification | Go to **Route V.human** |
-| summaries = plans AND plans > 0 | Phase complete (verification passed, missing, or n/a) | Go to Step 3 |
+| summaries = plans AND plans > 0 AND verification_status = passed | Phase complete (verification passed) | Go to Step 3 |
 | plans = 0 | Phase not yet planned | Go to **Route B** |
 
-Rows are evaluated top to bottom; the first matching row wins. The two `verification_status` rows must precede the general `summaries = plans` row so a non-`passed` verification is not reported as complete.
+Rows are evaluated top to bottom; the first matching row wins. The `verification_status` rows must precede the passed row so non-`passed` verification is not reported as complete.
 
 ---
 
@@ -314,7 +317,7 @@ Read its `<objective>` section.
 
 `/clear` then:
 
-`/gsd-execute-phase {phase} ${GSD_WS}`
+`/gsd:execute-phase {phase} ${GSD_WS}`
 
 ---
 ```
@@ -344,7 +347,7 @@ PHASE_HAS_UI=$(echo "$PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true" ||
 
 `/clear` then:
 
-`/gsd-plan-phase {phase-number} ${GSD_WS}`
+`/gsd:plan-phase {phase-number} ${GSD_WS}`
 
 ---
 ```
@@ -360,14 +363,14 @@ PHASE_HAS_UI=$(echo "$PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true" ||
 
 `/clear` then:
 
-`/gsd-discuss-phase {phase}` — gather context and clarify approach
+`/gsd:discuss-phase {phase}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd-ui-phase {phase}` — generate UI design contract (recommended for frontend phases)
-- `/gsd-plan-phase {phase}` — skip discussion, plan directly
-- `/gsd-discuss-phase {phase}` — include assumptions check before planning
+- `/gsd:ui-phase {phase}` — generate UI design contract (recommended for frontend phases)
+- `/gsd:plan-phase {phase}` — skip discussion, plan directly
+- `/gsd:discuss-phase {phase}` — include assumptions check before planning
 
 ---
 ```
@@ -383,13 +386,13 @@ PHASE_HAS_UI=$(echo "$PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true" ||
 
 `/clear` then:
 
-`/gsd-discuss-phase {phase} ${GSD_WS}` — gather context and clarify approach
+`/gsd:discuss-phase {phase} ${GSD_WS}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd-plan-phase {phase} ${GSD_WS}` — skip discussion, plan directly
-- `/gsd-discuss-phase {phase} ${GSD_WS}` — include assumptions check before planning
+- `/gsd:plan-phase {phase} ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:discuss-phase {phase} ${GSD_WS}` — include assumptions check before planning
 
 ---
 ```
@@ -409,13 +412,13 @@ UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
 
 `/clear` then:
 
-`/gsd-plan-phase {phase} --gaps ${GSD_WS}`
+`/gsd:plan-phase {phase} --gaps ${GSD_WS}`
 
 ---
 
 **Also available:**
-- `/gsd-execute-phase {phase} ${GSD_WS}` — execute phase plans
-- `/gsd-verify-work {phase} ${GSD_WS}` — run more UAT testing
+- `/gsd:execute-phase {phase} ${GSD_WS}` — execute phase plans
+- `/gsd:verify-work {phase} ${GSD_WS}` — run more UAT testing
 
 ---
 ```
@@ -435,15 +438,45 @@ UAT.md exists with `status: partial` — testing session ended before all items 
 
 `/clear` then:
 
-`/gsd-verify-work {phase} ${GSD_WS}` — resume testing from where you left off
+`/gsd:verify-work {phase} ${GSD_WS}` — resume testing from where you left off
 
 ---
 
 **Also available:**
-- `/gsd-audit-uat ${GSD_WS}` — full cross-phase UAT audit
-- `/gsd-execute-phase {phase} ${GSD_WS}` — execute phase plans
+- `/gsd:audit-uat ${GSD_WS}` — full cross-phase UAT audit
+- `/gsd:execute-phase {phase} ${GSD_WS}` — execute phase plans
 
 ---
+```
+
+---
+
+**Route V.missing: verification report missing**
+
+All plans have summaries, but canonical verification has not passed. The phase is implementation-complete, not phase-complete.
+
+```
+`/gsd:execute-phase {phase} ${GSD_WS}` — re-run execution verification
+```
+
+---
+
+**Route V.unknown: verification status unknown**
+
+VERIFICATION.md has an unexpected status. The phase is implementation-complete, not phase-complete.
+
+```
+`/gsd:execute-phase {phase} ${GSD_WS}` — regenerate verification
+```
+
+---
+
+**Route V.stale: verification is stale**
+
+VERIFICATION.md has `status: passed`, but one or more SUMMARY.md files are newer than the verification report. The phase is implementation-complete, not phase-complete.
+
+```
+`/gsd:verify-work {phase} ${GSD_WS}` — re-run verification against the latest summaries
 ```
 
 ---
@@ -461,7 +494,7 @@ VERIFICATION.md exists with `status: gaps_found` — verification identified gap
 
 `/clear` then:
 
-`/gsd-plan-phase {phase} --gaps ${GSD_WS}`
+`/gsd:plan-phase {phase} --gaps ${GSD_WS}`
 
 ---
 ```
@@ -481,7 +514,7 @@ VERIFICATION.md exists with `status: human_needed` — automated checks passed b
 
 `/clear` then:
 
-`/gsd-verify-work {phase} ${GSD_WS}` — resume human verification
+`/gsd:verify-work {phase} ${GSD_WS}` — resume human verification
 
 ---
 ```
@@ -531,14 +564,14 @@ NEXT_HAS_UI=$(echo "$NEXT_PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true
 
 `/clear` then:
 
-`/gsd-discuss-phase {Z+1}` — gather context and clarify approach
+`/gsd:discuss-phase {Z+1}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd-ui-phase {Z+1}` — generate UI design contract (recommended for frontend phases)
-- `/gsd-plan-phase {Z+1}` — skip discussion, plan directly
-- `/gsd-verify-work {Z}` — user acceptance test before continuing
+- `/gsd:ui-phase {Z+1}` — generate UI design contract (recommended for frontend phases)
+- `/gsd:plan-phase {Z+1}` — skip discussion, plan directly
+- `/gsd:verify-work {Z}` — user acceptance test before continuing
 
 ---
 ```
@@ -556,13 +589,13 @@ NEXT_HAS_UI=$(echo "$NEXT_PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true
 
 `/clear` then:
 
-`/gsd-discuss-phase {Z+1} ${GSD_WS}` — gather context and clarify approach
+`/gsd:discuss-phase {Z+1} ${GSD_WS}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd-plan-phase {Z+1} ${GSD_WS}` — skip discussion, plan directly
-- `/gsd-verify-work {Z} ${GSD_WS}` — user acceptance test before continuing
+- `/gsd:plan-phase {Z+1} ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:verify-work {Z} ${GSD_WS}` — user acceptance test before continuing
 
 ---
 ```
@@ -584,12 +617,12 @@ All {N} phases finished!
 
 `/clear` then:
 
-`/gsd-complete-milestone ${GSD_WS}`
+`/gsd:complete-milestone ${GSD_WS}`
 
 ---
 
 **Also available:**
-- `/gsd-verify-work ${GSD_WS}` — user acceptance test before completing milestone
+- `/gsd:verify-work ${GSD_WS}` — user acceptance test before completing milestone
 
 ---
 ```
@@ -615,7 +648,7 @@ Ready to plan the next milestone.
 
 `/clear` then:
 
-`/gsd-new-milestone ${GSD_WS}`
+`/gsd:new-milestone ${GSD_WS}`
 
 ---
 ```
@@ -625,10 +658,10 @@ Ready to plan the next milestone.
 <step name="edge_cases">
 **Handle edge cases:**
 
-- Phase complete but next phase not planned → offer `/gsd-plan-phase [next] ${GSD_WS}`
+- Phase complete but next phase not planned → offer `/gsd:plan-phase [next] ${GSD_WS}`
 - All work complete → offer milestone completion
 - Blockers present → highlight before offering to continue
-- Handoff file exists → mention it, offer `/gsd-resume-work ${GSD_WS}`
+- Handoff file exists → mention it, offer `/gsd:resume-work ${GSD_WS}`
 </step>
 
 <step name="forensic_audit">
@@ -735,12 +768,12 @@ Review the flagged items above before acting on the routing suggestion.
 ```
 
 Then for each failed check, add a concrete next action:
-- Check 2 (orphaned handoff): `Read the handoff file(s) and resume from where work was paused: /gsd-resume-work ${GSD_WS}`
+- Check 2 (orphaned handoff): `Read the handoff file(s) and resume from where work was paused: /gsd:resume-work ${GSD_WS}`
 - Check 3 (deferred scope): `Add the missing phases to ROADMAP.md or update the deferred references`
 - Check 4 (memory pending): `Review the flagged memory entries and resolve or clear them`
 - Check 5 (blocking todos): `Complete the operational steps in .planning/todos/pending/ before continuing`
 - Check 6 (uncommitted code): `Commit or stash the uncommitted changes before advancing`
-- Check 1 (STATE inconsistency): `Run /gsd-verify-work ${PHASE} ${GSD_WS} to reconcile state`
+- Check 1 (STATE inconsistency): `Run /gsd:verify-work ${PHASE} ${GSD_WS} to reconcile state`
 </step>
 
 </process>
@@ -750,7 +783,7 @@ Then for each failed check, add a concrete next action:
 - [ ] Rich context provided (recent work, decisions, issues)
 - [ ] Current position clear with visual progress
 - [ ] What's next clearly explained
-- [ ] Smart routing: /gsd-execute-phase if plans exist, /gsd-plan-phase if not
+- [ ] Smart routing: /gsd:execute-phase if plans exist, /gsd:plan-phase if not
 - [ ] User confirms before any action
 - [ ] Seamless handoff to appropriate gsd command
       </success_criteria>

@@ -54,7 +54,7 @@ Only future phases can be removed:
 - Current phase: {current}
 - Phase {target} is current or completed
 
-To abandon current work, use /gsd-pause-work instead.
+To abandon current work, use /gsd:pause-work instead.
 ```
 
 Exit.
@@ -127,7 +127,7 @@ Changes:
 ## What's Next
 
 Would you like to:
-- `/gsd-progress` — see updated roadmap status
+- `/gsd:progress` — see updated roadmap status
 - Continue with current phase
 - Review roadmap
 
