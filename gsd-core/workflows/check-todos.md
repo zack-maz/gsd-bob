@@ -29,7 +29,7 @@ Todos are captured during work sessions with /gsd-add-todo.
 
 Would you like to:
 
-1. Continue with current phase (/gsd:progress)
+1. Continue with current phase (/gsd-progress)
 2. Add a todo now (/gsd-add-todo)
 ```
 

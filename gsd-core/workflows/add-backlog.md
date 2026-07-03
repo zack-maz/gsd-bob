@@ -76,7 +76,7 @@ Phase {NEXT}: {description}
 Directory: {PHASE_DIR}/
 
 This item lives in the backlog parking lot.
-Use /gsd:discuss-phase {NEXT} to explore it further.
+Use /gsd-discuss-phase {NEXT} to explore it further.
 Use /gsd:review-backlog to promote items to active milestone.
 ```
 
@@ -84,7 +84,7 @@ Use /gsd:review-backlog to promote items to active milestone.
 
 <notes>
 - 999.x numbering keeps backlog items out of the active phase sequence
-- Phase directories are created immediately so /gsd:discuss-phase and /gsd:plan-phase work on them
+- Phase directories are created immediately so /gsd-discuss-phase and /gsd-plan-phase work on them
 - No `Depends on:` field — backlog items are unsequenced by definition
 - Sparse numbering is fine (999.1, 999.3) — always uses next-decimal
 - Promote backlog items to the active milestone with /gsd:review-backlog

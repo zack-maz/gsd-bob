@@ -263,7 +263,7 @@ The sketch-findings skill will auto-load when building the UI.
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- `/gsd:plan-phase` — start building the real UI
+- `/gsd-plan-phase` — start building the real UI
 - `/gsd:ui-phase` — generate a UI design contract for a frontend phase
 - `/gsd:sketch [idea]` — sketch a specific new design area
 - `/gsd:explore` — continue exploring

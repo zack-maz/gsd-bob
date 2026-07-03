@@ -10,9 +10,9 @@ Plan-driven development for solo agentic work with Claude Code. GSD Core turns a
 ## Start here (3 commands)
 
 ```text
-/gsd:new-project        # Greenfield: questioning → research → requirements → roadmap
-/gsd:plan-phase 1       # Create a detailed plan for phase 1
-/gsd:execute-phase 1    # Execute all plans in the phase
+/gsd-new-project        # Greenfield: questioning → research → requirements → roadmap
+/gsd-plan-phase 1       # Create a detailed plan for phase 1
+/gsd-execute-phase 1    # Execute all plans in the phase
 ```
 
 Existing codebase? Run `/gsd:map-codebase` first to ground GSD in your code.
@@ -21,13 +21,13 @@ Existing codebase? Run `/gsd:map-codebase` first to ground GSD in your code.
 
 | Command | Purpose |
 |---|---|
-| `/gsd:progress` | Where am I, what's next — also routes freeform intent with `--do "..."` |
+| `/gsd-progress` | Where am I, what's next — also routes freeform intent with `--do "..."` |
 | `/gsd:quick` | Small ad-hoc task with GSD guarantees (planning dir + atomic commit) |
 | `/gsd:fast "<task>"` | Trivial inline change — no subagents, ≤3 file edits |
-| `/gsd:discuss-phase <N>` | Capture vision and decisions before planning |
-| `/gsd:debug "<symptom>"` | Persistent debug session, survives `/clear` |
+| `/gsd-discuss-phase <N>` | Capture vision and decisions before planning |
+| `/gsd-debug "<symptom>"` | Persistent debug session, survives `/clear` |
 | `/gsd:capture` | Save an idea, todo, note, seed, or backlog item |
-| `/gsd:verify-work <N>` | Conversational UAT for a completed phase |
+| `/gsd-verify-work <N>` | Conversational UAT for a completed phase |
 | `/gsd:ship <N>` | Open a PR from a completed phase |
 | `/gsd:help --full` | Complete reference (every command, every flag) |
 

@@ -3,8 +3,8 @@ Safe git revert workflow. Rolls back GSD phase or plan commits using the phase m
 </purpose>
 
 <required_reading>
-@~/.claude/gsd-core/references/ui-brand.md
-@~/.claude/gsd-core/references/gate-prompts.md
+@$HOME/.claude/gsd-core/references/ui-brand.md
+@$HOME/.claude/gsd-core/references/gate-prompts.md
 </required_reading>
 
 <process>
@@ -285,12 +285,12 @@ Show next steps:
 
 /clear then:
 
-/gsd:progress
+/gsd-progress
 
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- `/gsd:execute-phase ${PHASE}` — re-execute if needed
+- `/gsd-execute-phase ${PHASE}` — re-execute if needed
 - `/gsd:undo --last 1` — undo the revert itself if something went wrong
 
 ───────────────────────────────────────────────────────────────

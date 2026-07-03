@@ -3,7 +3,7 @@ Audit Nyquist validation gaps for a completed phase. Generate missing tests. Upd
 </purpose>
 
 <required_reading>
-@~/.claude/gsd-core/references/ui-brand.md
+@$HOME/.claude/gsd-core/references/ui-brand.md
 </required_reading>
 
 <available_agent_types>
@@ -44,7 +44,7 @@ SUMMARY_FILES=$(ls "${PHASE_DIR}"/*-SUMMARY.md 2>/dev/null)
 
 - **State A** (`VALIDATION_FILE` non-empty): Audit existing
 - **State B** (`VALIDATION_FILE` empty, `SUMMARY_FILES` non-empty): Reconstruct from artifacts
-- **State C** (`SUMMARY_FILES` empty): Exit — "Phase {N} not executed. Run /gsd:execute-phase {N} ${GSD_WS} first."
+- **State C** (`SUMMARY_FILES` empty): Exit — "Phase {N} not executed. Run /gsd-execute-phase {N} ${GSD_WS} first."
 
 ## 2. Discovery
 
@@ -99,7 +99,7 @@ Print: `◆ Spawning nyquist auditor... (runs in a subagent — no output until 
 
 ```
 Agent(
-  prompt="Read ~/.claude/agents/gsd-nyquist-auditor.md for instructions.\n\n" +
+  prompt="Read $HOME/.claude/agents/gsd-nyquist-auditor.md for instructions.\n\n" +
     "<files_to_read>{PLAN, SUMMARY, impl files, VALIDATION.md}</files_to_read>" +
     "<gaps>{gap list}</gaps>" +
     "<test_infrastructure>{framework, config, commands}</test_infrastructure>" +
@@ -121,7 +121,7 @@ Handle return:
 ## 6. Generate/Update VALIDATION.md
 
 **State B (create):**
-1. Read template from `~/.claude/gsd-core/templates/VALIDATION.md`
+1. Read template from `$HOME/.claude/gsd-core/templates/VALIDATION.md`
 2. Fill: frontmatter, Test Infrastructure, Per-Task Map, Manual-Only, Sign-Off
 3. Write to `${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md`
 

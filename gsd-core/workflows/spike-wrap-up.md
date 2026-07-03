@@ -284,7 +284,7 @@ After the summary, present next-step options:
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- `/gsd:plan-phase` — start planning the real implementation
+- `/gsd-plan-phase` — start planning the real implementation
 - `/gsd:spike [idea]` — spike a specific new idea
 - `/gsd:explore` — continue exploring
 - Other

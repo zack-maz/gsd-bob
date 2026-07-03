@@ -47,8 +47,8 @@ Parse current values (default to `true` if not present):
 - `workflow.ui_safety_gate` — prompt to run /gsd:ui-phase before planning frontend phases (default: true if absent)
 - `workflow.ai_integration_phase` — framework selection + eval strategy for AI phases (default: true if absent)
 - `workflow.tdd_mode` — enforce RED/GREEN/REFACTOR gate sequence during execute-phase (default: false if absent)
-- `workflow.code_review` — enable /gsd:code-review and /gsd:code-review --fix commands (default: true if absent)
-- `workflow.code_review_depth` — default depth for /gsd:code-review: `quick`, `standard`, or `deep` (default: `"standard"` if absent; only relevant when `code_review` is on)
+- `workflow.code_review` — enable /gsd-code-review and /gsd-code-review --fix commands (default: true if absent)
+- `workflow.code_review_depth` — default depth for /gsd-code-review: `quick`, `standard`, or `deep` (default: `"standard"` if absent; only relevant when `code_review` is on)
 - `workflow.ui_review` — run visual quality audit (/gsd:ui-review) in autonomous mode (default: true if absent)
 - `commit_docs` — whether `.planning/` files are committed to git (default: true if absent)
 - `intel.enabled` — enable queryable codebase intelligence (/gsd:map-codebase --query) (default: false if absent)
@@ -201,11 +201,11 @@ AskUserQuestion([
     ]
   },
   {
-    question: "Enable Code Review? (/gsd:code-review and /gsd:code-review --fix commands)",
+    question: "Enable Code Review? (/gsd-code-review and /gsd-code-review --fix commands)",
     header: "Code Review",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Enable /gsd:code-review commands for reviewing source files changed during a phase." },
+      { label: "Yes (Recommended)", description: "Enable /gsd-code-review commands for reviewing source files changed during a phase." },
       { label: "No", description: "Commands exit with a configuration gate message. Use when code review is handled externally." }
     ]
   },
@@ -213,7 +213,7 @@ AskUserQuestion([
   // chosen code_review value is "Yes". If code_review is "No", omit this question from
   // the AskUserQuestion call and do not touch the existing workflow.code_review_depth value.
   {
-    question: "Code Review Depth? (default depth for /gsd:code-review — override per-run with --depth=)",
+    question: "Code Review Depth? (default depth for /gsd-code-review — override per-run with --depth=)",
     header: "Review Depth",
     multiSelect: false,
     options: [
@@ -374,7 +374,7 @@ AskUserQuestion([
     header: "Graph auto-update",
     multiSelect: false,
     options: [
-      { label: "No (Recommended)", description: "Manual /gsd:graphify build only. Conservative default — opt in if you want fresh context on every /gsd:quick or /gsd:plan-phase." },
+      { label: "No (Recommended)", description: "Manual /gsd:graphify build only. Conservative default — opt in if you want fresh context on every /gsd:quick or /gsd-plan-phase." },
       { label: "Yes", description: "Auto-rebuild the graph in a detached background process after git commit/merge/pull/rebase --continue/cherry-pick on the default branch. Hook returns instantly; rebuild runs out-of-band. No-op if Graphify is disabled." }
     ]
   }
@@ -569,14 +569,14 @@ Display:
 | Context Warnings     | {On/Off} |
 | Saved as Defaults    | {Yes/No} |
 
-These settings apply to future /gsd:plan-phase and /gsd:execute-phase runs.
+These settings apply to future /gsd-plan-phase and /gsd-execute-phase runs.
 
 Quick commands:
 - /gsd:config --integrations — configure API keys (Brave/Firecrawl/Exa), review.models CLI routing, and agent_skills injection
 - /gsd:config --profile <profile> — switch model profile
-- /gsd:plan-phase --research — force research
-- /gsd:plan-phase --skip-research — skip research
-- /gsd:plan-phase --skip-verify — skip plan check
+- /gsd-plan-phase --research — force research
+- /gsd-plan-phase --skip-research — skip research
+- /gsd-plan-phase --skip-verify — skip plan check
 - /gsd:config --advanced — power-user tuning (plan bounce, timeouts, branch templates, cross-AI, context window, model policy)
 ```
 </step>

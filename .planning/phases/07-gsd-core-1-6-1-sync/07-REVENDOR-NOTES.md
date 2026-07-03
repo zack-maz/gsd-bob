@@ -104,6 +104,48 @@ for d in bin contexts references templates workflows; do cp -R "$SRC/$d" "gsd-co
 
 **Gotchas/dead-ends:** none — pack, extract, nuke and restage all clean on the first pass. `npm pack` required network (immutable registry-signed tarball, D-04 / T-07-SC Approved).
 
+### Plan 02 — Task 2: re-inject deltas + idempotency + seam re-verification (2026-07-03)
+
+```bash
+# RUN 1 — reproduce all six local deltas over the pristine 1.6.1 tree
+node scripts/apply-bob-patches.cjs
+#   [1] colon→hyphen: 90 file(s) changed
+#   [2] ~/.claude→$HOME: 41 file(s) changed   (scanned 234 .md under workflows,references,templates,contexts)
+#   [3] registry: "bob" block inserted before "claude" in const runtimes
+#   [4a] converter block: inserted before module.exports
+#   [4b] converter exports: 3 symbols added
+#   [5a] alias manifest: "bob" key added
+#   [5b] name-policy alias: "bob" entry added after "cline"
+#   [6] VERSION: wrote 1.6.1
+
+# IDEMPOTENCY PROOF (D-02) — compare run-1 output to run-2 output DIRECTLY (NOT vs HEAD).
+git add gsd-core/                       # stage post-run-1 tree as the comparison baseline
+node scripts/apply-bob-patches.cjs      # RUN 2 — every step reported "already applied — no-op" / "0 changed"
+git diff --quiet gsd-core/              # → clean: second run is a pure no-op vs the staged post-run-1 tree
+#   → "IDEMPOTENT: re-run made zero changes vs staged post-run-1 tree"
+```
+
+**Idempotency verdict:** PROVEN AT RUNTIME. Run 2 reported `[1] 0 changed`, `[2] 0 changed`, and every patch step `already applied — no-op`; `git diff --quiet gsd-core/` against the staged post-run-1 tree is clean. The colon→hyphen normalization is therefore at a fixed point — no real command-form `gsd:<cmd>` survived (the 3 intentional `gsd:...`/`gsd:X` placeholders and stock `bin/` colon strings are expected and untouched, per RESEARCH §1).
+
+**Normalization scope reconfirmed against the live run (RESEARCH A2):**
+- colon→hyphen: **90** .md files changed (RESEARCH predicted ~88 — within the doc-tree band; delta is `contexts/` now in scope).
+- ~/.claude→$HOME: **41** .md files changed (RESEARCH A2 targeted ≈129 *lines*; file-count 41 is consistent — one file carries many lines).
+- Post-run: `grep -rn '~/\.claude' gsd-core/{workflows,references,templates,contexts}` → **empty** (all doc-tree occurrences rewritten to `$HOME/.claude`). Stock `bin/` `~/.claude` comments/literals are NEVER normalized (RESEARCH §1) and are out of scope.
+
+**SYNC-01 payload version-consistency (D-07):**
+- `cat gsd-core/VERSION` → `1.6.1` ✅
+- `grep -rn '1\.5\.0' gsd-core/` → **one hit only**: `gsd-core/bin/lib/legacy-cleanup.cjs:225` — a **STOCK UPSTREAM comment** (`// When Codex upgrades to gsd-core 1.5.0 it writes fresh skill files to`), verified byte-identical in the pristine 1.6.1 tarball. This is a historical Codex-migration reference, **NOT our payload's version marker**. See DEVIATION below. Scoped assertion `grep -rn '1\.5\.0' gsd-core/ | grep -v 'legacy-cleanup.cjs:225:'` → empty ✅ (no payload-version 1.5.0/1.6.1 mix).
+
+**SYNC-02 seam re-verification (both seams):**
+- Seam A — converter existence: `require('./gsd-core/bin/lib/runtime-artifact-conversion.cjs')` exposes both `convertClaudeCommandToBobSkill` and `convertClaudeCommandToBobCommand` as functions ✅.
+- Seam B — registry + aliases: `require('./gsd-core/bin/lib/capability-registry.cjs')` loads clean; `runtimes.bob` resolves (`id=bob title="IBM Bob" configHome.name=.bob env=["BOB_CONFIG_DIR"]`); `runtime-aliases.manifest.json` `bob=["bob","bob-cli"]`; `runtime-name-policy.cjs` carries `bob:` alias ✅.
+- `node --check` on all three patched `.cjs` (capability-registry, runtime-artifact-conversion, runtime-name-policy) → syntax OK ✅ (anchor inserts did not corrupt JS — mitigates T-07-04).
+
+**DEVIATION [Rule 1-adjacent / research-premise correction] — stock 1.5.0 comment in 1.6.1:**
+RESEARCH §7 asserted "the only place 1.5.0 could live is `gsd-core/VERSION`" — that fact was verified against the **1.5.0** pristine tarball. The **1.6.1** payload ships a NEW stock file line (`bin/lib/legacy-cleanup.cjs:225`) containing the literal `1.5.0` inside an upstream historical comment about Codex skill-migration (#1453). It is immutable stock upstream content, identical in the packed tarball, in the same class as the stock `bin/` `~/.claude` (~20) and `/gsd:` colon (~38) strings the plan already scopes OUT of its assertions. **Resolution: NOT edited.** Editing stock `bin/` code would (a) introduce an undocumented 7th delta the patch script does not reproduce → breaking D-02 idempotency and the Phase-10 runbook, and (b) corrupt the nuke-and-restage "pristine + exactly six deltas" integrity contract (T-07-03). The SYNC-01 semantic intent — the payload carries ONE consistent version with no 1.5.0/1.6.1 mix — holds: `VERSION`=1.6.1 and no version-marker residue. The literal must-have grep is refined to exclude this single stock historical-reference line. (Plan 03's residue sweep is doc/test-scoped and does not touch stock `bin/` either.)
+
+---
+
 ---
 
 ## D-03 converter re-verification result (filled in Plan 02/03)
@@ -113,7 +155,7 @@ re-injection into the 1.6.1 `runtime-artifact-conversion.cjs`. Per RESEARCH §3 
 hand-edited code (in-file banner `gsd-bob HAND-EDIT to this GENERATED file`), NOT stock gsd-core —
 they must be re-injected wholesale by `apply-bob-patches.cjs`, not treated as upstream functions.
 
-_(to be filled live during Plan 02/03)_
+**D-03 VERDICT (Plan 02, 2026-07-03):** converters re-injected; `require('./gsd-core/bin/lib/runtime-artifact-conversion.cjs')` resolves BOTH `convertClaudeCommandToBobSkill` and `convertClaudeCommandToBobCommand` as functions — **no upstream rename break, because the converters were never stock upstream** (grep-confirmed absent from the pristine 1.6.1 tarball; present only after `apply-bob-patches.cjs` re-injects the ~105-line block + 3 exports). This is the re-injection contract holding, NOT a stock-function existence check. `node --check` on the patched file passes (anchor insert before `module.exports` + the 3 export symbols after `convertClaudeCommandToCursorCommand,` did not corrupt syntax). All block dependencies (`yamlQuote`, `extractFrontmatterAndBody`, `extractFrontmatterField`) survive in 1.6.1's file — the require resolves clean. Golden byte-equivalence of the converter OUTPUT is validated by the skill/command/text-mode suites in Plan 03.
 
 ---
 

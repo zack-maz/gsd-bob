@@ -163,10 +163,10 @@ Then re-run verification to apply.
 
 Overrides can also be managed through the verification workflow:
 
-1. Run `/gsd:verify-work` — verification finds gaps
+1. Run `/gsd-verify-work` — verification finds gaps
 2. Review gaps — determine which are intentional deviations
 3. Add override entries to VERIFICATION.md frontmatter
-4. Re-run `/gsd:verify-work` — overrides are applied, remaining gaps shown
+4. Re-run `/gsd-verify-work` — overrides are applied, remaining gaps shown
 
 </creating_overrides>
 

@@ -10,7 +10,7 @@ Emit a section from the full reference for the topic in `$ARGUMENTS`. Read `work
 | `workflow`, `core`, `core-workflow` | `## Core Workflow` (entire section through end of `### Quick Mode`) |
 | `init`, `new-project` | `### Project Initialization` |
 | `map`, `map-codebase` | The `/gsd:map-codebase` block under `### Project Initialization` |
-| `discuss`, `discuss-phase` | The `/gsd:discuss-phase` block under `### Phase Planning` |
+| `discuss`, `discuss-phase` | The `/gsd-discuss-phase` block under `### Phase Planning` |
 | `plan`, `planning`, `plan-phase` | `### Phase Planning` |
 | `execute`, `exec`, `execute-phase` | `### Execution` |
 | `progress`, `route` | `### Progress Tracking` plus `### Smart Router` |
@@ -24,7 +24,7 @@ Emit a section from the full reference for the topic in `$ARGUMENTS`. Read `work
 | `sketch` | The `/gsd:sketch` and `/gsd:sketch --wrap-up` blocks under `### Spiking & Sketching` |
 | `spike-sketch`, `experiments` | `### Spiking & Sketching` |
 | `capture`, `notes`, `todos` | `### Capturing Ideas, Notes, and Todos` |
-| `verify`, `verify-work`, `uat` | `### User Acceptance Testing` plus the `/gsd:audit-uat` block |
+| `verify`, `verify-work`, `uat` | `### User Acceptance Testing` plus the `/gsd-audit-uat` block |
 | `ship`, `pr` | `### Ship Work` plus the `/gsd:pr-branch` block |
 | `review`, `peer-review` | The `/gsd:review` block under `### Ship Work` |
 | `audit`, `auditing`, `audit-milestone` | `### Milestone Auditing` |

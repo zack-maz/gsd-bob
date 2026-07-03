@@ -19,8 +19,8 @@ Then verify each level against the actual codebase.
 </core_principle>
 
 <required_reading>
-@~/.claude/gsd-core/references/verification-patterns.md
-@~/.claude/gsd-core/templates/verification-report.md
+@$HOME/.claude/gsd-core/references/verification-patterns.md
+@$HOME/.claude/gsd-core/templates/verification-report.md
 </required_reading>
 
 <process>
@@ -537,7 +537,7 @@ REPORT_PATH="$PHASE_DIR/${PHASE_NUM}-VERIFICATION.md"
 
 Fill template sections: frontmatter (phase/timestamp/status/score), goal achievement, artifact table, wiring table, requirements coverage, anti-patterns, human verification, gaps summary, fix plans (if gaps_found), metadata.
 
-See ~/.claude/gsd-core/templates/verification-report.md for complete template.
+See $HOME/.claude/gsd-core/templates/verification-report.md for complete template.
 </step>
 
 <step name="return_to_orchestrator">

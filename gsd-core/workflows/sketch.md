@@ -11,10 +11,10 @@ Supports two modes:
 <required_reading>
 Read all files referenced by the invoking prompt's execution_context before starting.
 
-@~/.claude/gsd-core/references/sketch-theme-system.md
-@~/.claude/gsd-core/references/sketch-variant-patterns.md
-@~/.claude/gsd-core/references/sketch-interactivity.md
-@~/.claude/gsd-core/references/sketch-tooling.md
+@$HOME/.claude/gsd-core/references/sketch-theme-system.md
+@$HOME/.claude/gsd-core/references/sketch-variant-patterns.md
+@$HOME/.claude/gsd-core/references/sketch-interactivity.md
+@$HOME/.claude/gsd-core/references/sketch-tooling.md
 </required_reading>
 
 <process>
@@ -338,7 +338,7 @@ After all sketches complete:
 
 **Also available:**
 - `/gsd:sketch` — sketch more (or run with no argument for frontier mode)
-- `/gsd:plan-phase` — start building the real UI
+- `/gsd-plan-phase` — start building the real UI
 - `/gsd:spike` — spike technical feasibility of a design pattern
 
 ───────────────────────────────────────────────────────────────

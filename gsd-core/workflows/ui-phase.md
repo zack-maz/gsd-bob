@@ -5,7 +5,7 @@ UI-SPEC.md locks spacing, typography, color, copywriting, and design system deci
 </purpose>
 
 <required_reading>
-@~/.claude/gsd-core/references/ui-brand.md
+@$HOME/.claude/gsd-core/references/ui-brand.md
 </required_reading>
 
 <available_agent_types>
@@ -54,7 +54,7 @@ UI phase is disabled in config. Enable via /gsd:settings.
 ```
 Exit workflow.
 
-**If `planning_exists` is false:** Error — run `/gsd:new-project` first.
+**If `planning_exists` is false:** Error — run `/gsd-new-project` first.
 
 ## 2. Parse and Validate Phase
 
@@ -71,7 +71,7 @@ PHASE_INFO=$(gsd_run query roadmap.get-phase "${PHASE}")
 **If `has_context` is false:**
 ```
 No CONTEXT.md found for Phase {N}.
-Recommended: run /gsd:discuss-phase {N} first to capture design preferences.
+Recommended: run /gsd-discuss-phase {N} first to capture design preferences.
 Continuing without user decisions — UI researcher will ask all questions.
 ```
 Continue (non-blocking).
@@ -124,7 +124,7 @@ Display:
 Build prompt:
 
 ```markdown
-Read ~/.claude/agents/gsd-ui-researcher.md for instructions.
+Read $HOME/.claude/agents/gsd-ui-researcher.md for instructions.
 
 <objective>
 Create UI design contract for Phase {phase_number}: {phase_name}
@@ -135,7 +135,7 @@ Answer: "What visual and interaction contracts does this phase need?"
 - {state_path} (Project State)
 - {roadmap_path} (Roadmap)
 - {requirements_path} (Requirements)
-- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+- {context_path} (USER DECISIONS from /gsd-discuss-phase)
 - {research_path} (Technical Research — stack decisions)
 - {SKETCH_FINDINGS_PATH} (Sketch Findings — validated design decisions, CSS patterns, visual direction from /gsd:sketch, if exists)
 </files_to_read>
@@ -144,7 +144,7 @@ ${AGENT_SKILLS_UI}
 
 <output>
 Write to: {phase_dir}/{padded_phase}-UI-SPEC.md
-Template: ~/.claude/gsd-core/templates/UI-SPEC.md
+Template: $HOME/.claude/gsd-core/templates/UI-SPEC.md
 </output>
 
 <config>
@@ -189,7 +189,7 @@ Display:
 Build prompt:
 
 ```markdown
-Read ~/.claude/agents/gsd-ui-checker.md for instructions.
+Read $HOME/.claude/agents/gsd-ui-checker.md for instructions.
 
 <objective>
 Validate UI design contract for Phase {phase_number}: {phase_name}
@@ -284,14 +284,14 @@ Dimensions: 6/6 passed
 {If CONTEXT.md exists for this phase:}
 **Plan Phase {N}** — planner will use UI-SPEC.md as design context
 
-`/clear` then: `/gsd:plan-phase {N}`
+`/clear` then: `/gsd-plan-phase {N}`
 
 {If CONTEXT.md does NOT exist:}
 **Discuss Phase {N}** — gather implementation context before planning
 
-`/clear` then: `/gsd:discuss-phase {N}`
+`/clear` then: `/gsd-discuss-phase {N}`
 
-(or `/gsd:plan-phase {N}` to skip discussion)
+(or `/gsd-plan-phase {N}` to skip discussion)
 
 ───────────────────────────────────────────────────────────────
 ```

@@ -6,8 +6,8 @@ offers mid-conversation research when useful, then routes crystallized outputs t
 <required_reading>
 Read all files referenced by the invoking prompt's execution_context before starting.
 
-@~/.claude/gsd-core/references/questioning.md
-@~/.claude/gsd-core/references/domain-probes.md
+@$HOME/.claude/gsd-core/references/questioning.md
+@$HOME/.claude/gsd-core/references/domain-probes.md
 </required_reading>
 
 <available_agent_types>
@@ -130,7 +130,7 @@ gsd_run query commit "docs: capture exploration — {topic_slug}" --files {file_
 **Outputs:** {count} artifact(s) created
 {list of created files}
 
-Continue exploring with `/gsd:explore` or start working with `/gsd:progress --next`.
+Continue exploring with `/gsd:explore` or start working with `/gsd-progress --next`.
 ```
 
 </process>

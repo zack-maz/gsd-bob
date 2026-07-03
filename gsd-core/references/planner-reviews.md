@@ -4,7 +4,7 @@ Triggered when orchestrator sets Mode to `reviews`. Replanning from scratch with
 
 **Mindset:** Fresh planner with review insights — not a surgeon making patches, but an architect who has read peer critiques.
 
-**Execution contract:** REVIEWS.md is audit trail and feedback input, not a second execution contract. /gsd:execute-phase primarily consumes PLAN.md plus the normal phase context. Every current actionable review finding must therefore be incorporated into the relevant PLAN.md or explicitly deferred/rejected in that PLAN.md.
+**Execution contract:** REVIEWS.md is audit trail and feedback input, not a second execution contract. /gsd-execute-phase primarily consumes PLAN.md plus the normal phase context. Every current actionable review finding must therefore be incorporated into the relevant PLAN.md or explicitly deferred/rejected in that PLAN.md.
 
 ### Step 1: Load REVIEWS.md
 Read the reviews file from `<files_to_read>`. Parse:

@@ -35,9 +35,9 @@ via filesystem and git state.
 
 <required_reading>
 Read STATE.md before any operation to load project context.
-@~/.claude/gsd-core/references/agent-contracts.md
-@~/.claude/gsd-core/references/context-budget.md
-@~/.claude/gsd-core/references/gates.md
+@$HOME/.claude/gsd-core/references/agent-contracts.md
+@$HOME/.claude/gsd-core/references/context-budget.md
+@$HOME/.claude/gsd-core/references/gates.md
 </required_reading>
 
 <available_agent_types>
@@ -145,8 +145,8 @@ When `CONTEXT_WINDOW >= 500000` (1M-class models), subagent prompts include rich
 - This enables cross-phase awareness and history-aware verification
 
 When `CONTEXT_WINDOW < 200000` (sub-200K models), subagent prompts are thinned to reduce static overhead:
-- Executor agents omit extended deviation rule examples and checkpoint examples from inline prompt — load on-demand via @~/.claude/gsd-core/references/executor-examples.md
-- Planner agents omit extended anti-pattern lists and specificity examples from inline prompt — load on-demand via @~/.claude/gsd-core/references/planner-antipatterns.md
+- Executor agents omit extended deviation rule examples and checkpoint examples from inline prompt — load on-demand via @$HOME/.claude/gsd-core/references/executor-examples.md
+- Planner agents omit extended anti-pattern lists and specificity examples from inline prompt — load on-demand via @$HOME/.claude/gsd-core/references/planner-antipatterns.md
 - Core rules and decision logic remain inline; only verbose examples and edge-case lists are extracted
 - This reduces executor static overhead by ~40% while preserving behavioral correctness
 
@@ -211,7 +211,7 @@ if [ "$MVP_MODE" = "true" ] && [ "$TDD_MODE" = "true" ]; then
   fi
 fi
 ```
-Pure doc-only / config-only / test-only tasks return `is_behavior_adding=false` and are exempt. When the gate trips, Read `~/.claude/gsd-core/references/execute-mvp-tdd.md` for the exact halt report format.
+Pure doc-only / config-only / test-only tasks return `is_behavior_adding=false` and are exempt. When the gate trips, Read `$HOME/.claude/gsd-core/references/execute-mvp-tdd.md` for the exact halt report format.
 </step>
 
 <step name="check_blocking_antipatterns" priority="first">
@@ -267,7 +267,7 @@ checkpoints between tasks. The user can review, modify, or redirect work at any 
 
    b. **If "Review first":** Read and display the full plan file. Ask again: Execute, Modify, Skip.
 
-   c. **If "Execute":** Read and follow `~/.claude/gsd-core/workflows/execute-plan.md` **inline**
+   c. **If "Execute":** Read and follow `$HOME/.claude/gsd-core/workflows/execute-plan.md` **inline**
       (do NOT spawn a subagent). Execute tasks one at a time.
 
    d. **After each task:** Pause briefly. If the user intervenes (types anything), stop and address
@@ -491,9 +491,9 @@ increases monotonically across waves. `{status}` is `complete` (success),
 
 **For each wave:**
 
-@~/.claude/gsd-core/references/execute-phase-wave-guard.md
+@$HOME/.claude/gsd-core/references/execute-phase-wave-guard.md
 
-@~/.claude/gsd-core/references/execute-phase-context-guard.md
+@$HOME/.claude/gsd-core/references/execute-phase-context-guard.md
 
 1. **Intra-wave files_modified overlap check (BEFORE spawning):**
 
@@ -643,12 +643,12 @@ increases monotonically across waves. `{status}` is `complete` (success),
        </parallel_execution>
 
        <execution_context>
-       @~/.claude/gsd-core/workflows/execute-plan.md
-       @~/.claude/gsd-core/templates/summary.md
-       @~/.claude/gsd-core/references/checkpoints.md
-       @~/.claude/gsd-core/references/tdd.md
-       @~/.claude/gsd-core/references/worktree-path-safety.md
-       ${CONTEXT_WINDOW < 200000 ? '' : '@~/.claude/gsd-core/references/executor-examples.md'}
+       @$HOME/.claude/gsd-core/workflows/execute-plan.md
+       @$HOME/.claude/gsd-core/templates/summary.md
+       @$HOME/.claude/gsd-core/references/checkpoints.md
+       @$HOME/.claude/gsd-core/references/tdd.md
+       @$HOME/.claude/gsd-core/references/worktree-path-safety.md
+       ${CONTEXT_WINDOW < 200000 ? '' : '@$HOME/.claude/gsd-core/references/executor-examples.md'}
        </execution_context>
 
        <files_to_read>
@@ -1036,13 +1036,13 @@ increases monotonically across waves. `{status}` is `complete` (success),
    2. Switch to a different runtime / model and resume
    3. Abort phase and report partial state
    ```
-   Re-run `/gsd:execute-phase` after quota reset for Option 1.
+   Re-run `/gsd-execute-phase` after quota reset for Option 1.
    **Step 7.2 — `class == "classify-handoff-bug"`:**
    If error contains `classifyHandoffIfNeeded is not defined`, treat as Claude runtime bug. Run the same step-5 spot-checks; PASS => treat as success, FAIL => fall through.
    **Step 7.3 — `class == "unknown-failure"`:**
    Report failed plan and ask Continue/Stop; continuing may cascade into dependent plan failures.
 
-@~/.claude/gsd-core/references/execute-phase-between-wave-reset.md
+@$HOME/.claude/gsd-core/references/execute-phase-between-wave-reset.md
 
 8. **Execute checkpoint plans between waves** — see `<checkpoint_handling>`.
 9. **Proceed to next wave.**
@@ -1157,8 +1157,8 @@ Apply the same "incomplete" filtering rules as earlier:
 
 Selected wave finished successfully. This phase still has incomplete plans, so phase-level verification and completion were intentionally skipped.
 
-/gsd:execute-phase {phase} ${GSD_WS}                # Continue remaining waves
-/gsd:execute-phase {phase} --wave {next} ${GSD_WS}  # Run the next wave explicitly
+/gsd-execute-phase {phase} ${GSD_WS}                # Continue remaining waves
+/gsd-execute-phase {phase} --wave {next} ${GSD_WS}  # Run the next wave explicitly
 ```
 
 **If no incomplete plans remain after the selected wave finishes:**
@@ -1193,7 +1193,7 @@ REVIEW_STATUS=$(sed -n '/^---$/,/^---$/p' "$REVIEW_FILE" | grep "^status:" | hea
 If REVIEW_STATUS is not "clean" and not "skipped" and not empty, display:
 ```
 Code review found issues. Consider running:
-/gsd:code-review ${PHASE_NUMBER} --fix
+/gsd-code-review ${PHASE_NUMBER} --fix
 ```
 
 **Error handling:** If the Skill invocation fails or throws, catch the error, display "Code review encountered an error (non-blocking): {error}" and proceed to gate dispatch. Review failures must never block execution.
@@ -1208,7 +1208,7 @@ CHECK_EXIT=$?
 
 **Gate evaluation** uses the same two-step contract as `execute:wave:post` above: **Step 1** — if the check command failed (non-zero `CHECK_EXIT`, empty/unparseable output), `onError == "halt"` stops and surfaces the error, `onError == "skip"` warns and continues to the next hook (do not read `block`). **Step 2** (command succeeded) — a blocking gate (`hook.blocking == true`) halts on `GATE_RESULT.block == true` with its message/table (never bypassed by `onError`); an advisory gate (`hook.blocking == false`) shows its `table`/summary when `block == true` or `message` is non-empty, then continues; a blocking gate with `block == false` continues silently.
 
-**TDD review escalation (overrides the advisory default for the `tdd.review-checkpoint` gate only).** The tdd `execute:post` gate is declared `blocking: false`, so by the generic contract above it displays its `message`/table and continues. There is ONE documented exception (see `~/.claude/gsd-core/references/execute-mvp-tdd.md`): when `MVP_MODE=true` AND `TDD_MODE=true` AND `GATE_RESULT.block == true` (one or more TDD plans miss a RED or GREEN gate commit), the end-of-phase TDD review escalates from advisory to **blocking under MVP+TDD** — refuse to mark the phase complete and present:
+**TDD review escalation (overrides the advisory default for the `tdd.review-checkpoint` gate only).** The tdd `execute:post` gate is declared `blocking: false`, so by the generic contract above it displays its `message`/table and continues. There is ONE documented exception (see `$HOME/.claude/gsd-core/references/execute-mvp-tdd.md`): when `MVP_MODE=true` AND `TDD_MODE=true` AND `GATE_RESULT.block == true` (one or more TDD plans miss a RED or GREEN gate commit), the end-of-phase TDD review escalates from advisory to **blocking under MVP+TDD** — refuse to mark the phase complete and present:
 
 ```
 Phase blocked: {N} TDD plan(s) violate the RED→GREEN gate sequence under MVP+TDD.
@@ -1451,14 +1451,14 @@ Tests saved to `{phase_num}-UAT.md`.
 
 When ready to run the tests:
 
-`/gsd:verify-work {X} ${GSD_WS}`
+`/gsd-verify-work {X} ${GSD_WS}`
 
 Verify-work will walk you through each item and mark the phase complete when all tests pass.
 ```
 
 **Do NOT advance the phase from this branch.** Phase completion is handled by verify-work's auto-transition after UAT passes.
 
-**If user acknowledges without reporting issues (including "ok", "noted", "ack", "got it", "approved", "done", "yes", "pass", or similar):** Stop. The phase remains pending. No further orchestrator action — wait for the user to run `/gsd:verify-work`.
+**If user acknowledges without reporting issues (including "ok", "noted", "ack", "got it", "approved", "done", "yes", "pass", or similar):** Stop. The phase remains pending. No further orchestrator action — wait for the user to run `/gsd-verify-work`.
 
 **If user reports issues now (before running verify-work):** Proceed to gap closure as currently implemented.
 
@@ -1477,13 +1477,13 @@ Verify-work will walk you through each item and mark the phase complete when all
 
 `/clear` then:
 
-`/gsd:plan-phase {X} --gaps ${GSD_WS}`
+`/gsd-plan-phase {X} --gaps ${GSD_WS}`
 
 Also: `cat {phase_dir}/{phase_num}-VERIFICATION.md` — full report
-Also: `/gsd:verify-work {X} ${GSD_WS}` — manual testing first
+Also: `/gsd-verify-work {X} ${GSD_WS}` — manual testing first
 ```
 
-Gap closure cycle: `/gsd:plan-phase {X} --gaps ${GSD_WS}` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → user runs `/gsd:execute-phase {X} --gaps-only ${GSD_WS}` → verifier re-runs.
+Gap closure cycle: `/gsd-plan-phase {X} --gaps ${GSD_WS}` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → user runs `/gsd-execute-phase {X} --gaps-only ${GSD_WS}` → verifier re-runs.
 </step>
 
 <step name="update_roadmap">
@@ -1509,7 +1509,7 @@ Extract from result: `next_phase`, `next_phase_name`, `is_last_phase`, `warnings
 
 {list each warning}
 
-These items are tracked and will appear in `/gsd:progress` and `/gsd:audit-uat`.
+These items are tracked and will appear in `/gsd-progress` and `/gsd-audit-uat`.
 ```
 
 ```bash
@@ -1596,7 +1596,7 @@ gsd_run query commit "docs(phase-{X}): evolve PROJECT.md after phase completion"
 
 <step name="offer_next">
 
-**Exception:** If `gaps_found`, the `verify_phase_goal` step already presents the gap-closure path (`/gsd:plan-phase {X} --gaps`). No additional routing needed — skip auto-advance.
+**Exception:** If `gaps_found`, the `verify_phase_goal` step already presents the gap-closure path (`/gsd-plan-phase {X} --gaps`). No additional routing needed — skip auto-advance.
 
 **No-transition check (spawned by auto-advance chain):**
 
@@ -1640,7 +1640,7 @@ STOP. Do not proceed to auto-advance or transition.
 
 Execute the transition workflow inline (do NOT use Agent — orchestrator context is ~10-15%, transition needs phase completion data already in context):
 
-Read and follow `~/.claude/gsd-core/workflows/transition.md`, passing through the `--auto` flag so it propagates to the next phase invocation.
+Read and follow `$HOME/.claude/gsd-core/workflows/transition.md`, passing through the `--auto` flag so it propagates to the next phase invocation.
 
 **If neither `--auto` nor `AUTO_MODE` is true:**
 
@@ -1659,10 +1659,10 @@ If CONTEXT.md does **not** exist for the next phase, present:
 ```
 ## ✓ Phase {X}: {Name} Complete
 
-/gsd:progress ${GSD_WS} — see updated roadmap
-/gsd:discuss-phase {next} ${GSD_WS} — start here: discuss next phase before planning  ← recommended
-/gsd:plan-phase {next} ${GSD_WS} — plan next phase (skip discuss)
-/gsd:execute-phase {next} ${GSD_WS} — execute next phase (skip discuss and plan)
+/gsd-progress ${GSD_WS} — see updated roadmap
+/gsd-discuss-phase {next} ${GSD_WS} — start here: discuss next phase before planning  ← recommended
+/gsd-plan-phase {next} ${GSD_WS} — plan next phase (skip discuss)
+/gsd-execute-phase {next} ${GSD_WS} — execute next phase (skip discuss and plan)
 ```
 
 If CONTEXT.md **exists** for the next phase, present:
@@ -1670,10 +1670,10 @@ If CONTEXT.md **exists** for the next phase, present:
 ```
 ## ✓ Phase {X}: {Name} Complete
 
-/gsd:progress ${GSD_WS} — see updated roadmap
-/gsd:plan-phase {next} ${GSD_WS} — start here: plan next phase (CONTEXT.md already present)  ← recommended
-/gsd:discuss-phase {next} ${GSD_WS} — re-discuss next phase
-/gsd:execute-phase {next} ${GSD_WS} — execute next phase (skip planning)
+/gsd-progress ${GSD_WS} — see updated roadmap
+/gsd-plan-phase {next} ${GSD_WS} — start here: plan next phase (CONTEXT.md already present)  ← recommended
+/gsd-discuss-phase {next} ${GSD_WS} — re-discuss next phase
+/gsd-execute-phase {next} ${GSD_WS} — execute next phase (skip planning)
 ```
 
 Only suggest the commands listed above. Do not invent or hallucinate command names.
@@ -1701,7 +1701,7 @@ For 1M+ context models, consider:
 </failure_handling>
 
 <resumption>
-Re-run `/gsd:execute-phase {phase}` → discover_plans finds completed SUMMARYs → skips them → resumes from first incomplete plan → continues wave execution.
+Re-run `/gsd-execute-phase {phase}` → discover_plans finds completed SUMMARYs → skips them → resumes from first incomplete plan → continues wave execution.
 
 STATE.md tracks: last completed plan, current wave, pending checkpoints.
 </resumption>

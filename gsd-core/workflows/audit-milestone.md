@@ -287,9 +287,9 @@ per group of related gaps) using the standard phase chain:
 /clear then:
 
 /gsd:phase --insert <N> "Close gap: <REQ-ID> — <description>"
-/gsd:discuss-phase <N>
-/gsd:plan-phase <N>
-/gsd:execute-phase <N>
+/gsd-discuss-phase <N>
+/gsd-plan-phase <N>
+/gsd-execute-phase <N>
 
 For Nyquist-coverage gaps flagged in the table above, prefer running
 `/gsd:validate-phase <N>` for each flagged phase (and `/gsd:secure-phase
@@ -338,9 +338,9 @@ Insert a closure phase using the standard chain:
 /clear then:
 
 /gsd:phase --insert <N> "Address tech debt: <area>"
-/gsd:discuss-phase <N>
-/gsd:plan-phase <N>
-/gsd:execute-phase <N>
+/gsd-discuss-phase <N>
+/gsd-plan-phase <N>
+/gsd-execute-phase <N>
 
 ───────────────────────────────────────────────────────────────
 </offer_next>

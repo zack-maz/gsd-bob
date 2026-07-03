@@ -787,7 +787,7 @@ Display:
 | model_policy.medium                        | {model-id/null} |
 | model_policy.low                           | {model-id/null} |
 
-These settings apply to future /gsd:plan-phase, /gsd:execute-phase, /gsd:discuss-phase,
+These settings apply to future /gsd-plan-phase, /gsd-execute-phase, /gsd-discuss-phase,
 and /gsd:ship runs.
 
 For common-case toggles (model profile, research/plan_check/verifier, branching strategy,

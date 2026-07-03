@@ -428,7 +428,7 @@ gsd_run query commit "docs(spikes): update conventions" --files .planning/spikes
 
 **Also available:**
 - `/gsd:spike` — spike more ideas (or run with no argument for frontier mode)
-- `/gsd:plan-phase` — start planning the real implementation
+- `/gsd-plan-phase` — start planning the real implementation
 - `/gsd:explore` — continue exploring the idea
 
 ───────────────────────────────────────────────────────────────

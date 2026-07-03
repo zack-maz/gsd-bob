@@ -77,7 +77,7 @@ This prevents the "scavenger hunt" anti-pattern where executors explore the code
 
 ## Specificity
 
-**Test:** Could a different Claude instance execute without asking clarifying questions? If not, add specificity. See @~/.claude/gsd-core/references/planner-antipatterns.md for vague-vs-specific comparison table.
+**Test:** Could a different Claude instance execute without asking clarifying questions? If not, add specificity. See @$HOME/.claude/gsd-core/references/planner-antipatterns.md for vague-vs-specific comparison table.
 
 ## User Setup Detection
 
@@ -159,7 +159,7 @@ Derive plans from actual work. Granularity determines compression tolerance, not
 
 ### Next Steps
 
-Run `/clear` first for a fresh context window, then execute: `/gsd:execute-phase {phase}`
+Run `/clear` first for a fresh context window, then execute: `/gsd-execute-phase {phase}`
 ```
 
 ## Gap Closure Plans Created Return Format
@@ -178,7 +178,7 @@ Run `/clear` first for a fresh context window, then execute: `/gsd:execute-phase
 
 ### Next Steps
 
-Execute: `/gsd:execute-phase {phase} --gaps-only`
+Execute: `/gsd-execute-phase {phase} --gaps-only`
 ```
 
 ## Checkpoint Reached / Revision Complete

@@ -39,7 +39,7 @@ Configuration options for `.planning/` directory behavior.
 | `workflow.test_command` | `null` | Custom shell command run as the regression/test gate by verify-phase, execute-phase, audit-fix, and post-merge-gate. When unset, GSD auto-detects (Makefile / package.json / Cargo.toml / go.mod / pyproject.toml). Example: `npm test`. |
 | `workflow.build_command` | `null` | Custom shell command run as the build gate by the post-merge gate. When unset, the build step is skipped/auto-detected. Example: `npm run build`. |
 | `workflow.inline_plan_threshold` | `2` | Plans with this many tasks or fewer execute inline (Pattern C) instead of spawning a subagent. Avoids ~14K token spawn overhead for small plans. Set to `0` to always spawn subagents. |
-| `manager.flags.discuss` | `""` | Flags passed to `/gsd:discuss-phase` when dispatched from manager (e.g. `"--auto --analyze"`) |
+| `manager.flags.discuss` | `""` | Flags passed to `/gsd-discuss-phase` when dispatched from manager (e.g. `"--auto --analyze"`) |
 | `manager.flags.plan` | `""` | Flags passed to plan workflow when dispatched from manager |
 | `manager.flags.execute` | `""` | Flags passed to execute workflow when dispatched from manager |
 | `response_language` | `null` | Language for user-facing questions and prompts across all phases/subagents (e.g. `"Portuguese"`, `"Japanese"`, `"Spanish"`). When set, all spawned agents include a directive to respond in this language. |
@@ -349,7 +349,7 @@ Set via `manager.*` namespace (e.g., `"manager": { "flags": { "discuss": "--auto
 
 | Key | Type | Default | Allowed Values | Description |
 |-----|------|---------|----------------|-------------|
-| `manager.flags.discuss` | string | `""` | Any CLI flags string | Flags passed to `/gsd:discuss-phase` from manager (e.g., `"--auto --analyze"`) |
+| `manager.flags.discuss` | string | `""` | Any CLI flags string | Flags passed to `/gsd-discuss-phase` from manager (e.g., `"--auto --analyze"`) |
 | `manager.flags.plan` | string | `""` | Any CLI flags string | Flags passed to plan workflow from manager |
 | `manager.flags.execute` | string | `""` | Any CLI flags string | Flags passed to execute workflow from manager |
 

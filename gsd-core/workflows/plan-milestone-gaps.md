@@ -173,12 +173,12 @@ gsd_run query commit "docs(roadmap): add gap closure phases {N}-{M}" --files .pl
 
 `/clear` then:
 
-`/gsd:plan-phase {N}`
+`/gsd-plan-phase {N}`
 
 ---
 
 **Also available:**
-- `/gsd:execute-phase {N}` — if plans already exist
+- `/gsd-execute-phase {N}` — if plans already exist
 - `cat .planning/ROADMAP.md` — see updated roadmap
 
 ---
@@ -277,5 +277,5 @@ becomes:
 - [ ] Coverage count updated in REQUIREMENTS.md
 - [ ] Phase directories created
 - [ ] Changes committed (includes REQUIREMENTS.md)
-- [ ] User knows to run `/gsd:plan-phase` next
+- [ ] User knows to run `/gsd-plan-phase` next
 </success_criteria>

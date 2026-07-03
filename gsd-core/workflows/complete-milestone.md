@@ -105,7 +105,7 @@ ALL_PHASES_VERIFIED=$(printf '%s' "$INIT_MANAGER" | jq -r '[
 
 If not all_phases_verified, verified_closeout must not proceed. Set `closeout_type=override_closeout`, show each phase whose `phase_complete !== true` or `verification_status !== 'passed'`, and require an explicit user choice:
 1. **Proceed anyway** — record verification overrides in MILESTONES.md/STATE.md
-2. **Run verification first** — `/gsd:verify-work {phase}` or `/gsd:execute-phase {phase}`
+2. **Run verification first** — `/gsd-verify-work {phase}` or `/gsd-execute-phase {phase}`
 3. **Abort** — return to development
 
 Only set `closeout_type=verified_closeout` when `ALL_PHASES_VERIFIED` is `true`.
@@ -544,7 +544,7 @@ ls .planning/RETROSPECTIVE.md 2>/dev/null || true
 
 **If exists:** Read the file, append new milestone section before the "## Cross-Milestone Trends" section.
 
-**If doesn't exist:** Create from template at `~/.claude/gsd-core/templates/retrospective.md`.
+**If doesn't exist:** Create from template at `$HOME/.claude/gsd-core/templates/retrospective.md`.
 
 **Gather retrospective data:**
 

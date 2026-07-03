@@ -72,7 +72,7 @@ blocks direct STATE.md writes):
    `{decimal_phase}`:
 
    ```bash
-   gsd_run query state.patch '{"Current Phase":"{decimal_phase}","Next recommended run":"/gsd:plan-phase {decimal_phase}"}'
+   gsd_run query state.patch '{"Current Phase":"{decimal_phase}","Next recommended run":"/gsd-plan-phase {decimal_phase}"}'
    ```
 
    (Adjust field names to whatever pointers STATE.md exposes — the handler
@@ -116,7 +116,7 @@ Project state updated: .planning/STATE.md
 
 `/clear` then:
 
-`/gsd:plan-phase {decimal_phase}`
+`/gsd-plan-phase {decimal_phase}`
 
 ---
 
@@ -136,7 +136,7 @@ Project state updated: .planning/STATE.md
 - Don't insert before Phase 1 (decimal 0.1 makes no sense)
 - Don't renumber existing phases
 - Don't modify the target phase content
-- Don't create plans yet (that's /gsd:plan-phase)
+- Don't create plans yet (that's /gsd-plan-phase)
 - Don't commit changes (user decides when to commit)
 </anti_patterns>
 

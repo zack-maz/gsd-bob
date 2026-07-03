@@ -68,7 +68,7 @@ Parse JSON for: `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `phase
 **If `phase_found` is false:**
 ```
 Phase [X] not found in roadmap.
-Use /gsd:progress to see available phases.
+Use /gsd-progress to see available phases.
 ```
 Exit.
 
@@ -90,7 +90,7 @@ If SPEC.md already exists:
   - "Skip" — Exit (use existing spec as-is)
 
 If "View": Display SPEC.md, then offer Update/Skip.
-If "Skip": Exit with message: "Existing SPEC.md unchanged. Run /gsd:discuss-phase [X] to continue."
+If "Skip": Exit with message: "Existing SPEC.md unchanged. Run /gsd-discuss-phase [X] to continue."
 If "Update": Load existing SPEC.md, continue to Step 3.
 
 ## Step 2: Scout Codebase
@@ -190,7 +190,7 @@ If gate passes (ambiguity ≤ 0.20 AND all minimums met):
 ## Step 5.5: Edge-Completeness Probe
 
 Run AFTER the ambiguity gate passes (you probe edges of clear requirements, not vague
-ones). Reference: @~/.claude/gsd-core/references/edge-probe.md.
+ones). Reference: @$HOME/.claude/gsd-core/references/edge-probe.md.
 
 **Runtime coverage compute — resolve and invoke edge-probe.cjs:**
 
@@ -328,7 +328,7 @@ Populate the `## Edge Coverage` section of SPEC.md from the resolved edges.
 ## Step 5.6: Prohibition-Completeness Probe (must-NOT)
 
 Run AFTER Step 5.5 (you probe the must-NOT axis of clear requirements, over the same
-requirement list). Reference: @~/.claude/gsd-core/references/prohibition-probe.md — the
+requirement list). Reference: @$HOME/.claude/gsd-core/references/prohibition-probe.md — the
 portable two-stage protocol, the canon-referral rule, and the status×verification schema
 live there (size-cap discipline; keep this step lean).
 
@@ -421,7 +421,7 @@ downstream rather than blocking authoring.
 
 ## Step 6: Generate SPEC.md
 
-Use the SPEC.md template from @~/.claude/gsd-core/templates/spec.md.
+Use the SPEC.md template from @$HOME/.claude/gsd-core/templates/spec.md.
 
 - Populate the **Edge Coverage** section from Step 5.5 (covered/dismissed/backstop/unresolved rows).
 - Populate the **Prohibitions** section from Step 5.6 (resolved/dismissed/unresolved rows with the test|judgment tier).
@@ -469,7 +469,7 @@ SPEC.md written — {N} requirements locked.
   Phase {X}: {name}
   Ambiguity: {final_score} (gate: ≤ 0.20)
 
-Next: /gsd:discuss-phase {X}
+Next: /gsd-discuss-phase {X}
   discuss-phase will detect SPEC.md and focus on implementation decisions only.
 ```
 
@@ -496,7 +496,7 @@ Next: /gsd:discuss-phase {X}
 - Boundaries are explicit (in scope / out of scope with reasoning)
 - Acceptance criteria are pass/fail checkboxes
 - SPEC.md committed atomically (when commit_docs is true)
-- User directed to /gsd:discuss-phase as next step
+- User directed to /gsd-discuss-phase as next step
 - Edge-completeness probe run; Edge Coverage section populated; unresolved edges flagged as assumptions
 - Prohibition-completeness probe run; Prohibitions section populated; unresolved prohibitions flagged as assumptions
 </success_criteria>

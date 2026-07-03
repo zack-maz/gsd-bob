@@ -7,10 +7,10 @@ There is no `/gsd-transition` command. This workflow is invoked automatically by
 verification. Users should never be told to run `/gsd-transition`.
 
 **Valid user commands for phase progression:**
-- `/gsd:discuss-phase {N}` — discuss a phase before planning
-- `/gsd:plan-phase {N}` — plan a phase
-- `/gsd:execute-phase {N}` — execute a phase
-- `/gsd:progress` — see roadmap progress
+- `/gsd-discuss-phase {N}` — discuss a phase before planning
+- `/gsd-plan-phase {N}` — plan a phase
+- `/gsd-execute-phase {N}` — execute a phase
+- `/gsd-progress` — see roadmap progress
 
 </internal_workflow>
 
@@ -92,7 +92,7 @@ Stop before confirming:
 ```
 Verification incomplete: ${VERIFY_STATUS:-missing}
 
-Resolve before transition. Review: `/gsd:audit-uat`
+Resolve before transition. Review: `/gsd-audit-uat`
 ```
 
 This preliminary check blocks obviously unresolved verification before the
@@ -281,7 +281,7 @@ Scan LEARNINGS.md files from recent phases for recurring patterns and surface pr
 **Invoke the graduation helper:**
 
 ```text
-@~/.claude/gsd-core/workflows/graduation.md
+@$HOME/.claude/gsd-core/workflows/graduation.md
 ```
 
 This step is fully delegated to `graduation.md`. It handles guard checks (feature flag, window size, threshold), clustering, backlog filtering, HITL prompting, promotion writes, and STATE.md updates.
@@ -471,7 +471,7 @@ Next: Phase [X+1] — [Name]
 ⚡ Auto-continuing: Plan Phase [X+1] in detail
 ```
 
-Exit skill and invoke SlashCommand("/gsd:plan-phase [X+1] --auto ${GSD_WS}")
+Exit skill and invoke SlashCommand("/gsd-plan-phase [X+1] --auto ${GSD_WS}")
 
 **If CONTEXT.md does NOT exist:**
 
@@ -483,7 +483,7 @@ Next: Phase [X+1] — [Name]
 ⚡ Auto-continuing: Discuss Phase [X+1] first
 ```
 
-Exit skill and invoke SlashCommand("/gsd:discuss-phase [X+1] --auto ${GSD_WS}")
+Exit skill and invoke SlashCommand("/gsd-discuss-phase [X+1] --auto ${GSD_WS}")
 
 </if>
 
@@ -502,13 +502,13 @@ Exit skill and invoke SlashCommand("/gsd:discuss-phase [X+1] --auto ${GSD_WS}")
 
 `/clear` then:
 
-`/gsd:discuss-phase [X+1] ${GSD_WS}` — gather context and clarify approach
+`/gsd-discuss-phase [X+1] ${GSD_WS}` — gather context and clarify approach
 
 ---
 
 **Also available:**
-- `/gsd:plan-phase [X+1] ${GSD_WS}` — skip discussion, plan directly
-- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+- `/gsd-plan-phase [X+1] ${GSD_WS}` — skip discussion, plan directly
+- `/gsd-plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
 
 ---
 ```
@@ -527,13 +527,13 @@ Exit skill and invoke SlashCommand("/gsd:discuss-phase [X+1] --auto ${GSD_WS}")
 
 `/clear` then:
 
-`/gsd:plan-phase [X+1] ${GSD_WS}`
+`/gsd-plan-phase [X+1] ${GSD_WS}`
 
 ---
 
 **Also available:**
-- `/gsd:discuss-phase [X+1] ${GSD_WS}` — revisit context
-- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+- `/gsd-discuss-phase [X+1] ${GSD_WS}` — revisit context
+- `/gsd-plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
 
 ---
 ```

@@ -33,7 +33,7 @@ Check if `--auto` flag is present in $ARGUMENTS.
 **Document requirement:**
 Auto mode requires an idea document — either:
 
-- File reference: `/gsd:new-project --auto @prd.md`
+- File reference: `/gsd-new-project --auto @prd.md`
 - Pasted/written text in the prompt
 
 If no document content provided, error:
@@ -42,8 +42,8 @@ If no document content provided, error:
 Error: --auto requires an idea document.
 
 Usage:
-  /gsd:new-project --auto @your-idea.md
-  /gsd:new-project --auto [paste or write your idea here]
+  /gsd-new-project --auto @your-idea.md
+  /gsd-new-project --auto [paste or write your idea here]
 
 The document should describe what you want to build.
 ```
@@ -116,7 +116,7 @@ INSTRUCTION_FILE=$(gsd_run query project-instruction-file --runtime "$RUNTIME")
 
 All subsequent references to the project instruction file use `$INSTRUCTION_FILE`.
 
-**If `project_exists` is true:** Error — project already initialized. Use `/gsd:progress`.
+**If `project_exists` is true:** Error — project already initialized. Use `/gsd-progress`.
 
 **Git init (#3491 — never nest `.git` inside an existing worktree):**
 
@@ -143,7 +143,7 @@ Use AskUserQuestion:
 **If "Map codebase first":**
 
 ```
-Run `/gsd:map-codebase` first, then return to `/gsd:new-project`
+Run `/gsd:map-codebase` first, then return to `/gsd-new-project`
 ```
 
 Exit command.
@@ -981,7 +981,7 @@ Your STACK.md feeds into roadmap creation. Be prescriptive:
 
 <output>
 Write to: .planning/research/STACK.md
-Use template: ~/.claude/gsd-core/templates/research-project/STACK.md
+Use template: $HOME/.claude/gsd-core/templates/research-project/STACK.md
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
 
@@ -1021,7 +1021,7 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 
 <output>
 Write to: .planning/research/FEATURES.md
-Use template: ~/.claude/gsd-core/templates/research-project/FEATURES.md
+Use template: $HOME/.claude/gsd-core/templates/research-project/FEATURES.md
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
 
@@ -1061,7 +1061,7 @@ Your ARCHITECTURE.md informs phase structure in roadmap. Include:
 
 <output>
 Write to: .planning/research/ARCHITECTURE.md
-Use template: ~/.claude/gsd-core/templates/research-project/ARCHITECTURE.md
+Use template: $HOME/.claude/gsd-core/templates/research-project/ARCHITECTURE.md
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
 
@@ -1101,7 +1101,7 @@ Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
 
 <output>
 Write to: .planning/research/PITFALLS.md
-Use template: ~/.claude/gsd-core/templates/research-project/PITFALLS.md
+Use template: $HOME/.claude/gsd-core/templates/research-project/PITFALLS.md
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
 ```
@@ -1127,7 +1127,7 @@ ${AGENT_SKILLS_SYNTHESIZER}
 
 <output>
 Write to: .planning/research/SUMMARY.md
-Use template: ~/.claude/gsd-core/templates/research-project/SUMMARY.md
+Use template: $HOME/.claude/gsd-core/templates/research-project/SUMMARY.md
 Commit after writing.
 </output>
 ", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
@@ -1530,7 +1530,7 @@ Present completion summary:
 ╚══════════════════════════════════════════╝
 ```
 
-Exit skill and invoke SlashCommand("/gsd:discuss-phase 1 --auto")
+Exit skill and invoke SlashCommand("/gsd-discuss-phase 1 --auto")
 
 **If interactive mode:**
 
@@ -1552,13 +1552,13 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 /clear then:
 
-/gsd:discuss-phase 1 — gather context and clarify approach
+/gsd-discuss-phase 1 — gather context and clarify approach
 
 ---
 
 **Also available:**
 - /gsd:ui-phase 1 — generate UI design contract (recommended for frontend phases)
-- /gsd:plan-phase 1 — skip discussion, plan directly
+- /gsd-plan-phase 1 — skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -1574,12 +1574,12 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 /clear then:
 
-/gsd:discuss-phase 1 — gather context and clarify approach
+/gsd-discuss-phase 1 — gather context and clarify approach
 
 ---
 
 **Also available:**
-- /gsd:plan-phase 1 — skip discussion, plan directly
+- /gsd-plan-phase 1 — skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -1622,7 +1622,7 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 - [ ] STATE.md initialized
 - [ ] REQUIREMENTS.md traceability updated
 - [ ] `$INSTRUCTION_FILE` generated with GSD workflow guidance (runtime-derived via the shared `getProjectInstructionFile` policy — `AGENTS.md` for codex/opencode/kilo/kimi, `.github/copilot-instructions.md` for copilot, `GEMINI.md` for gemini/antigravity, `.claude/CLAUDE.md` for claude; an existing hand-crafted file without GSD markers is left untouched unless `--force`)
-- [ ] User knows next step is `/gsd:discuss-phase 1`
+- [ ] User knows next step is `/gsd-discuss-phase 1`
 
 **Atomic commits:** Each phase commits its artifacts immediately. If context is lost, artifacts persist.
 

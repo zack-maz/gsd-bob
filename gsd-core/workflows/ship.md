@@ -442,7 +442,7 @@ Next steps:
 - Review/approve PR
 - Merge when CI passes
 - /gsd:complete-milestone (if last phase in milestone)
-- /gsd:progress (to see what's next)
+- /gsd-progress (to see what's next)
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -454,8 +454,8 @@ Next steps:
 After shipping:
 
 - /gsd:complete-milestone — if all phases in milestone are done
-- /gsd:progress — see overall project state
-- /gsd:execute-phase {next} — continue to next phase
+- /gsd-progress — see overall project state
+- /gsd-execute-phase {next} — continue to next phase
 </offer_next>
 
 <success_criteria>

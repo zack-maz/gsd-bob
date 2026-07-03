@@ -321,7 +321,7 @@ Show:
 - Docs ingested (count + type breakdown)
 - Decisions locked, requirements created, constraints captured
 - Conflict report path (`.planning/INGEST-CONFLICTS.md`)
-- Next step: `/gsd:plan-phase 1` (new mode) or `/gsd:plan-phase N` (merge, pointing at the first newly-added phase)
+- Next step: `/gsd-plan-phase 1` (new mode) or `/gsd-plan-phase N` (merge, pointing at the first newly-added phase)
 
 </step>
 

@@ -490,7 +490,7 @@ If `VERIFY_STATUS` is empty, handle_blocker: "No verification results for phase 
 
 **If `passed`:**
 
-Display `Phase ${PHASE_NUM} ✅ ${PHASE_NAME} — Verification passed`, run `@~/.claude/gsd-core/workflows/transition.md`, then Proceed to iterate step.
+Display `Phase ${PHASE_NUM} ✅ ${PHASE_NAME} — Verification passed`, run `@$HOME/.claude/gsd-core/workflows/transition.md`, then Proceed to iterate step.
 
 **If `stale`:** handle_blocker: "Stale verification for phase ${PHASE_NUM}."
 
@@ -504,7 +504,7 @@ On **"Validate now"**: Present items, then ask:
 - **question:** "Validation result?"
 - **options:** "All good — continue" / "Found issues"
 
-On "All good — continue": set VERIFICATION frontmatter `status: passed`, display `Phase ${PHASE_NUM} ✅ Human validation passed`, run `@~/.claude/gsd-core/workflows/transition.md`, then iterate.
+On "All good — continue": set VERIFICATION frontmatter `status: passed`, display `Phase ${PHASE_NUM} ✅ Human validation passed`, run `@$HOME/.claude/gsd-core/workflows/transition.md`, then iterate.
 
 On "Found issues": Go to handle_blocker with the user's reported issues as the description.
 
@@ -515,10 +515,10 @@ On **"Continue without validation"**: record an explicit deferred state and stop
 
 | Phase | State | Resume |
 |-------|-------|--------|
-| ${PHASE_NUM} | verification_deferred_human | /gsd:verify-work ${PHASE_NUM} |
+| ${PHASE_NUM} | verification_deferred_human | /gsd-verify-work ${PHASE_NUM} |
 ```
 
-Append/update this STATE.md section, display `Phase ${PHASE_NUM} ⏭ verification_deferred_human — resume with /gsd:verify-work ${PHASE_NUM}`, then handle_blocker: "Human verification deferred for phase ${PHASE_NUM}."
+Append/update this STATE.md section, display `Phase ${PHASE_NUM} ⏭ verification_deferred_human — resume with /gsd-verify-work ${PHASE_NUM}`, then handle_blocker: "Human verification deferred for phase ${PHASE_NUM}."
 
 **If `gaps_found`:**
 
@@ -558,7 +558,7 @@ If still `gaps_found` after this retry: Display "Gaps persist after closure atte
 - **question:** "Gap closure did not fully resolve issues. How to proceed?"
 - **options:** "Continue anyway" / "Stop autonomous mode"
 
-On "Continue anyway": record `verification_deferred_gaps` using the table below, display `Phase ${PHASE_NUM} ⏭ verification_deferred_gaps — resume with /gsd:plan-phase ${PHASE_NUM} --gaps`, then handle_blocker: "Verification gaps deferred for phase ${PHASE_NUM}."
+On "Continue anyway": record `verification_deferred_gaps` using the table below, display `Phase ${PHASE_NUM} ⏭ verification_deferred_gaps — resume with /gsd-plan-phase ${PHASE_NUM} --gaps`, then handle_blocker: "Verification gaps deferred for phase ${PHASE_NUM}."
 On "Stop autonomous mode": Go to handle_blocker.
 
 This limits gap closure to 1 retry.
@@ -570,10 +570,10 @@ On **"Continue without fixing"**: record an explicit deferred state and stop aut
 
 | Phase | State | Resume |
 |-------|-------|--------|
-| ${PHASE_NUM} | verification_deferred_gaps | /gsd:plan-phase ${PHASE_NUM} --gaps |
+| ${PHASE_NUM} | verification_deferred_gaps | /gsd-plan-phase ${PHASE_NUM} --gaps |
 ```
 
-Append/update this STATE.md section, display `Phase ${PHASE_NUM} ⏭ verification_deferred_gaps — resume with /gsd:plan-phase ${PHASE_NUM} --gaps`, then handle_blocker: "Verification gaps deferred for phase ${PHASE_NUM}."
+Append/update this STATE.md section, display `Phase ${PHASE_NUM} ⏭ verification_deferred_gaps — resume with /gsd-plan-phase ${PHASE_NUM} --gaps`, then handle_blocker: "Verification gaps deferred for phase ${PHASE_NUM}."
 
 On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps remain in phase ${PHASE_NUM}".
 

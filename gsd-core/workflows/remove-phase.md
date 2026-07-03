@@ -127,7 +127,7 @@ Changes:
 ## What's Next
 
 Would you like to:
-- `/gsd:progress` — see updated roadmap status
+- `/gsd-progress` — see updated roadmap status
 - Continue with current phase
 - Review roadmap
 

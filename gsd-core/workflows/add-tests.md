@@ -55,7 +55,7 @@ Read the phase artifacts (in order of priority):
 If no SUMMARY.md exists:
 ```
 ERROR: No SUMMARY.md found for phase ${PHASE_ARG}
-This command works on completed phases. Run /gsd:execute-phase first.
+This command works on completed phases. Run /gsd-execute-phase first.
 ```
 Exit.
 
@@ -331,7 +331,7 @@ Present next steps:
 
 **Also available:**
 - `/gsd:add-tests {next_phase}` — test another phase
-- `/gsd:verify-work {phase_number}` — run UAT verification
+- `/gsd-verify-work {phase_number}` — run UAT verification
 
 ---
 ```

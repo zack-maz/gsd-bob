@@ -29,7 +29,7 @@ Documents are reference material for Claude when planning/executing. Always incl
 
 <step name="parse_paths_flag" priority="first">
 Parse an optional `--paths <p1,p2,...>` argument. When supplied (by the
-post-execute codebase-drift gate in `/gsd:execute-phase` or by a user running
+post-execute codebase-drift gate in `/gsd-execute-phase` or by a user running
 `/gsd:map-codebase --paths apps/accounting,packages/ui`), the workflow
 operates in **incremental-remap mode**:
 
@@ -416,7 +416,7 @@ Created .planning/codebase/:
 
 `/clear` then:
 
-`/gsd:new-project`
+`/gsd-new-project`
 
 ---
 
