@@ -224,4 +224,26 @@ Re-verify every `UPSTREAM.md` file:line pointer against the 1.6.1 source (5-arti
 inventory + the undocumented name-policy alias, 4th data patch). Bump targeted version 1.5.0 →
 1.6.1 and correct the "converters are stock upstream" framing (they are a vendored hand-edit).
 
-_(to be filled live during Plan 03)_
+### Plan 03 — Task 2: UPSTREAM.md → 1.6.1 pointer re-verification (2026-07-03)
+
+Every pointer grep'd/inspected against the **re-vendored 1.6.1 source** (never copied from the
+stale 1.5.0 numbers). Old (1.5.0) → New (1.6.1) file:line for each artifact:
+
+| # | Artifact | 1.5.0 (old) | 1.6.1 (re-verified) | Command used |
+|---|----------|-------------|---------------------|--------------|
+| 1 | `"bob"` registry entry | `capability-registry.cjs` L3045–3109 | **L2876–2940** (configHome L2884–2888, artifactLayout L2892–2929, commandStyle L2930) | `grep -n '"bob": {' …capability-registry.cjs` → L2876; block closes at L2940 before `"claude"` L2941 |
+| 2 | Command converter impl | `runtime-artifact-conversion.cjs` L763 (export L2016); registry L3077/L3095 | **impl L2427, export L2462**; registry **L2908 / L2926** | `grep -n 'function convertClaudeCommandToBobCommand\|convertClaudeCommandToBobCommand,'` |
+| 3 | Skill converter impl | `runtime-artifact-conversion.cjs` L735 (export L2015); registry L3069/L3087 | **impl L2399, export L2461**; registry **L2900 / L2918**; HAND-EDIT banner **L2338** | `grep -n 'function convertClaudeCommandToBobSkill\|gsd-bob HAND-EDIT'` |
+| 4 | Runtime alias (manifest) | `runtime-aliases.manifest.json` L79–82 | **L79–82** (unchanged) | `grep -n '"bob"' …runtime-aliases.manifest.json` |
+| 5 | Runtime alias (name-policy) — **newly documented 4th data patch** | (absent from inventory) | `runtime-name-policy.cjs` **L41** (`bob: ['bob','bob-cli']` in `FALLBACK_ALIASES`) | `grep -n 'bob' …runtime-name-policy.cjs` |
+| 6 | configHome / shim resolution | `runtime-homes.cjs` dot-home L83–91 | **L84–92** (`case 'dot-home'`); shim **0 bob refs** | `grep -n "case 'dot-home'"` + `grep -c -i 'bob' …gsd-tools.cjs` → 0 |
+
+**Framing correction (SYNC-03 honesty fix):** the prior UPSTREAM.md claimed "No new converter
+code … they already exist upstream." That is FALSE. The two Bob converters are a **local
+~105-line hand-edit** (banner `gsd-bob HAND-EDIT to this GENERATED file` at L2338), grep-confirmed
+ABSENT from the pristine 1.6.1 tarball and present only after `apply-bob-patches.cjs` re-injects
+them (Plan 02 D-03 verdict). Reframed honestly: the registry entry + both aliases are pure-data
+moves; the converters are a small parameterized rewrite of gsd-core's
+`convertClaudeCommandTo<Runtime>{Skill,Command}` family a maintainer would fold upstream. The
+inventory grew **5 → 6 artifacts** (added the name-policy alias, artifact #5). The
+backend-neutrality guarantee section was left accurate (unchanged).
