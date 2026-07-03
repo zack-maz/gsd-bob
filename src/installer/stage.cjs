@@ -29,6 +29,7 @@ const {
   mergeCustomModes,
   gateArtifact,
   buildSupportRoster,
+  neutralizeModelReferences,
 } = require('../bob-adapter.cjs');
 const { sha256, safeJoin, classifyOnUpdate, classifyOrphan } = require('./manifest.cjs');
 
@@ -274,15 +275,18 @@ function stage({ target, scope, workspaceRoot, dryRun = false, manifest, report,
       const candidate = { name, requires: [] };
       if (gateArtifact(candidate, BOB_CAPABILITY_DECL).supported) {
         const content = fs.readFileSync(path.join(convertibleSrc, rel), 'utf8');
-        // Flat command (gsd- prefix), per the bob artifactLayout.
+        // Flat command (gsd- prefix), per the bob artifactLayout. The converter
+        // output is run through the adapter's neutralizeModelReferences post-pass
+        // (D-02) so every emitted artifact is born model-neutral (NEUTRAL-01/02);
+        // stage.cjs calls the adapter, never inlines the rewrite.
         stageFile(
           path.join('commands', `${name}.md`),
-          Buffer.from(convertClaudeCommandToBobCommand(content, name)),
+          Buffer.from(neutralizeModelReferences(convertClaudeCommandToBobCommand(content, name))),
         );
-        // Nested skill (gsd- prefix) at skills/<name>/SKILL.md.
+        // Nested skill (gsd- prefix) at skills/<name>/SKILL.md — same post-pass.
         stageFile(
           path.join('skills', name, 'SKILL.md'),
-          Buffer.from(convertClaudeCommandToBobSkill(content, name)),
+          Buffer.from(neutralizeModelReferences(convertClaudeCommandToBobSkill(content, name))),
         );
       }
       // Unsupported candidates are surfaced through the roster (already rendered
