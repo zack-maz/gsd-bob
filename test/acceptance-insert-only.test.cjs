@@ -23,9 +23,15 @@ const { repoRoot } = require('./_helpers/vendor.cjs');
 
 const CHECKLIST = path.join(repoRoot, '.planning', 'ACCEPTANCE-CHECKLIST.md');
 const FROZEN = path.join(repoRoot, 'test', 'fixtures', 'acceptance', 'frozen-ac01-26.md');
-// Em-dashes (U+2014) exact — must match the live headers byte-for-byte.
+// START uses the exact em-dash (U+2014) title so it byte-anchors the first
+// frozen header. END anchors on the AC-27 ID PREFIX only (not its full title):
+// AC-27 lives OUTSIDE the frozen range and is legitimately editable, so keying
+// the boundary to its mutable description would make a benign AC-27 title reword
+// falsely fail this frozen-region guard. `## AC-27` occurs once as a header and
+// starts at the identical byte offset as the full title, so the slice is
+// unchanged and the committed fixture still matches byte-for-byte.
 const START = '## AC-01 — Subagent isolation';
-const END = '## AC-27 — model-neutrality zero-literal grep (NEUTRAL-03)';
+const END = '## AC-27';
 
 function frozenSlice(md) {
   const s = md.indexOf(START);
@@ -34,8 +40,16 @@ function frozenSlice(md) {
   return md.slice(s, e);
 }
 
+/** `## AC-27` must resolve to exactly one header so the end anchor is unambiguous. */
+function assertSingleAc27Header(md) {
+  const headers = (md.match(/^## AC-27\b/gm) || []).length;
+  assert.equal(headers, 1, `expected exactly one '## AC-27' header, found ${headers}`);
+}
+
 test('SC#3: AC-01..AC-26 step blocks are byte-unchanged (insert-only)', () => {
-  const live = frozenSlice(fs.readFileSync(CHECKLIST, 'utf8'));
+  const md = fs.readFileSync(CHECKLIST, 'utf8');
+  assertSingleAc27Header(md);
+  const live = frozenSlice(md);
   const frozen = fs.readFileSync(FROZEN, 'utf8');
   assert.equal(live, frozen, 'the AC-01..AC-26 frozen slice diverged from the committed snapshot');
 });
