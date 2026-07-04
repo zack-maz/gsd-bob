@@ -33,11 +33,11 @@ npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local
 
 **For each step:** run the `Cmd:` line verbatim; type numbered answers when a flow prompts you. Mark `Result: [ ] pass [ ] fail` inline AND fill the matching row in `## Results Roll-Up`. Mark **fail** whenever the observed output does not match `Expect:`. **If a fail concerns a watch-list assumption** (a conservative Phase-1 default — subagent isolation, structured prompts, config-home override, IDE-vs-Shell signal), record the refutation in `.planning/ACCEPTANCE-FOLLOWUPS.md` so it becomes a tracked v2 enhancement rather than a silent gap.
 
-**Read-only by default (T-01-SC preserved):** Steps `AC-01..AC-12` and `AC-26` are pure read-only observation and may run in any order. The ONLY mutating commands are the already-marked install / core-loop / quality-gate / uninstall runs inside `AC-13..AC-25` (`npx … gsd-bob …`, `/gsd-*` invocations). This run scaffolding adds **no new `Cmd:` line** and does not weaken the read-only-by-default posture — run the mutating steps in the dependency order below.
+**Read-only by default (T-01-SC preserved):** Steps `AC-01..AC-12`, `AC-26`, and `AC-27..AC-45` are pure read-only observation and may run in any order (`AC-27..AC-45` add no new mutating `Cmd:` — `grep`/`ls`/`cat` only). The ONLY mutating commands are the already-marked install / core-loop / quality-gate / uninstall runs inside `AC-13..AC-25` (`npx … gsd-bob …`, `/gsd-*` invocations). This run scaffolding adds **no new `Cmd:` line** and does not weaken the read-only-by-default posture — run the mutating steps in the dependency order below.
 
 ## Execution Order
 
-1. **Read-only first (any order):** `AC-01..AC-12` (observation / `grep` / `cat` / `echo` only) and `AC-26` (README / upstream doc greps). `AC-11`'s read-only `cat`/`grep` is most meaningful AFTER the `AC-13` install has run, but the command itself mutates nothing.
+1. **Read-only first (any order):** `AC-01..AC-12` (observation / `grep` / `cat` / `echo` only), `AC-26` (README / upstream doc greps), `AC-27` (model-neutrality grep), and `AC-28..AC-45` (per-command emission-recognition, `ls`/`cat` only). `AC-11`'s read-only `cat`/`grep` is most meaningful AFTER the `AC-13` install has run, but the command itself mutates nothing.
 2. **Mutating steps, in this exact dependency order** (each depends on prior install / loop state):
    - `AC-13` — install (`gsd-bob --bob --local`) into a fresh scratch `.bob/`.
    - `AC-14` — re-run the same install (idempotency), after seeding a user mode/command/rule.
@@ -79,6 +79,25 @@ The single at-a-glance pass/fail record to report. Mark each row (keep the inlin
 | AC-24 | [ ] pass  [ ] fail | |
 | AC-25 | [ ] pass  [ ] fail | |
 | AC-26 | [ ] pass  [ ] fail | |
+| AC-27 | [ ] pass  [ ] fail | |
+| AC-28 | [ ] pass  [ ] fail | |
+| AC-29 | [ ] pass  [ ] fail | |
+| AC-30 | [ ] pass  [ ] fail | |
+| AC-31 | [ ] pass  [ ] fail | |
+| AC-32 | [ ] pass  [ ] fail | |
+| AC-33 | [ ] pass  [ ] fail | |
+| AC-34 | [ ] pass  [ ] fail | |
+| AC-35 | [ ] pass  [ ] fail | |
+| AC-36 | [ ] pass  [ ] fail | |
+| AC-37 | [ ] pass  [ ] fail | |
+| AC-38 | [ ] pass  [ ] fail | |
+| AC-39 | [ ] pass  [ ] fail | |
+| AC-40 | [ ] pass  [ ] fail | |
+| AC-41 | [ ] pass  [ ] fail | |
+| AC-42 | [ ] pass  [ ] fail | |
+| AC-43 | [ ] pass  [ ] fail | |
+| AC-44 | [ ] pass  [ ] fail | |
+| AC-45 | [ ] pass  [ ] fail | |
 
 ---
 
@@ -268,5 +287,131 @@ Result: [ ] pass  [ ] fail
 
 Cmd:    On a real Bob machine, AFTER the AC-13 install, read-only grep the emitted converted-artifact set for any surviving model-routing literal — tier tokens or a line-anchored model directive — scoped to the CONVERTED set only (NOT `"$BOB_HOME"/gsd-core/**`, which is the raw-copied vendored payload, out of scope per D-01): `grep -rniE '\b(opus|sonnet|haiku)\b|^[[:space:]]*(model|effort|model_profile|resolve_model_ids)[[:space:]]*:' "$BOB_HOME"/commands/gsd-*.md "$BOB_HOME"/skills/gsd-*/SKILL.md`. This is a pure read-only grep; nothing is written, moved, or deleted.
 Expect: ZERO lines printed (grep exits non-zero) = PASS — every emitted `.bob/commands/gsd-*.md` and `.bob/skills/gsd-*/SKILL.md` carries no tier token and no machine-readable model directive; Bob owns model routing. Any printed `file:line` is a leaked literal = FAIL.
-Confirms: NEUTRAL-03 — zero model literals across the emitted `.bob/` converted set, guarding regressions / SC#3. (on-device complement to test/model-neutrality.test.cjs, which enforces the same invariant hermetically via the real staging path)
+Confirms: NEUTRAL-03, ACCEPT-02 — zero model literals across the emitted `.bob/` converted set, guarding regressions / SC#3. (on-device complement to test/model-neutrality.test.cjs, which enforces the same invariant hermetically via the real staging path)
+Result: [ ] pass  [ ] fail
+
+## AC-28 — new-milestone command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `new-milestone` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-new-milestone.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-new-milestone.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-new-milestone` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `new-milestone`.
+Result: [ ] pass  [ ] fail
+
+## AC-29 — complete-milestone command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `complete-milestone` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-complete-milestone.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-complete-milestone.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-complete-milestone` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `complete-milestone`.
+Result: [ ] pass  [ ] fail
+
+## AC-30 — milestone-summary command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `milestone-summary` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-milestone-summary.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-milestone-summary.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-milestone-summary` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `milestone-summary`.
+Result: [ ] pass  [ ] fail
+
+## AC-31 — quick command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `quick` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-quick.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-quick.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-quick` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `quick`.
+Result: [ ] pass  [ ] fail
+
+## AC-32 — fast command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `fast` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-fast.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-fast.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-fast` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `fast`.
+Result: [ ] pass  [ ] fail
+
+## AC-33 — ship command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `ship` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-ship.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-ship.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-ship` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `ship`.
+Result: [ ] pass  [ ] fail
+
+## AC-34 — explore command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `explore` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-explore.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-explore.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-explore` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `explore`.
+Result: [ ] pass  [ ] fail
+
+## AC-35 — spec-phase command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `spec-phase` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-spec-phase.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-spec-phase.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-spec-phase` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `spec-phase`.
+Result: [ ] pass  [ ] fail
+
+## AC-36 — mvp-phase command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `mvp-phase` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-mvp-phase.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-mvp-phase.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-mvp-phase` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `mvp-phase`.
+Result: [ ] pass  [ ] fail
+
+## AC-37 — map-codebase command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `map-codebase` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-map-codebase.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-map-codebase.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-map-codebase` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `map-codebase`.
+Result: [ ] pass  [ ] fail
+
+## AC-38 — ui-phase command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `ui-phase` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-ui-phase.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-ui-phase.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-ui-phase` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `ui-phase`.
+Result: [ ] pass  [ ] fail
+
+## AC-39 — secure-phase command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `secure-phase` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-secure-phase.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-secure-phase.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-secure-phase` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `secure-phase`.
+Result: [ ] pass  [ ] fail
+
+## AC-40 — extract-learnings command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `extract-learnings` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-extract-learnings.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-extract-learnings.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-extract-learnings` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `extract-learnings`.
+Result: [ ] pass  [ ] fail
+
+## AC-41 — docs-update command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `docs-update` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-docs-update.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-docs-update.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-docs-update` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `docs-update`.
+Result: [ ] pass  [ ] fail
+
+## AC-42 — health command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `health` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-health.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-health.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-health` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `health`.
+Result: [ ] pass  [ ] fail
+
+## AC-43 — stats command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `stats` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-stats.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-stats.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-stats` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `stats`.
+Result: [ ] pass  [ ] fail
+
+## AC-44 — resume-work command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `resume-work` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-resume-work.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-resume-work.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-resume-work` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `resume-work`.
+Result: [ ] pass  [ ] fail
+
+## AC-45 — pause-work command emitted + recognized under Bob (read-only) (ACCEPT-01)
+
+Cmd:    On a real Bob machine, read-only inspect the emitted Bob slash command for the `pause-work` command and confirm Bob recognizes it. List and read (no edits) the emitted file `gsd-pause-work.md` in the `.bob/commands/` directory using `ls` and `cat` only, and observe the command in Bob's slash-command palette / listing. No file is written, moved, or deleted.
+Expect: `.bob/commands/gsd-pause-work.md` exists with `description:` (and, where applicable, `argument-hint:`) frontmatter and a `$1` positional-arg body; Bob lists the command and shows its description as `/gsd-pause-work` (hyphen form).
+Confirms: ACCEPT-01, CMD-01 — device-runnable emission/recognition step for the newly added Phase 9 command `pause-work`.
 Result: [ ] pass  [ ] fail
