@@ -21,12 +21,30 @@
 - gsd-audit-fix
 - gsd-audit-uat
 - gsd-code-review
+- gsd-complete-milestone
 - gsd-debug
 - gsd-discuss-phase
+- gsd-docs-update
 - gsd-execute-phase
+- gsd-explore
+- gsd-extract-learnings
+- gsd-fast
+- gsd-health
+- gsd-map-codebase
+- gsd-milestone-summary
+- gsd-mvp-phase
+- gsd-new-milestone
 - gsd-new-project
+- gsd-pause-work
 - gsd-plan-phase
 - gsd-progress
+- gsd-quick
+- gsd-resume-work
+- gsd-secure-phase
+- gsd-ship
+- gsd-spec-phase
+- gsd-stats
+- gsd-ui-phase
 - gsd-verify-work
 
 ## Unsupported on Bob (omitted from the loadable set, recorded loud)
