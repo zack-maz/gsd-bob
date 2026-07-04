@@ -3,7 +3,6 @@ description: "Autonomous audit-to-fix pipeline — find issues, classify, fix, t
 argument-hint: "--source <audit-uat> [--severity <medium|high|all>] [--max N] [--dry-run]"
 ---
 
-
 <objective>
 Run an audit, classify findings as auto-fixable vs manual-only, then autonomously fix
 auto-fixable issues with test verification and atomic commits.
@@ -22,4 +21,3 @@ Flags:
 <process>
 Execute end-to-end.
 </process>
-</output>

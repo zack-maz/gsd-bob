@@ -7,7 +7,6 @@ allowed-tools:
   - Grep
   - Bash
 ---
-
 <objective>
 Scan all phases for pending, skipped, blocked, and human_needed UAT items. Cross-reference against codebase to detect stale documentation. Produce prioritized human test plan.
 </objective>
@@ -23,4 +22,3 @@ Core planning files are loaded in-workflow via CLI.
 Glob: .planning/phases/*/*-UAT.md
 Glob: .planning/phases/*/*-VERIFICATION.md
 </context>
-</output>

@@ -9,8 +9,8 @@ allowed-tools:
   - Grep
   - Write
   - Agent
+requires: [config, import, phase, quick, review]
 ---
-
 <objective>
 Review source files changed during a phase for bugs, security vulnerabilities, and code quality problems.
 
@@ -57,4 +57,3 @@ The workflow (not this command) enforces these gates:
 - Agent spawning (gsd-code-reviewer)
 - Result presentation (inline summary + next steps)
 </process>
-</output>

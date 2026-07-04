@@ -10,7 +10,6 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-
 <objective>
 Debug issues using scientific method with subagent isolation.
 
@@ -51,4 +50,3 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved | head -5
 <process>
 Execute end-to-end.
 </process>
-</output>
