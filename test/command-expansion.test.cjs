@@ -21,8 +21,9 @@
  *       and skill (name + non-empty description only, no argument-hint); neither
  *       body carries a Claude config-home path form or the colon command dialect;
  *       the conversion carries the .bob home + hyphen form.
- *   B — neutrality (per stem, all 28): scanModelLiterals over each converted
- *       command and skill returns [] (reuse the shared detector, D-06).
+ *   B — neutrality (per stem, all 28): scanModelLiterals over each EMITTED
+ *       (neutralizeModelReferences post-pass, as stage.cjs applies) command and
+ *       skill returns [] (reuse the shared detector, D-06).
  *   C — emitted count (CMD-01, D-07): one scratch stage() run emits N command
  *       files and N skill SKILL.md files where N === the number of
  *       commands/gsd sources; a single guard pins that N === 28.
@@ -44,7 +45,7 @@ const path = require('node:path');
 const { requireVendor, repoRoot } = require('./_helpers/vendor.cjs');
 
 const conv = requireVendor('runtime-artifact-conversion.cjs');
-const { scanModelLiterals } = require(path.join(repoRoot, 'src', 'bob-adapter.cjs'));
+const { scanModelLiterals, neutralizeModelReferences } = require(path.join(repoRoot, 'src', 'bob-adapter.cjs'));
 const { stage } = require(path.join(repoRoot, 'src', 'installer', 'stage.cjs'));
 const { newReport } = require(path.join(repoRoot, 'src', 'installer', 'report.cjs'));
 const manifestMod = require(path.join(repoRoot, 'src', 'installer', 'manifest.cjs'));
@@ -68,9 +69,20 @@ const hyphenForm = ['gsd', '-'].join('');
 
 // ---- scratch stage() harness (mirrors model-neutrality.test.cjs:48-89) --------
 
+// Every scratch() dir is tracked and removed in the after-hook so a full gsd-core
+// payload copy never leaks into os.tmpdir() across runs (hermetic-cleanup convention, WR-01).
+const scratchDirs = [];
 function scratch(prefix) {
-  return fs.mkdtempSync(path.join(os.tmpdir(), `gsdbob-${prefix}-`));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), `gsdbob-${prefix}-`));
+  scratchDirs.push(dir);
+  return dir;
 }
+
+test.after(() => {
+  for (const dir of scratchDirs) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
 
 function freshManifest(target) {
   return manifestMod.buildManifest({
@@ -165,19 +177,22 @@ test('at least one converted body references the .bob home + hyphen form (positi
 
 for (const stem of stems) {
   const name = `${hyphenForm}${stem}`;
-  test(`${stem}: converted command + skill carry ZERO model literals (scanModelLiterals)`, () => {
+  test(`${stem}: EMITTED command + skill carry ZERO model literals (scanModelLiterals over the neutralized post-pass)`, () => {
     const source = fs.readFileSync(path.join(cmdSrcDir, `${stem}.md`), 'utf8');
-    const cmd = conv.convertClaudeCommandToBobCommand(source, name);
-    const skill = conv.convertClaudeCommandToBobSkill(source, name);
+    // Mirror stage.cjs exactly: the emitted artifact is the converter output run
+    // through the neutralizeModelReferences post-pass. Assert the zero-literal
+    // property of what actually reaches .bob/, not the raw converter output (WR-02).
+    const cmd = neutralizeModelReferences(conv.convertClaudeCommandToBobCommand(source, name));
+    const skill = neutralizeModelReferences(conv.convertClaudeCommandToBobSkill(source, name));
     assert.deepEqual(
       scanModelLiterals(cmd),
       [],
-      `command ${name} must carry zero model literals`,
+      `emitted command ${name} must carry zero model literals`,
     );
     assert.deepEqual(
       scanModelLiterals(skill),
       [],
-      `skill ${name} must carry zero model literals`,
+      `emitted skill ${name} must carry zero model literals`,
     );
   });
 }
