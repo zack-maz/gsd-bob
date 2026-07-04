@@ -58,12 +58,18 @@ const MODEL_DIRECTIVE_RE_SOURCE =
   '^[ \\t]*(model|effort|model_profile|resolve_model_ids)[ \\t]*:.*$';
 
 /**
- * Brand-agnostic vendor-prefixed model-ID pre-collapse (Pitfall 1): an
- * alphabetic vendor prefix + `-` + a tier token + trailing id chars. Matches a
- * full model id (e.g. `<vendor>-<tier>-4-1`) WITHOUT embedding the vendor name
- * here, so this adapter stays brand-literal-free (backend-neutral invariant).
+ * Brand-agnostic vendor-prefixed model-ID pre-collapse (Pitfall 1 / WR-01): an
+ * alphabetic vendor prefix, OPTIONAL intervening version/date segments, then a
+ * tier token + trailing id chars. The `(?:[.-][A-Za-z0-9]+)*` middle tolerates
+ * ids that place a version BETWEEN the vendor prefix and the tier token
+ * (e.g. `<vendor>-3-<tier>-20240229`, `<vendor>-3.5-<tier>`), not only the
+ * vendor-immediately-tier shape — so the WHOLE id collapses cleanly and the
+ * inner tier is never mangled into a residue that keeps the surviving vendor
+ * brand (the WR-01 false-green). Built from MODEL_TIER_TOKENS (no bare brand
+ * literal here — backend-neutral invariant). Segment classes are disjoint from
+ * their separators, so matching is linear-time / ReDoS-safe (T-08-02).
  */
-const MODEL_ID_RE_SOURCE = `[A-Za-z]+-(${MODEL_TIER_TOKENS.join('|')})[\\w.-]*`;
+const MODEL_ID_RE_SOURCE = `[A-Za-z]+(?:[.-][A-Za-z0-9]+)*[.-](${MODEL_TIER_TOKENS.join('|')})[\\w.-]*`;
 
 /** Neutral collapse phrase for a full vendor-prefixed model id. */
 const MODEL_ID_REPLACEMENT = 'the configured model';
@@ -107,8 +113,18 @@ function neutralizeModelReferences(content) {
 
 /**
  * The zero-literal detector the NEUTRAL-03 invariant reuses so the pass and the
- * test share ONE definition (D-03). Constructs fresh per-line RegExps (resetting
- * `lastIndex`) so no shared `/g` state can cause an intermittent missed match.
+ * test share ONE definition (D-03). Detects THREE shapes, EACH built from the
+ * SAME shared SOURCE constant the rewrite consumes — so detector and rewrite can
+ * never drift (WR-01):
+ *   (1) a vendor-prefixed model id (MODEL_ID_RE_SOURCE) — closes the old
+ *       rewrite/detector asymmetry where a surviving vendor-prefixed id (or a
+ *       date-infixed id the pre-collapse used to miss) went completely unseen,
+ *       and reports the FULL id token (not just the inner tier) for an actionable
+ *       failure message.
+ *   (2) a bare word-boundary tier token (MODEL_TIER_RE_SOURCE).
+ *   (3) a machine-readable model-directive LINE (MODEL_DIRECTIVE_RE_SOURCE).
+ * Constructs fresh per-line RegExps (resetting `lastIndex`) so no shared `/g`
+ * state can cause an intermittent missed match.
  *
  * @param {string} content  artifact text to scan
  * @returns {Array<{line:number, token:string}>} one hit per surviving literal, 1-based line
@@ -116,10 +132,13 @@ function neutralizeModelReferences(content) {
 function scanModelLiterals(content) {
   const hits = [];
   const lines = content.split('\n');
+  const id = new RegExp(MODEL_ID_RE_SOURCE, 'gi'); // same SOURCE as the rewrite (D-03)
   const tier = new RegExp(MODEL_TIER_RE_SOURCE, 'gi');
   const directive = new RegExp(MODEL_DIRECTIVE_RE_SOURCE, 'i'); // per-line, no /g state
   lines.forEach((line, i) => {
     let m;
+    id.lastIndex = 0;
+    while ((m = id.exec(line)) !== null) hits.push({ line: i + 1, token: m[0] });
     tier.lastIndex = 0;
     while ((m = tier.exec(line)) !== null) hits.push({ line: i + 1, token: m[0] });
     if (directive.test(line)) hits.push({ line: i + 1, token: line.trim().slice(0, 40) });

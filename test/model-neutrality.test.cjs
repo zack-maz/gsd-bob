@@ -152,6 +152,33 @@ test('NEUTRAL-02 (Pitfall 1): a vendor-prefixed model id collapses cleanly, no m
   assert.ok(!neutralizeModelReferences(`Runs on ${id} today.`).includes(SAMPLE_NEUTRAL));
 });
 
+test('NEUTRAL-02/03 (WR-01): a date-infixed vendor id collapses cleanly AND the detector flags any survivor', () => {
+  // A real dated model-id shape: a version segment BETWEEN the vendor prefix and
+  // the tier token (e.g. `vendorx-3-<tier>-20240229`) — the pre-fix blind spot.
+  // `vendorx` is a synthetic stand-in so this file carries no bare brand literal.
+  const vendor = 'vendorx';
+  const dated = [vendor, '3', SAMPLE_TIER, '20240229'].join('-');
+
+  // (1) Rewrite parity: the WHOLE id collapses. Pre-fix, MODEL_ID_RE missed this
+  //     shape, so step 3 rewrote only the inner tier and left a mangled residue
+  //     (`vendorx-3-<neutral>-20240229`) with the vendor brand still surviving.
+  const out = neutralizeModelReferences(`Runs on ${dated} today.`);
+  assert.equal(out, 'Runs on the configured model today.');
+  assert.ok(!out.includes(vendor), 'no surviving vendor brand in the rewritten output');
+  assert.ok(!out.includes(SAMPLE_NEUTRAL), 'no mangled inner-tier residue');
+  assert.deepEqual(scanModelLiterals(out), [], 'the rewritten output scans clean');
+
+  // (2) Detector parity (the important half): if the id ever SURVIVES un-rewritten
+  //     (a rewrite regression), scanModelLiterals must flag it AS THE FULL ID —
+  //     not just the inner tier the pre-fix detector happened to catch. Pre-fix,
+  //     the detector had no id shape at all, so the mangled residue scanned as [].
+  const hits = scanModelLiterals(`Runs on ${dated} today.`);
+  assert.ok(
+    hits.some((h) => h.token === dated),
+    'scanModelLiterals must report the full vendor-prefixed id (rewrite/detector parity)',
+  );
+});
+
 test('allowlist: peer-AI CLI reviewer flags are left untouched (tier-scoped regex)', () => {
   const flags = 'run --opencode --gemini --codex --ollama';
   assert.equal(neutralizeModelReferences(flags), flags);
