@@ -19,7 +19,7 @@ The tracked `gsd-core/` tree is **not** the pristine npm tarball. It is:
 pristine @opengsd/gsd-core tarball
   + colon→hyphen normalization pass          (over the .md doc tree)
   + ~/.claude → $HOME/.claude normalization  (over the .md doc tree)
-  + four Bob data/code patches               (registry, converters, two aliases)
+  + three Bob data/code deltas               (registry, converters, both aliases)
   + a local VERSION file                     (the tarball ships none)
 ```
 

@@ -1,11 +1,11 @@
 # Bob Command Reference
 
 > **GENERATED — do not hand-edit.** Regenerate with `node scripts/generate-command-reference.cjs`.
-> One row per emitted command, derived from the `commands/gsd/*.md` source set. Each
-> description is lifted VERBATIM from the source frontmatter `description:` field, so this
-> reference cannot silently drift from what actually installs (D-02). The set-equality drift
-> guard `test/docs-conformance.test.cjs` pins this list to the generated `SUPPORT-ROSTER.md`
-> Supported set.
+> One row per emitted command, derived from the `commands/gsd/*.md` source set and filtered
+> through the same bob-adapter gate the roster uses. Each description is lifted VERBATIM from
+> the source frontmatter `description:` field, so this reference cannot silently drift from
+> what actually installs (D-02). The set-equality drift guard `test/docs-conformance.test.cjs`
+> pins this list to the generated `SUPPORT-ROSTER.md` Supported set.
 
 | Command | Description |
 | ------- | ----------- |

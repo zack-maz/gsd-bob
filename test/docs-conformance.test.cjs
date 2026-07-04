@@ -93,10 +93,30 @@ test('assertion 2: README ## Supported skills token set == roster Supported set'
 
 test('assertion 3: COMMANDS.md token set == roster Supported set', () => {
   const commands = fs.readFileSync(path.join(repoRoot, 'COMMANDS.md'), 'utf8');
-  const commandsSet = tokenSet(commands);
+  // Slice to the table body (from the `| Command |` header row) before tokenizing,
+  // matching assertion 2's README-slicing so a future `gsd-` token in the GENERATED
+  // banner can never falsely satisfy the assertion (IN-01).
+  const tableIdx = commands.search(/^\| Command \|/m);
+  assert.ok(tableIdx >= 0, 'COMMANDS.md has a `| Command |` table header');
+  const commandsSet = tokenSet(commands.slice(tableIdx));
   assert.deepEqual(
     [...commandsSet].sort(),
     [...rosterSupported].sort(),
     'COMMANDS.md gsd- token set must equal the roster Supported set (no missing, no extra)',
+  );
+});
+
+// The README prose count is tied to `stems.length` so a future count bump forces the
+// README to be updated in lockstep — closing the unguarded hardcoded-`28` drift
+// surface the pinned literal + set-equality assertions do not cover (WR-04).
+test('assertion 4: README prose command count tracks the stem count', () => {
+  const readme = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
+  assert.ok(
+    readme.includes(`The ${stems.length} skills below`),
+    `README must say "The ${stems.length} skills below" (prose count must track the stem count)`,
+  );
+  assert.ok(
+    readme.includes(`for each of the ${stems.length} emitted commands`),
+    `README must say "for each of the ${stems.length} emitted commands" (prose count must track the stem count)`,
   );
 });
