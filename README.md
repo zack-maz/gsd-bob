@@ -52,11 +52,18 @@ Use `--dry-run` on any install to print the full staging plan without writing an
 
 ## Supported skills
 
-The skills below are the supported (emitted) set, sourced from
+The 28 skills below are the supported (emitted) set, sourced from
 [`SUPPORT-ROSTER.md`](./SUPPORT-ROSTER.md) — the roster is **generated** from the bob-adapter
 gate (`node scripts/generate-support-roster.cjs`), never hand-maintained, so this list cannot
 silently drift from what actually installs. Each emits both a Bob slash command and an Agent
-Skill:
+Skill. They are grouped below by cluster; the full one-line reference for each lives in
+[`COMMANDS.md`](./COMMANDS.md), and the drift between this list, `COMMANDS.md`, and the roster
+is guarded by `test/docs-conformance.test.cjs`.
+
+### Core loop
+
+The primary `new-project` → `discuss-phase` → `plan-phase` → `execute-phase` → `verify-work`
+spine, plus the situational `progress` command.
 
 - `gsd-new-project`
 - `gsd-discuss-phase`
@@ -64,14 +71,53 @@ Skill:
 - `gsd-execute-phase`
 - `gsd-verify-work`
 - `gsd-progress`
+
+### Quality gates
+
+Review, debug, audit, and security passes run against completed work.
+
 - `gsd-code-review`
 - `gsd-debug`
 - `gsd-audit-fix`
 - `gsd-audit-uat`
+- `gsd-secure-phase`
+
+### Milestone lifecycle
+
+Opening, shipping, closing, and summarizing a milestone.
+
+- `gsd-new-milestone`
+- `gsd-complete-milestone`
+- `gsd-milestone-summary`
+- `gsd-ship`
+
+### Planning aids
+
+Alternate planning entry points and quick-turnaround task runners.
+
+- `gsd-spec-phase`
+- `gsd-mvp-phase`
+- `gsd-ui-phase`
+- `gsd-explore`
+- `gsd-quick`
+- `gsd-fast`
+
+### Context & maintenance
+
+Codebase intelligence, documentation, session continuity, and health/stats.
+
+- `gsd-map-codebase`
+- `gsd-docs-update`
+- `gsd-extract-learnings`
+- `gsd-health`
+- `gsd-stats`
+- `gsd-pause-work`
+- `gsd-resume-work`
 
 This covers the GSD **core loop** (`new-project` → `discuss-phase` → `plan-phase` →
-`execute-phase` → `verify-work`, plus `progress`) and the four **quality gates**
-(`code-review`, `debug`, `audit-fix`, `audit-uat`).
+`execute-phase` → `verify-work`, plus `progress`), the **quality gates** (`code-review`,
+`debug`, `audit-fix`, `audit-uat`, `secure-phase`), the **milestone lifecycle**, alternate
+**planning aids**, and the **context & maintenance** commands — the daily-driver GSD surface.
 
 ## Flagged gaps (parity-first)
 
@@ -115,6 +161,12 @@ Every device-runnable step lives in [`.planning/ACCEPTANCE-CHECKLIST.md`](./.pla
 
 ## Documentation
 
+- [`COMMANDS.md`](./COMMANDS.md) — the generated per-command reference: a one-line description
+  for each of the 28 emitted commands, sourced from source frontmatter.
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — how the Bob adapter maps open-gsd primitives onto
+  Bob (converters, capability-map gate, backend-neutrality, `.planning/` interchange).
+- [`MAINTAINING.md`](./MAINTAINING.md) — the maintainer runbook for bumping the vendored
+  gsd-core payload to a new version.
 - [`.planning/ACCEPTANCE-CHECKLIST.md`](./.planning/ACCEPTANCE-CHECKLIST.md) — the consolidated,
   device-runnable on-device acceptance pass.
 - [`UPSTREAM.md`](./UPSTREAM.md) — the 5-artifact upstream-move inventory for a gsd-core
