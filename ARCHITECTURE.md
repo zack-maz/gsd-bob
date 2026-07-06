@@ -109,6 +109,17 @@ every exclusion **loud**.
   generated `SUPPORT-ROSTER.md`: `gsd-autonomous` (requires isolated subagent orchestration
   that Bob runs sequentially inline) and `gsd-parallel-fanout` (requires isolated subagents).
 
+- **Context-window consequence of "no isolated subagents".** Because *no isolated subagents →
+  sequential inline* means the entire GSD loop shares **one** context window (there is no
+  per-subagent fresh context to fan work out into), Bob's **270k** runtime window is the
+  operative token budget for the whole loop. gsd-core keys its read-depth / advisory scaling on
+  a top-level `context_window` integer in `.planning/config.json` (defaulting to a conservative
+  **200000** when absent). So the installer seeds `context_window: 270000` into the
+  workspace-root `.planning/config.json` — via `mergeTextMode` (constant `BOB_CONTEXT_WINDOW`)
+  in `src/installer/config-merge.cjs`, unconditionally, exactly as it forces
+  `workflow.text_mode` — so gsd-core's budget math reflects Bob's real shared window instead of
+  the 200k default.
+
 - **Loud, not silent.** Every excluded artifact produces an `unsupported on Bob: <reason>`
   line (`UNSUPPORTED_MARKER` in `src/bob-adapter.cjs`), rendered into `SUPPORT-ROSTER.md` by
   `renderRoster()` in `src/installer/stage.cjs`. The roster is **generated from the gate**,

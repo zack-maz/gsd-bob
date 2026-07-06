@@ -132,7 +132,11 @@ silently broken. Current gaps:
 
 Bob runs subagents sequentially inline (no isolated-subagent / `new_task` primitive), and
 interactive prompts degrade to numbered `text_mode` choices rather than a structured-choice
-payload. These are conservative, documented lower-bound defaults.
+payload. These are conservative, documented lower-bound defaults. Because sequential-inline
+execution means the whole loop shares **one** context window, the installer seeds
+`context_window: 270000` (Bob's real runtime window) into `.planning/config.json` so gsd-core's
+read-depth / advisory scaling matches the real shared budget instead of the conservative 200k
+default.
 
 ## Targeted gsd-core version
 
