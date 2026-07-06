@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 Phase: 11
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-07-06 — Completed quick task 260706-jwe: re-baseline frozen AC-01..26 to @zack-maz/gsd-bob
+Last activity: 2026-07-06 — Bumped version 0.2.0 → 0.2.1 (0.2.0 already published/immutable; 0.2.1 ships the 270k installer seed + doc fixes), tagged v0.2.1
 
 ## Performance Metrics
 
