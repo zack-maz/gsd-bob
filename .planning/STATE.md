@@ -2,15 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 1.6.1 Sync & Command Expansion
-status: planning
-last_updated: "2026-07-02T23:15:00.000Z"
-last_activity: 2026-07-02
+current_phase: 11
+status: verifying
+stopped_at: Phase 11 context gathered
+last_updated: "2026-07-04T17:44:00.058Z"
+last_activity: 2026-07-04
+last_activity_desc: Phase 11 complete
 progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 11
+  completed_phases: 5
+  total_plans: 10
+  completed_plans: 10
+  percent: 45
+current_phase_name: on-device-acceptance-delta
 ---
 
 # Project State
@@ -20,20 +24,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** A Bob user installs via a single command and runs the full GSD planning loop (new-project → plan-phase → execute-phase → verify) natively, producing the same `.planning/` artifacts GSD produces in Claude Code.
-**Current focus:** Phase 7 — gsd-core 1.6.1 Sync (v2.0 roadmap approved; Phases 7–11 mapped)
+**Current focus:** Phase 11 — on-device-acceptance-delta
 
 ## Current Position
 
-Phase: 7 — gsd-core 1.6.1 Sync (not started)
-Plan: —
-Status: v2.0 roadmap created; ready to plan Phase 7
-Last activity: 2026-07-02 — Milestone v2.0 roadmap created (Phases 7–11)
+Phase: 11
+Plan: Not started
+Status: Phase complete — ready for verification
+Last activity: 2026-07-06 — Completed quick task 260706-j81: seed Bob's 270k context window
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 12
+- Total plans completed: 21
 - Average duration: 2 min
 - Total execution time: 0.0 hours
 
@@ -46,6 +50,11 @@ Last activity: 2026-07-02 — Milestone v2.0 roadmap created (Phases 7–11)
 | 04 | 2 | - | - |
 | 5 | 3 | - | - |
 | 6 | 1 | - | - |
+| 07 | 3 | - | - |
+| 8 | 1 | - | - |
+| 9 | 2 | - | - |
+| 10 | 3 | - | - |
+| 11 | 1 | - | - |
 
 **Recent Trend:**
 
@@ -66,6 +75,17 @@ Last activity: 2026-07-02 — Milestone v2.0 roadmap created (Phases 7–11)
 | Phase 05 P02 | ~6min | 2 tasks | 12 files |
 | Phase 05 P03 | 4min | 2 tasks | 3 files |
 | Phase 06 P01 | 4 | 3 tasks | 4 files |
+| Phase 07 P01 | 25m | 2 tasks | 2 files |
+| Phase 07 P02 | ~15m | 2 tasks | 3 files |
+| Phase 07 P03 | ~20m | 3 tasks | 5 files |
+| Phase 08 P01 | 9 min | 3 tasks | 5 files |
+| Phase 09 P01 | ~15m | 2 tasks | 31 files |
+| Phase 09 P01 | ~15m | 2 tasks | 31 files |
+| Phase 09 P02 | 8min | 2 tasks | 1 files |
+| Phase 10 P01 | 10min | 3 tasks | 4 files |
+| Phase 10 P02 | 6m | 1 tasks | 1 files |
+| Phase 10 P03 | 5m | 1 tasks | 1 files |
+| Phase 11 P01 | 18min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -102,6 +122,16 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 05]: README skill list sourced from generated SUPPORT-ROSTER.md (never hand-typed); AC-22..26 appended one-per-SC in the AC-17..21 schema, AC-01..21 untouched
 - [Phase 06]: Coverage matrix is a standalone phase-dir file (D-01) keeping the frozen checklist untouched; a hermetic acceptance-coverage.test.cjs re-derives REQUIREMENTS v1 IDs + checklist Confirms family-regex tokens at run time and fails on any orphan SC/AC (no frozen ID list).
 - [Phase 06]: AC-15 uninstall ordered LAST as teardown (D-03); FU-03 SPIKE-04 config-home links a descriptive proposed enhancement (no invented v2 ID, Pitfall 5); followups presence test is structural only (does not assert rows stay 'unconfirmed').
+- [Phase 07]: 07-01: apply-bob-patches.cjs embeds bob blocks as per-line JSON.stringify arrays (byte-perfect, readable); six-delta model confirmed correcting D-01
+- [Phase ?]: Phase 07-02 re-vendor: nuke-and-restage curated gsd-core/ subset from immutable 1.6.1 tarball; re-inject six deltas via apply-bob-patches.cjs; preserve stock upstream 1.5.0 comment in legacy-cleanup.cjs to keep idempotency + restage integrity
+- [Phase ?]: UPSTREAM.md inventory grew 5 to 6 artifacts: documented the runtime-name-policy.cjs FALLBACK_ALIASES bob entry; corrected the converter framing to reflect a vendored hand-edit not stock upstream
+- [Phase ?]: Phase 8 model-neutralization: one shared SOURCE regex in bob-adapter.cjs powers both neutralizeModelReferences and the NEUTRAL-03 invariant (D-03); scope locked to emitted converted set, raw payload excluded (D-01)
+- [Phase ?]: acceptance-coverage.test.cjs Open Q1 resolved via option (a): fixed boundary to '## Milestone v2.0 Requirements' and added a declared-id (v1+v2.0) phantom-ref set so AC-27 -> NEUTRAL-03 is admitted while typos still fail
+- [Phase ?]: Two-roster divergence Option A: CMD-02 verified against repo-root generated SUPPORT-ROSTER.md + count==28, not the installed 5-entry renderRoster list; stage.cjs untouched
+- [Phase ?]: [Phase 10-01]: COMMANDS.md is generated (scripts/generate-command-reference.cjs) from commands/gsd/*.md frontmatter, never hand-authored — blurbs trace verbatim to source and the D-03 conformance guard keeps README + COMMANDS pinned to the generated SUPPORT-ROSTER Supported set.
+- [Phase ?]: [Phase 10-01]: README cluster subheads are h3 so ## Flagged gaps stays the first h2 after ## Supported skills; package.json files allowlist untouched (D-07) — COMMANDS/ARCHITECTURE/MAINTAINING stay repo-only.
+- [Phase ?]: ARCHITECTURE.md cites live src/bob-adapter.cjs + stage.cjs symbols; deleted CAPABILITY-MAP.md referenced only as git-recovered history (D-05)
+- [Phase ?]: Authored MAINTAINING.md as a replayable version-bump checklist (D-06); kept <old>/<new> placeholders; excluded from package.json files allowlist (D-07)
 
 ### Pending Todos
 
@@ -123,6 +153,8 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260619-ncs | Fix installer to stage gsd-core siblings (scripts/fix-slash-commands.cjs + synthesized package.json) so the staged `.bob/` shim loads out-of-tree; out-of-tree regression test added. On-device find during the Phase 6 acceptance pass. | 2026-06-19 | be4002a | [260619-ncs](./quick/260619-ncs-fix-gsd-bob-installer-to-stage-gsd-core-/) |
 | 260619-ou0 | Prepare first npm publish: add `package.json` `files` allowlist (bin/, src/, gsd-core/, commands/, scripts/, README.md, LICENSE) + MIT LICENSE file. `npm pack` verified clean (no .planning/, test/, or .tgz; 405 files, 1.3 MB). Does not publish (login user-driven). | 2026-06-20 | 5e5686b | [260619-ou0](./quick/260619-ou0-npm-publish-packaging/) |
+| 260704-gmp | Bump version 0.1.2 → 0.2.0 for the milestone v2.0 release (1.6.1 sync, model neutralization, 28-command expansion, docs). `npm pack --dry-run` verified clean (0 .planning/test/.tgz entries; 445 files, 1.5 MB). Does not publish (user-driven `npm publish`). | 2026-07-04 | c18a156 | [260704-gmp](./quick/260704-gmp-bump-version-0-1-2-to-0-2-0-and-verify-n/) |
+| 260706-j81 | Seed Bob's 270k context window into the installer config + document it. `mergeTextMode` now seeds top-level `context_window: 270000` (alongside `text_mode:true`) into `.planning/config.json` so gsd-core's read-depth/advisory scaling matches Bob's real shared window under sequential-inline execution (was silently defaulting to 200k). ARCHITECTURE.md (Axis 2) + README.md (Flagged gaps) updated. Tests 7/7. | 2026-07-06 | 4d25e93 | [260706-j81](./quick/260706-j81-seed-bob-270k-context-window/) |
 
 ## Deferred Items
 
@@ -134,6 +166,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:15:00.000Z
-Stopped at: Milestone v2.0 roadmap created (Phases 7–11); ready to plan Phase 7
-Resume file: .planning/ROADMAP.md (Phase 7 — gsd-core 1.6.1 Sync)
+Last session: 2026-07-04T17:29:11.456Z
+Stopped at: Phase 11 context gathered
+Resume file: .planning/phases/11-on-device-acceptance-delta/11-CONTEXT.md

@@ -98,4 +98,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-02 — v1.0 milestone complete (Phases 1–6, 15 plans); starting milestone v2.0 (1.6.1 Sync & Command Expansion).*
+*Last updated: 2026-07-04 — v1.0 milestone complete (Phases 1–6, 15 plans); milestone v2.0 in progress: Phase 7 (1.6.1 Sync), Phase 8 (Model Neutralization), and Phase 9 (Command Expansion — emitted surface grown 10→28) complete; Phases 10 (Documentation) and 11 (Acceptance Delta) remain.*

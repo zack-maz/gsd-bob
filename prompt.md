@@ -12,3 +12,4 @@ bob docs: https://bob.ibm.com/
     - user can select between update, clean install, etc
     - user can select between local and global scope
 - somehow extend/contribute to open-gsd/gsd-core repo (as its open-source)
+

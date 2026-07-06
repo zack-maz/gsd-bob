@@ -28,11 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Milestone v2.0 — 1.6.1 Sync & Command Expansion (Phases 7–11):**
 
-- [ ] **Phase 7: gsd-core 1.6.1 Sync** - Fully re-vendor the `gsd-core/` payload from 1.5.0 → 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer
-- [ ] **Phase 8: Model Neutralization** - Add a converter pass so zero model references (structural directives + inline prose) reach emitted `.bob/` artifacts, guarded by a zero-literal invariant assertion
-- [ ] **Phase 9: Command Expansion** - Grow the curated emitted command set from 10 to 28 by vendoring 18 capability-map-gated command sources, each emitting model-neutral output
-- [ ] **Phase 10: Documentation** - Document the adapter to a maintainer standard: expanded README, per-command reference, Bob-vs-open-gsd architecture doc, and a gsd-core version-bump runbook
-- [ ] **Phase 11: On-Device Acceptance Delta** - Extend the acceptance checklist with device-runnable steps for the new commands and the model-neutrality invariant (insert-only; v1 AC-01..AC-26 frozen)
+- [x] **Phase 7: gsd-core 1.6.1 Sync** - Fully re-vendor the `gsd-core/` payload from 1.5.0 → 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer (completed 2026-07-03)
+- [x] **Phase 8: Model Neutralization** - Add a converter pass so zero model references (structural directives + inline prose) reach emitted `.bob/` artifacts, guarded by a zero-literal invariant assertion (completed 2026-07-03)
+- [x] **Phase 9: Command Expansion** - Grow the curated emitted command set from 10 to 28 by vendoring 18 capability-map-gated command sources, each emitting model-neutral output (completed 2026-07-04)
+- [x] **Phase 10: Documentation** - Document the adapter to a maintainer standard: expanded README, per-command reference, Bob-vs-open-gsd architecture doc, and a gsd-core version-bump runbook (completed 2026-07-04)
+- [x] **Phase 11: On-Device Acceptance Delta** - Extend the acceptance checklist with device-runnable steps for the new commands and the model-neutrality invariant (insert-only; v1 AC-01..AC-26 frozen) (completed 2026-07-04)
 
 ## Phase Details
 
@@ -179,7 +179,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The Bob runtime descriptor and converter suites re-run green against the 1.6.1 bin layer — existing golden/equivalence tests pass, or each diff is updated with a recorded justification — and `gsd_run query` still resolves the `bob` home under the new bin, verified in the Claude/Node runtime with the live-Bob run captured as an acceptance-checklist step (SYNC-02).
   3. `UPSTREAM.md` records gsd-core 1.6.1 as the targeted version and its 5-artifact move-inventory pointers are re-verified (file:line) against the 1.6.1 source (SYNC-03).
 
-**Plans**: TBD
+**Plans**: 3/3 plans complete
+
+**Wave 1**
+
+- [x] 07-01-PLAN.md — Capture the pre-vendor baseline (186/3) + author the idempotent six-delta `scripts/apply-bob-patches.cjs` (normalization ×2 + registry + converter + 2 aliases + VERSION) before the nuke (SYNC-01, SYNC-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [x] 07-02-PLAN.md — npm pack @1.6.1 → nuke-and-restage the curated subset → run apply-bob-patches → prove idempotency + re-verify converter/registry seams + payload version-consistency (SYNC-01, SYNC-02)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [x] 07-03-PLAN.md — Run suites unchanged + apply D-08 drift policy (invariants unmodified) + SYNC-03 UPSTREAM.md→1.6.1 (re-verified pointers, added name-policy alias, corrected converter framing) + final 1.5.0 sweep + finalize re-vendor notes (SYNC-01, SYNC-02, SYNC-03)
+
 **Note**: The concrete re-vendor steps performed here (fetch, diff, stage, re-validate) are captured as raw notes to seed the Phase 10 MAINTAINING runbook (DOCS-04) — the runbook must reflect the real dance, not an aspirational one.
 
 ### Phase 8: Model Neutralization
@@ -193,7 +206,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The converter rewrites inline model prose (`opus`/`sonnet`/`haiku` and equivalents) in emitted `.bob/` artifacts to model-neutral wording, verified by before/after converter tests over payload samples drawn from the ~231 known mentions (NEUTRAL-02).
   3. An invariant test asserts zero model literals (per a defined regex) across the entire emitted `.bob/` output set and fails loudly on any regression, passing against the full 1.6.1-derived emission — with this same invariant authored as a device-runnable acceptance step for Phase 11 (NEUTRAL-03).
 
-**Plans**: TBD
+**Plans**: 1/1 plans complete
+
+- [x] 08-01-PLAN.md — model-neutralization pass + shared regex in bob-adapter.cjs, wired into stage.cjs; NEUTRAL-03 invariant test; acceptance-coverage boundary fix + AC-27 append
 
 ### Phase 9: Command Expansion
 
@@ -206,7 +221,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Each added command passes the capability-map gate — Supported, or flagged-skip with an explicit reason (subagent-heavy → sequential-inline, prompts → `text_mode`) — and the regenerated `SUPPORT-ROSTER.md` reflects the full 28-command set (CMD-02).
   3. The expanded set holds the `.planning/` artifact contract, verified by per-command equivalence/golden tests with the real-answer guard, and every newly emitted command passes the Phase 8 model-neutrality invariant (CMD-03).
 
-**Plans**: TBD
+**Plans**: 2/2 plans complete
+
+**Wave 1**
+
+- [x] 09-01-PLAN.md — Vendor 18 new pristine 1.6.1 sources + re-sync the 4 drifted (code-review/debug/audit-fix/audit-uat) into commands/gsd/; regenerate SUPPORT-ROSTER.md (28) + the 8 quality-gate golden fixtures (CMD-01, CMD-02, CMD-03)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [x] 09-02-PLAN.md — New directory-derived structural-equivalence + count==28 + roster-reflects-28 suite (test/command-expansion.test.cjs); re-run NEUTRAL-03 / roster-capmap / quality-gate-equivalence green over the 28-command emission (CMD-01, CMD-02, CMD-03)
 
 ### Phase 10: Documentation
 
@@ -220,7 +243,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. An architecture doc explains the Bob adapter design versus traditional open-gsd — converter/descriptor model, capability-map gate, backend-neutrality, and `.planning/` interchange — reviewable as a standalone maintainer artifact (DOCS-03).
   4. A `MAINTAINING` runbook documents the repeatable gsd-core version-bump procedure with concrete steps, sourced from the actual 1.5.0 → 1.6.1 re-vendor performed in Phase 7 (DOCS-04).
 
-**Plans**: TBD
+**Plans**: 3/3 plans complete
+
+- [x] 10-01-PLAN.md — README expansion (28-command list) + COMMANDS.md generator + hermetic doc-conformance drift guard (DOCS-01, DOCS-02, D-03)
+- [x] 10-02-PLAN.md — ARCHITECTURE.md: Bob adapter vs traditional open-gsd across four axes, live-code anchored (DOCS-03)
+- [x] 10-03-PLAN.md — MAINTAINING.md: repeatable gsd-core version-bump runbook distilled from Phase 7's real re-vendor (DOCS-04)
 
 ### Phase 11: On-Device Acceptance Delta
 
@@ -233,7 +260,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The checklist gains a device-runnable model-neutrality verification step — the NEUTRAL-03 zero-literal invariant runnable against a real Bob install — with an exact command and expected zero-match output (ACCEPT-02).
   3. The frozen v1 items AC-01..AC-26 remain byte-unchanged (insert-only guarantee), verified by an anchor/diff assertion against the prior checklist.
 
-**Plans**: TBD
+**Plans**: 1/1 plans complete
+
+- [x] 11-01-PLAN.md — Append read-only AC-28..AC-45 for the 18 new commands + amend AC-27 Confirms (ACCEPT-02); commit the AC-01..AC-26 freeze fixture and two hermetic guards (traceability + insert-only)
 
 ## Progress
 
@@ -255,8 +284,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. gsd-core 1.6.1 Sync | 0/TBD | Not started | - |
-| 8. Model Neutralization | 0/TBD | Not started | - |
-| 9. Command Expansion | 0/TBD | Not started | - |
-| 10. Documentation | 0/TBD | Not started | - |
-| 11. On-Device Acceptance Delta | 0/TBD | Not started | - |
+| 7. gsd-core 1.6.1 Sync | 3/3 | Complete    | 2026-07-03 |
+| 8. Model Neutralization | 1/1 | Complete    | 2026-07-03 |
+| 9. Command Expansion | 2/2 | Complete    | 2026-07-04 |
+| 10. Documentation | 3/3 | Complete    | 2026-07-04 |
+| 11. On-Device Acceptance Delta | 1/1 | Complete    | 2026-07-04 |

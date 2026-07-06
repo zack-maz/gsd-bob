@@ -85,41 +85,41 @@ The active milestone: bring gsd-bob to gsd-core 1.6.1 on one consistent version,
 
 Bring the vendored payload and the Bob integration to 1.6.1 on one consistent version.
 
-- [ ] **SYNC-01**: The vendored `gsd-core/` payload is fully replaced at 1.6.1 (workflows, templates, references, bin) — one consistent version, not a mixed 1.5.0/1.6.1 payload
-- [ ] **SYNC-02**: The Bob runtime descriptor and converter suites are re-validated against the 1.6.1 bin layer — existing golden/equivalence tests pass, or diffs are updated with a recorded justification, and the shim still resolves the `bob` home
-- [ ] **SYNC-03**: `UPSTREAM.md` records gsd-core 1.6.1 as the targeted version, with the 5-artifact move-inventory pointers re-verified against the new source
+- [x] **SYNC-01**: The vendored `gsd-core/` payload is fully replaced at 1.6.1 (workflows, templates, references, bin) — one consistent version, not a mixed 1.5.0/1.6.1 payload
+- [x] **SYNC-02**: The Bob runtime descriptor and converter suites are re-validated against the 1.6.1 bin layer — existing golden/equivalence tests pass, or diffs are updated with a recorded justification, and the shim still resolves the `bob` home
+- [x] **SYNC-03**: `UPSTREAM.md` records gsd-core 1.6.1 as the targeted version, with the 5-artifact move-inventory pointers re-verified against the new source
 
 ### Model Neutralization
 
 Emitted artifacts carry zero model references — Bob owns model routing.
 
-- [ ] **NEUTRAL-01**: The converter strips machine-readable model directives (frontmatter `model:`/`effort:`, `model_profile`/`resolve_model_ids`) from emitted `.bob/` artifacts
-- [ ] **NEUTRAL-02**: The converter rewrites inline model prose (`opus`/`sonnet`/`haiku` and equivalent) in emitted `.bob/` artifacts
-- [ ] **NEUTRAL-03**: An invariant test asserts zero model literals (per a defined regex) across the entire emitted `.bob/` output set, guarding against regressions
+- [x] **NEUTRAL-01**: The converter strips machine-readable model directives (frontmatter `model:`/`effort:`, `model_profile`/`resolve_model_ids`) from emitted `.bob/` artifacts
+- [x] **NEUTRAL-02**: The converter rewrites inline model prose (`opus`/`sonnet`/`haiku` and equivalent) in emitted `.bob/` artifacts
+- [x] **NEUTRAL-03**: An invariant test asserts zero model literals (per a defined regex) across the entire emitted `.bob/` output set, guarding against regressions
 
 ### Command Expansion
 
 Grow the curated emitted command surface from 10 to 28.
 
-- [ ] **CMD-01**: The 18 curated commands (`new-milestone`, `complete-milestone`, `milestone-summary`, `quick`, `fast`, `ship`, `explore`, `spec-phase`, `mvp-phase`, `map-codebase`, `ui-phase`, `secure-phase`, `extract-learnings`, `docs-update`, `health`, `stats`, `resume-work`, `pause-work`) are vendored into `commands/gsd/` and auto-emitted (10 → 28 total)
-- [ ] **CMD-02**: Each added command passes the capability-map gate (supported, or flagged-skip with an explicit reason), and the generated `SUPPORT-ROSTER.md` reflects the full 28-command set
-- [ ] **CMD-03**: The expanded set holds the `.planning/` artifact contract (per-command equivalence/golden with the real-answer guard) and emits model-neutral output
+- [x] **CMD-01**: The 18 curated commands (`new-milestone`, `complete-milestone`, `milestone-summary`, `quick`, `fast`, `ship`, `explore`, `spec-phase`, `mvp-phase`, `map-codebase`, `ui-phase`, `secure-phase`, `extract-learnings`, `docs-update`, `health`, `stats`, `resume-work`, `pause-work`) are vendored into `commands/gsd/` and auto-emitted (10 → 28 total)
+- [x] **CMD-02**: Each added command passes the capability-map gate (supported, or flagged-skip with an explicit reason), and the generated `SUPPORT-ROSTER.md` reflects the full 28-command set
+- [x] **CMD-03**: The expanded set holds the `.planning/` artifact contract (per-command equivalence/golden with the real-answer guard) and emits model-neutral output
 
 ### Documentation
 
 Document the adapter to a standard a gsd-core maintainer could review.
 
-- [ ] **DOCS-01**: `README.md` is expanded (install, scope/modes, the full 28-command list, flagged gaps) to maintainer standard, with the command list sourced from the generated roster
-- [ ] **DOCS-02**: A per-command reference doc briefly explains each of the 28 emitted commands
-- [ ] **DOCS-03**: An architecture doc explains the Bob adapter design versus traditional open-gsd (converter/descriptor model, capability-map gate, backend-neutrality, `.planning/` interchange)
-- [ ] **DOCS-04**: A `MAINTAINING` runbook documents the repeatable gsd-core version-bump procedure, sourced from the actual 1.5.0 → 1.6.1 re-vendor performed in the Sync phase
+- [x] **DOCS-01**: `README.md` is expanded (install, scope/modes, the full 28-command list, flagged gaps) to maintainer standard, with the command list sourced from the generated roster
+- [x] **DOCS-02**: A per-command reference doc briefly explains each of the 28 emitted commands
+- [x] **DOCS-03**: An architecture doc explains the Bob adapter design versus traditional open-gsd (converter/descriptor model, capability-map gate, backend-neutrality, `.planning/` interchange)
+- [x] **DOCS-04**: A `MAINTAINING` runbook documents the repeatable gsd-core version-bump procedure, sourced from the actual 1.5.0 → 1.6.1 re-vendor performed in the Sync phase
 
 ### On-Device Acceptance Delta
 
 Extend the single acceptance pass to cover the new surface.
 
-- [ ] **ACCEPT-01**: The on-device acceptance checklist gains device-runnable steps (exact commands + expected outputs) for the newly added commands
-- [ ] **ACCEPT-02**: The acceptance checklist gains a device-runnable model-neutrality verification step (the NEUTRAL-03 invariant, runnable against a real Bob install)
+- [x] **ACCEPT-01**: The on-device acceptance checklist gains device-runnable steps (exact commands + expected outputs) for the newly added commands
+- [x] **ACCEPT-02**: The acceptance checklist gains a device-runnable model-neutrality verification step (the NEUTRAL-03 invariant, runnable against a real Bob install)
 
 ## Future Requirements
 
@@ -191,21 +191,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UP-02 | Phase 5 | Complete |
 | VERIFY-01 | Phase 6 | Complete |
 | VERIFY-02 | Phase 6 | Complete |
-| SYNC-01 | Phase 7 | Pending |
-| SYNC-02 | Phase 7 | Pending |
-| SYNC-03 | Phase 7 | Pending |
-| NEUTRAL-01 | Phase 8 | Pending |
-| NEUTRAL-02 | Phase 8 | Pending |
-| NEUTRAL-03 | Phase 8 | Pending |
-| CMD-01 | Phase 9 | Pending |
-| CMD-02 | Phase 9 | Pending |
-| CMD-03 | Phase 9 | Pending |
-| DOCS-01 | Phase 10 | Pending |
-| DOCS-02 | Phase 10 | Pending |
-| DOCS-03 | Phase 10 | Pending |
-| DOCS-04 | Phase 10 | Pending |
-| ACCEPT-01 | Phase 11 | Pending |
-| ACCEPT-02 | Phase 11 | Pending |
+| SYNC-01 | Phase 7 | Complete |
+| SYNC-02 | Phase 7 | Complete |
+| SYNC-03 | Phase 7 | Complete |
+| NEUTRAL-01 | Phase 8 | Complete |
+| NEUTRAL-02 | Phase 8 | Complete |
+| NEUTRAL-03 | Phase 8 | Complete |
+| CMD-01 | Phase 9 | Complete |
+| CMD-02 | Phase 9 | Complete |
+| CMD-03 | Phase 9 | Complete |
+| DOCS-01 | Phase 10 | Complete |
+| DOCS-02 | Phase 10 | Complete |
+| DOCS-03 | Phase 10 | Complete |
+| DOCS-04 | Phase 10 | Complete |
+| ACCEPT-01 | Phase 11 | Complete |
+| ACCEPT-02 | Phase 11 | Complete |
 
 **Coverage:**
 
