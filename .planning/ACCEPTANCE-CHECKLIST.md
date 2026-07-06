@@ -28,7 +28,7 @@ Run this entire file once, top to bottom, on a **real Bob-enabled machine**. Cov
 **Install gsd-bob (the one mutating bootstrap, performed inside the AC-13 step):**
 
 ```
-npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local
+npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local
 ```
 
 **For each step:** run the `Cmd:` line verbatim; type numbered answers when a flow prompts you. Mark `Result: [ ] pass [ ] fail` inline AND fill the matching row in `## Results Roll-Up`. Mark **fail** whenever the observed output does not match `Expect:`. **If a fail concerns a watch-list assumption** (a conservative Phase-1 default — subagent isolation, structured prompts, config-home override, IDE-vs-Shell signal), record the refutation in `.planning/ACCEPTANCE-FOLLOWUPS.md` so it becomes a tracked v2 enhancement rather than a silent gap.
@@ -187,28 +187,28 @@ Result: [ ] pass  [ ] fail
 
 ## AC-13 — Single-command install prints the target and produces a working `.bob/` layout (INSTALL-01/02/03)
 
-Cmd:    On a real Bob machine, run ONE install command and observe the printed target, then read back the layout. Install (Phase-3-contributed mutating step, run in the Phase 6 pass): `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local` (or `node bin/gsd-bob.cjs --bob --local` from a checkout). Then read-only confirm: `ls -la .bob`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls .bob/gsd-core/bin/gsd-tools.cjs`. The `cat`/`grep`/`ls` read-backs mutate nothing.
+Cmd:    On a real Bob machine, run ONE install command and observe the printed target, then read back the layout. Install (Phase-3-contributed mutating step, run in the Phase 6 pass): `npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local` (or `node bin/gsd-bob.cjs --bob --local` from a checkout). Then read-only confirm: `ls -la .bob`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls .bob/gsd-core/bin/gsd-tools.cjs`. The `cat`/`grep`/`ls` read-backs mutate nothing.
 Expect: BEFORE writing, the command prints the resolved ABSOLUTE target path (e.g. `Installing into: /…/.bob`). After it completes, `.bob/custom_modes.yaml` exists with exactly one `slug: gsd`, and `.bob/gsd-core/bin/gsd-tools.cjs` is present — a working GSD layout at the chosen scope. The user could equally choose global (`--global` → `~/.bob`).
 Confirms: INSTALL-01 (resolved target printed before writing), INSTALL-02 (local/global scope selectable via a single command), INSTALL-03 (clean install produces a working `.bob/` layout) / SC#1 / SC#2.
 Result: [ ] pass  [ ] fail
 
 ## AC-14 — Re-run is idempotent and preserves user customizations (INSTALL-04)
 
-Cmd:    On a real Bob machine, AFTER seeding a user mode/command/rule and running the AC-13 install once, run the SAME install command a SECOND time (Phase-6 mutating step), then read-only confirm. Re-run: `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local`. Confirm (read-only): `grep -c "slug: gsd$" .bob/custom_modes.yaml` and `grep -c "slug: my-mode" .bob/custom_modes.yaml`, plus `ls` of any pre-existing user command/rule file.
+Cmd:    On a real Bob machine, AFTER seeding a user mode/command/rule and running the AC-13 install once, run the SAME install command a SECOND time (Phase-6 mutating step), then read-only confirm. Re-run: `npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local`. Confirm (read-only): `grep -c "slug: gsd$" .bob/custom_modes.yaml` and `grep -c "slug: my-mode" .bob/custom_modes.yaml`, plus `ls` of any pre-existing user command/rule file.
 Expect: `grep -c "slug: gsd$"` returns exactly `1` (no duplication on re-run), the pre-existing user mode `my-mode` is still present, and the user-authored command/rule files are untouched — the re-run updated in place without clobbering or duplicating anything.
 Confirms: INSTALL-04 — re-running the installer updates idempotently, preserving user-authored commands, rules, and `gsd-*` modes without duplication / SC#3.
 Result: [ ] pass  [ ] fail
 
 ## AC-15 — Manifest is the sole source of truth; uninstall touches only tracked entries (INSTALL-05)
 
-Cmd:    On a real Bob machine, AFTER the AC-13/AC-14 install, read-only inspect the manifest, then run the manifest-driven uninstall (Phase-6 mutating step) and read-only confirm what it spared. Inspect: `cat .bob/.gsd-bob-manifest.json` (observe `entries[]`). Uninstall: `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local --uninstall`. Confirm (read-only): `ls .bob/custom_modes.yaml`, `grep -c "slug: my-mode" .bob/custom_modes.yaml`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls -d .planning` (still present).
+Cmd:    On a real Bob machine, AFTER the AC-13/AC-14 install, read-only inspect the manifest, then run the manifest-driven uninstall (Phase-6 mutating step) and read-only confirm what it spared. Inspect: `cat .bob/.gsd-bob-manifest.json` (observe `entries[]`). Uninstall: `npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local --uninstall`. Confirm (read-only): `ls .bob/custom_modes.yaml`, `grep -c "slug: my-mode" .bob/custom_modes.yaml`, `grep -c "slug: gsd$" .bob/custom_modes.yaml`, and `ls -d .planning` (still present).
 Expect: `.gsd-bob-manifest.json` lists the tracked `entries[]` (the sole source of truth). After `--uninstall`: matching tracked `file` entries are gone, `custom_modes.yaml` still exists with `my-mode` and NO `slug: gsd` (un-merged, not deleted), the manifest dotfile is removed, and `.planning/` is still present (never deleted). A user file the manifest does not track is left intact.
 Confirms: INSTALL-05 — the manifest is the sole source of truth; update/uninstall touch only tracked entries; uninstall un-merges slices and never deletes `.planning/` (D-06/D-07) / SC#4.
 Result: [ ] pass  [ ] fail
 
 ## AC-16 — `--dry-run` prints the plan and writes nothing
 
-Cmd:    On a real Bob machine, run a dry-run install and confirm zero filesystem change. Snapshot, then dry-run, then re-snapshot (read-only around a no-write command): `find .bob -type f 2>/dev/null | sort > /tmp/before.txt; npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --local --dry-run; find .bob -type f 2>/dev/null | sort > /tmp/after.txt; diff /tmp/before.txt /tmp/after.txt`. Only `/tmp` snapshot files are written; the `--dry-run` command itself writes nothing under `.bob/`.
+Cmd:    On a real Bob machine, run a dry-run install and confirm zero filesystem change. Snapshot, then dry-run, then re-snapshot (read-only around a no-write command): `find .bob -type f 2>/dev/null | sort > /tmp/before.txt; npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --local --dry-run; find .bob -type f 2>/dev/null | sort > /tmp/after.txt; diff /tmp/before.txt /tmp/after.txt`. Only `/tmp` snapshot files are written; the `--dry-run` command itself writes nothing under `.bob/`.
 Expect: The dry-run output carries the `PLAN (dry-run — nothing written)` marker and the full staging plan, and `diff /tmp/before.txt /tmp/after.txt` reports NO differences (exit 0) — the dry-run mutated nothing on disk. Note: for a global install with no project `.planning/`, `text_mode` is a per-project guarantee written into `<project>/.planning/config.json` only — it is NOT enforced at the runtime/descriptor level.
 Confirms: INSTALL-01/05 dry-run safety (D-12) — `--dry-run` prints the plan and writes nothing; the global-scope `text_mode` limitation is surfaced, not hidden (per-project only).
 Result: [ ] pass  [ ] fail
