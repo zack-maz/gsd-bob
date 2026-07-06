@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 Phase: 11
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-07-06 — Completed quick task 260706-j81: seed Bob's 270k context window
+Last activity: 2026-07-06 — Completed quick task 260706-jwe: re-baseline frozen AC-01..26 to @zack-maz/gsd-bob
 
 ## Performance Metrics
 
@@ -155,6 +155,7 @@ None yet.
 | 260619-ou0 | Prepare first npm publish: add `package.json` `files` allowlist (bin/, src/, gsd-core/, commands/, scripts/, README.md, LICENSE) + MIT LICENSE file. `npm pack` verified clean (no .planning/, test/, or .tgz; 405 files, 1.3 MB). Does not publish (login user-driven). | 2026-06-20 | 5e5686b | [260619-ou0](./quick/260619-ou0-npm-publish-packaging/) |
 | 260704-gmp | Bump version 0.1.2 → 0.2.0 for the milestone v2.0 release (1.6.1 sync, model neutralization, 28-command expansion, docs). `npm pack --dry-run` verified clean (0 .planning/test/.tgz entries; 445 files, 1.5 MB). Does not publish (user-driven `npm publish`). | 2026-07-04 | c18a156 | [260704-gmp](./quick/260704-gmp-bump-version-0-1-2-to-0-2-0-and-verify-n/) |
 | 260706-j81 | Seed Bob's 270k context window into the installer config + document it. `mergeTextMode` now seeds top-level `context_window: 270000` (alongside `text_mode:true`) into `.planning/config.json` so gsd-core's read-depth/advisory scaling matches Bob's real shared window under sequential-inline execution (was silently defaulting to 200k). ARCHITECTURE.md (Axis 2) + README.md (Flagged gaps) updated. Tests 7/7. | 2026-07-06 | 4d25e93 | [260706-j81](./quick/260706-j81-seed-bob-270k-context-window/) |
+| 260706-jwe | **Deliberate v2.0 re-baseline of the Phase 11 frozen AC-01..26 snapshot** (governance amend). Corrected the stale install package name `@opengsd/gsd-bob` → `@zack-maz/gsd-bob` in ACCEPTANCE-CHECKLIST.md (1 preamble + 4 in frozen steps AC-13..16) and regenerated the byte-exact freeze fixture in lockstep so the insert-only guard passes against the NEW baseline. Knowingly moves the frozen baseline — accountability is this task + commit, not the byte-freeze. All 3 acceptance guards green; full suite 321/1 (only pre-existing CORE-02). | 2026-07-06 | 0f1f0e2 | [260706-jwe](./quick/260706-jwe-rebaseline-frozen-ac13-16/) |
 
 ## Deferred Items
 
