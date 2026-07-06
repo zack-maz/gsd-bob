@@ -54,7 +54,7 @@ A standalone, installable adapter package that makes **open-gsd** — the GSD ("
 |------------|---------|---------|-----------------|
 | **Node.js** | `>=22.15.0` (engines `>=22`) | Installer + `gsd-tools.cjs` runtime | Matches gsd-core (`>=22.0.0`) AND Bob Shell (`>=22.15.0`) exactly; `>=22.15.0` is the tighter of the two and the correct floor. Use Node 22 LTS ("Jod") as the baseline; works on 24/25. |
 | **CommonJS (`.cjs`)** | n/a | Module format for installer + tools | gsd-core ships CJS (`gsd-tools.cjs`, `install.js`, `bin/lib/*.cjs`). To be upstream-mergeable and to reuse the shim resolver verbatim, gsd-bob's runtime/installer code must also be CJS. (gsd-core authors in TypeScript and *compiles to .cjs at publish* per ADR-457 — adopt the same source-of-truth-TS → publish-CJS pattern only if you want type safety; pure hand-written CJS is also acceptable for a small adapter.) |
-| **npm + npx** | npm `>=10` | Distribution channel | Mirrors `npx -y --package=@opengsd/gsd-bob@latest -- gsd-bob --bob --<scope>`. Zero-install UX identical to existing GSD users. |
+| **npm + npx** | npm `>=10` | Distribution channel | Mirrors `npx -y --package=@zack-maz/gsd-bob@latest -- gsd-bob --bob --<scope>`. Zero-install UX identical to existing GSD users. |
 | **Node built-ins only** (`node:fs`, `node:path`, `node:os`, `node:child_process`) | n/a | Filesystem staging, home-dir resolution, runtime detection | gsd-core's installer and `runtime-homes.cjs` use *only* built-ins. Keeping gsd-bob dependency-free for install/staging is the single biggest contribution-readiness and security win. |
 
 ### Supporting Libraries
