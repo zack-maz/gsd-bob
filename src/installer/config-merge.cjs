@@ -1,11 +1,13 @@
 'use strict';
 
 /**
- * config-merge.cjs — the SOLE text_mode guarantee (RESEARCH Pitfall 2).
+ * config-merge.cjs — the SOLE text_mode + context_window guarantee
+ * (RESEARCH Pitfall 2).
  *
  * The bob runtime descriptor does NOT enforce workflow.text_mode; this MERGE
  * into the workspace-root .planning/config.json is the only mechanism that
- * turns text_mode on for a Bob install. It is root-anchored at
+ * turns text_mode on for a Bob install AND that seeds Bob's real context
+ * window (top-level `context_window`). It is root-anchored at
  * `<workspaceRoot>/.planning/config.json` (CORE-05) — NEVER written under the
  * scope/.bob dir.
  *
@@ -20,11 +22,26 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 /**
- * Merge `workflow.text_mode:true` into the root-anchored .planning/config.json.
+ * Bob's runtime context window, in tokens.
+ *
+ * Because gsd-bob degrades subagent work to sequential-inline execution (the
+ * `BOB_CAPABILITY_DECL` lower-bound default — no isolated subagents), the whole
+ * GSD loop shares ONE context window, so Bob's real 270k is the operative token
+ * budget. gsd-core keys its read-depth / advisory scaling on this top-level
+ * `context_window` integer (defaulting to a conservative 200000 when absent), so
+ * the adapter seeds Bob's true window to make gsd-core's budget math match reality.
+ */
+const BOB_CONTEXT_WINDOW = 270000;
+
+/**
+ * Merge `workflow.text_mode:true` + top-level `context_window` into the
+ * root-anchored .planning/config.json.
  *
  * Behavior:
- *   - missing config.json            → create `{ workflow: { text_mode: true } }`
+ *   - missing config.json            → create
+ *                                      `{ workflow: { text_mode: true }, context_window: 270000 }`
  *   - existing config with user keys → preserve them, set workflow.text_mode:true
+ *                                      and context_window:270000
  *   - non-object workflow value      → coerce to a fresh object, then set the key
  *   - re-run                         → byte-identical (idempotent)
  *   - UNPARSEABLE config.json        → warn (naming the path) + return WITHOUT
@@ -77,6 +94,12 @@ function mergeTextMode(workspaceRoot, { dryRun = false } = {}) {
       : {};
   cfg.workflow.text_mode = true;
 
+  // Seed Bob's real context window unconditionally — it is a runtime constant the
+  // adapter owns (exactly like text_mode). Under sequential-inline execution the
+  // whole loop shares one window, so gsd-core's read-depth/advisory scaling must
+  // key on Bob's true 270k rather than the conservative 200k default.
+  cfg.context_window = BOB_CONTEXT_WINDOW;
+
   // Byte-stable serialization so the manifest hash is reproducible across runs.
   const bytes = JSON.stringify(cfg, null, 2) + '\n';
 
@@ -89,4 +112,4 @@ function mergeTextMode(workspaceRoot, { dryRun = false } = {}) {
   return { written: true, path: planningCfg, bytes };
 }
 
-module.exports = { mergeTextMode };
+module.exports = { mergeTextMode, BOB_CONTEXT_WINDOW };

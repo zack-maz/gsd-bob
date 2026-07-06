@@ -32,16 +32,18 @@ function seedConfig(ws, raw) {
   fs.writeFileSync(cfgPath(ws), raw, 'utf8');
 }
 
-test('creates .planning/config.json with workflow.text_mode:true when absent', () => {
+test('creates .planning/config.json with workflow.text_mode:true + context_window:270000 when absent', () => {
   const ws = scratchWorkspace();
   const res = mergeTextMode(ws);
   assert.equal(res.written, true);
   assert.equal(res.path, cfgPath(ws));
   const parsed = JSON.parse(fs.readFileSync(cfgPath(ws), 'utf8'));
-  assert.deepEqual(parsed, { workflow: { text_mode: true } });
+  assert.deepEqual(parsed, { workflow: { text_mode: true }, context_window: 270000 });
+  assert.equal(parsed.context_window, 270000, "Bob's 270k window seeded top-level");
+  assert.equal(parsed.workflow.text_mode, true, 'text_mode set');
 });
 
-test('preserves user keys and sets workflow.text_mode:true', () => {
+test('preserves user keys and sets workflow.text_mode:true + context_window:270000', () => {
   const ws = scratchWorkspace();
   seedConfig(ws, JSON.stringify({ workflow: { granularity: 'coarse' }, other: 1 }, null, 2) + '\n');
   const res = mergeTextMode(ws);
@@ -50,15 +52,20 @@ test('preserves user keys and sets workflow.text_mode:true', () => {
   assert.equal(parsed.workflow.granularity, 'coarse', 'user workflow key preserved');
   assert.equal(parsed.workflow.text_mode, true, 'text_mode set');
   assert.equal(parsed.other, 1, 'top-level user key preserved');
+  assert.equal(parsed.context_window, 270000, 'context_window added/set to 270000');
 });
 
-test('is idempotent — byte-identical output on the second run', () => {
+test('is idempotent — byte-identical output on the second run (incl. context_window)', () => {
   const ws = scratchWorkspace();
   mergeTextMode(ws);
   const first = fs.readFileSync(cfgPath(ws));
   mergeTextMode(ws);
   const second = fs.readFileSync(cfgPath(ws));
   assert.ok(first.equals(second), 'second run produces byte-identical bytes');
+  assert.ok(
+    first.toString('utf8').includes('"context_window": 270000'),
+    'seeded context_window persists byte-identically across runs',
+  );
 });
 
 test('coerces a non-object workflow into a fresh object before setting text_mode', () => {
@@ -89,7 +96,12 @@ test('parse failure → warns and leaves the bytes UNCHANGED (never clobber)', (
 
   const after = fs.readFileSync(cfgPath(ws));
   assert.ok(before.equals(after), 'on-disk bytes are byte-identical before/after');
+  assert.ok(
+    !after.toString('utf8').includes('context_window'),
+    'no context_window injected into an unparseable user file',
+  );
   assert.equal(res.written, false, 'signals nothing was written');
+  assert.equal(res.bytes, undefined, 'no would-be bytes for a refused unparseable file');
   assert.ok(
     warnings.some((w) => w.includes(cfgPath(ws))),
     'warns naming the offending config path',
@@ -102,6 +114,10 @@ test('dryRun computes the result but writes nothing to disk', () => {
   assert.equal(res.written, false, 'dryRun does not write');
   assert.equal(fs.existsSync(cfgPath(ws)), false, 'no config.json created on disk');
   assert.ok(res.bytes && res.bytes.includes('text_mode'), 'would-be bytes still computed');
+  assert.ok(
+    res.bytes.includes('"context_window": 270000'),
+    'would-be bytes include the seeded context_window',
+  );
 });
 
 test('path is always <workspaceRoot>/.planning/config.json — never under a scope dir', () => {
