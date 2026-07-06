@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 1.6.1 Sync & Command Expansion
-current_phase: 11
-status: verifying
+current_phase: 0
+status: Awaiting next milestone
 stopped_at: Phase 11 context gathered
-last_updated: "2026-07-04T17:44:00.058Z"
-last_activity: 2026-07-04
-last_activity_desc: Phase 11 complete
+last_updated: "2026-07-06T21:49:33.590Z"
+last_activity: 2026-07-06
+last_activity_desc: Milestone v2.0 completed and archived
 progress:
   total_phases: 11
   completed_phases: 5
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-07-06 — Bumped version 0.2.0 → 0.2.1 (0.2.0 already published/immutable; 0.2.1 ships the 270k installer seed + doc fixes), tagged v0.2.1
+Phase: Milestone v2.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-06 — Milestone v2.0 completed and archived
 
 ## Performance Metrics
 
@@ -170,3 +170,7 @@ Items acknowledged and carried forward from previous milestone close:
 Last session: 2026-07-04T17:29:11.456Z
 Stopped at: Phase 11 context gathered
 Resume file: .planning/phases/11-on-device-acceptance-delta/11-CONTEXT.md
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

@@ -8,16 +8,17 @@ A standalone, installable adapter package that makes **open-gsd** — the GSD ("
 
 A Bob user can install via a single command and run the full GSD planning loop — new-project → plan-phase → execute-phase → verify — natively, producing the same `.planning/` artifacts GSD produces in Claude Code.
 
-## Current Milestone: v2.0 — 1.6.1 Sync & Command Expansion
+## Current State
 
-**Goal:** Bring gsd-bob up to gsd-core 1.6.1 on one consistent vendored version, make every emitted artifact fully model-neutral, roughly triple the emitted command surface (10 → 28) to cover the daily-driver GSD workflow, and document the adapter to a maintainer standard — including a repeatable runbook for future gsd-core version bumps.
+**Shipped:** v2.0 — 1.6.1 Sync & Command Expansion (2026-07-06). Published to npm as `@zack-maz/gsd-bob@0.2.1`.
 
-**Target features:**
-- Full re-vendor of the `gsd-core/` payload from 1.5.0 → 1.6.1, with the Bob descriptor + converters re-validated against the new bin layer
-- A model-neutralization converter pass so zero `opus`/`sonnet`/`haiku` (or model directives) reach emitted `.bob/` artifacts — Bob owns model routing
-- Curated expansion of the emitted command set from 10 to 28, each vetted through the capability-map gate
-- Documentation: expanded README, per-command reference, Bob-vs-open-gsd architecture doc, and a maintainer runbook for gsd-core version bumps
-- On-device acceptance delta covering the new commands and the model-neutrality invariant
+gsd-bob now vendors gsd-core **1.6.1** on one consistent version, emits **28** model-neutral commands (grown from 10), and is documented to a maintainer standard (expanded README, generated per-command `COMMANDS.md`, `ARCHITECTURE.md`, and a `MAINTAINING.md` version-bump runbook). The installer seeds Bob's real **270k** `context_window` into `.planning/config.json` so gsd-core's read-depth scaling matches Bob's sequential-inline shared window. The consolidated on-device acceptance checklist (AC-01..AC-45) is assembled for the single unattended pass on Bob hardware.
+
+**Milestones shipped:**
+- **v1.0 — Bob Runtime & Core Loop** (Phases 1–6): install one-liner + full planning loop native in Bob, upstream-ready.
+- **v2.0 — 1.6.1 Sync & Command Expansion** (Phases 7–11): 1.6.1 re-vendor, model neutralization, 10→28 command expansion, maintainer docs, acceptance delta.
+
+**Next milestone:** _Planning next milestone_ — run `/gsd-new-milestone`.
 
 ## Requirements
 
@@ -30,14 +31,15 @@ A Bob user can install via a single command and run the full GSD planning loop �
 - [x] Parity-first primitive mapping with explicit flag/skip for unsupported primitives — *Validated in Phase 2 (TRANS-04) and enforced through Phase 5*
 - [x] One-line npx/Node installer with local/global scope and clean/update modes; standalone `gsd-bob` package with own versioning — *Validated in Phase 3 (INSTALL-01..05)*
 - [x] End-to-end: install one-liner + full planning loop native in Bob + upstream-ready — *v1.0 milestone complete (Phases 1–6, 15 plans); on-device acceptance checklist assembled in Phase 6 (VERIFY-01/02)*
+- [x] Re-vendor the gsd-core payload to 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer — *Validated in Phase 7 (SYNC-01/02/03)*
+- [x] Neutralize all model references in emitted artifacts (structural directives + inline prose), verified by an invariant assertion — *Validated in Phase 8 (NEUTRAL-01/02/03)*
+- [x] Expand the curated emitted command set from 10 to 28, each capability-map-gated — *Validated in Phase 9 (CMD-01/02/03)*
+- [x] Document the adapter to a maintainer standard: README, per-command reference, architecture (Bob vs open-gsd), and a gsd-core version-bump runbook — *Validated in Phase 10 (DOCS-01/02/03/04)*
+- [x] Extend the on-device acceptance checklist to cover the new commands and the model-neutrality invariant — *Validated in Phase 11 (ACCEPT-01/02)*
 
-### Active (v2.0)
+### Active (next milestone)
 
-- [ ] Re-vendor the gsd-core payload to 1.6.1 on one consistent version and re-validate the Bob integration against the new bin layer
-- [ ] Neutralize all model references in emitted artifacts (structural directives + inline prose), verified by an invariant assertion
-- [ ] Expand the curated emitted command set from 10 to 28, each capability-map-gated
-- [ ] Document the adapter to a maintainer standard: README, per-command reference, architecture (Bob vs open-gsd), and a gsd-core version-bump runbook
-- [ ] Extend the on-device acceptance checklist to cover the new commands and the model-neutrality invariant
+_None yet — run `/gsd-new-milestone` to define the next milestone's requirements._ Candidate carry-forwards from the deferred long tail: the `transition` lifecycle command, `ai-integration-phase`, the knowledge-graph/mempalace cluster, and the actual upstream PR to open-gsd/gsd-core.
 
 ### Out of Scope
 
@@ -75,10 +77,12 @@ A Bob user can install via a single command and run the full GSD planning loop �
 | Parity-first; flag gaps rather than degrade | Keep a high "native" fidelity bar for v1; defer rich Bob-native re-modeling | — Pending |
 | npx/Node installer (local/global, clean/update) | Matches existing GSD install UX; lowest friction for current users | — Pending |
 | Develop test-deferred against docs + conservative defaults; verify once on-device | No Bob on the dev device; assume the constrained lower bound (no isolated subagents, no structured prompts) so it runs anywhere, then validate on a Bob machine | — Pending |
-| (v2.0) Full re-vendor to gsd-core 1.6.1 rather than cherry-picking content | One consistent payload version; curated commands and bin layer stay in lockstep; avoids a franken-version | — Pending |
-| (v2.0) Verify model-neutrality by invariant assertion (zero model literals in emitted `.bob/`), not byte-golden | Prose rewriting is fuzzy; absence-of-X is a cleaner, more durable contract than exact bytes | — Pending |
-| (v2.0) Expand emitted commands 10 → 28 via curated high-value tier, not emit-all | Keeps the roster meaningful and lets each command earn a hand-written doc entry; parity-first gate preserved | — Pending |
-| (v2.0) Author a MAINTAINING runbook sourced from Phase-1's real re-vendor | The vendoring model requires this dance every gsd-core release; a battle-tested playbook beats aspirational docs | — Pending |
+| (v2.0) Full re-vendor to gsd-core 1.6.1 rather than cherry-picking content | One consistent payload version; curated commands and bin layer stay in lockstep; avoids a franken-version | ✓ Good — Phase 7 shipped a single-version 1.6.1 payload |
+| (v2.0) Verify model-neutrality by invariant assertion (zero model literals in emitted `.bob/`), not byte-golden | Prose rewriting is fuzzy; absence-of-X is a cleaner, more durable contract than exact bytes | ✓ Good — NEUTRAL-03 zero-literal invariant holds over the full 28-command emission |
+| (v2.0) Expand emitted commands 10 → 28 via curated high-value tier, not emit-all | Keeps the roster meaningful and lets each command earn a hand-written doc entry; parity-first gate preserved | ✓ Good — 28 commands emit, each rostered + doc'd |
+| (v2.0) Author a MAINTAINING runbook sourced from Phase-1's real re-vendor | The vendoring model requires this dance every gsd-core release; a battle-tested playbook beats aspirational docs | ✓ Good — MAINTAINING.md distilled from the real 1.5.0→1.6.1 re-vendor |
+| (v2.0 close) Seed Bob's real 270k `context_window` into `.planning/config.json` at install | Under sequential-inline execution the whole loop shares one window; gsd-core read-depth scaling defaulted to a too-low 200k | ✓ Good — installer seeds `context_window: 270000` (quick 260706-j81) |
+| (v2.0 close) Publish under `@zack-maz/gsd-bob`; no `v2.0` git tag (release tags stay npm-aligned) | npm package is 0.2.1; a `v2.0` tag would imply a nonexistent 2.0.0 release | ✓ Good — milestone recorded in MILESTONES.md; release tag is `v0.2.1` |
 
 ## Evolution
 
@@ -98,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-04 — v1.0 milestone complete (Phases 1–6, 15 plans); milestone v2.0 in progress: Phase 7 (1.6.1 Sync), Phase 8 (Model Neutralization), and Phase 9 (Command Expansion — emitted surface grown 10→28) complete; Phases 10 (Documentation) and 11 (Acceptance Delta) remain.*
+*Last updated: 2026-07-06 — v2.0 milestone complete and archived (Phases 7–11, 10 plans); published to npm as `@zack-maz/gsd-bob@0.2.1`. v1.0 (Phases 1–6) and v2.0 both shipped. Awaiting next milestone (`/gsd-new-milestone`).*
