@@ -49,5 +49,4 @@
 
 ## Unsupported on Bob (omitted from the loadable set, recorded loud)
 
-- gsd-autonomous: unsupported on Bob: requires isolated subagent orchestration that Bob runs sequentially inline
-- gsd-parallel-fanout: unsupported on Bob: requires isolated subagents; Bob runs subagents sequentially inline
+- gsd-parallel-fanout: unsupported on Bob: requires parallel subagent fan-out; Bob documents isolated subagents but not parallel spawning — unverified

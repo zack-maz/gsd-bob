@@ -20,10 +20,11 @@ const path = require('node:path');
 
 const adapter = require(path.join(__dirname, '..', 'src', 'bob-adapter.cjs'));
 
-// Bob's conservative lower bound (CAPABILITY-MAP §1): no isolated subagents, no
-// structured prompts (text_mode only). The full capability declaration is owned
-// by the installer in Phase 3; this is the representative Phase-2 declaration.
-const bobCapabilityDecl = { isolatedSubagents: false, structuredPrompts: false };
+// Bob's conservative lower bound (CAPABILITY-MAP §1): Bob HAS isolated subagents;
+// the primitive that stays unsupported is parallel subagent fan-out (unverified),
+// plus no structured prompts (text_mode only). The full capability declaration is
+// owned by the installer in Phase 3; this is the representative Phase-2 declaration.
+const bobCapabilityDecl = { parallelSubagentFanout: false, structuredPrompts: false };
 
 // Candidate set DERIVED from `commands/gsd/*.md` — the same source the installer
 // iterates (`src/installer/stage.cjs` L239-266) — so the standalone script and the
@@ -37,13 +38,12 @@ const derivedCandidates = fs.existsSync(commandsDir)
       .map((f) => ({ name: `gsd-${path.basename(f, '.md')}`, requires: [] }))
   : [];
 
-// Preserve the two curated edge-case entries that exercise the gate's skip paths
+// Preserve the single curated edge-case entry that exercises the gate's skip path
 // so the roster keeps proving the mechanism:
-//   - gsd-autonomous: curated BOB_SKIP_LIST entry (hard dependency metadata can't self-describe).
-//   - gsd-parallel-fanout: unmet hard dependency — requires a primitive Bob lacks (isolated subagents).
+//   - gsd-parallel-fanout: unmet hard dependency — requires a primitive Bob lacks
+//     (parallel subagent fan-out; Bob has isolated subagents but not parallel spawning).
 const curatedEdgeCases = [
-  { name: 'gsd-autonomous', requires: [] },
-  { name: 'gsd-parallel-fanout', requires: ['isolatedSubagents'] },
+  { name: 'gsd-parallel-fanout', requires: ['parallelSubagentFanout'] },
 ];
 
 // De-duplicate by name (curated entries win if a derived source shares the name).

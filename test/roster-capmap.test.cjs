@@ -11,11 +11,11 @@
  * edge cases.
  *
  * Two assertions (D-09.3):
- *   (a) NO SUPPORTED GATE MISSING / SEQUENTIAL-INLINE LOWER BOUND (D-02): under
- *       the conservative `{isolatedSubagents:false, structuredPrompts:false}`
- *       declaration, every quality gate still reports supported:true — i.e. each
- *       degrades cleanly to sequential-inline and carries NO concurrency
- *       dependency, so NO quality-gate skip line is ever emitted.
+ *   (a) NO SUPPORTED GATE MISSING / PARALLEL-FAN-OUT LOWER BOUND (D-02): under
+ *       the conservative `{parallelSubagentFanout:false, structuredPrompts:false}`
+ *       declaration (Bob HAS isolated subagents; only parallel fan-out is gated),
+ *       every quality gate still reports supported:true — i.e. none requires
+ *       parallel subagent fan-out, so NO quality-gate skip line is ever emitted.
  *   (b) EVERY SKIP LINE TRACES TO A PRIMITIVE (D-06): each roster line ends in a
  *       reason that is exactly what the gate (the single capability-map authority)
  *       returns for that candidate — proving the reason is generated from the gate
@@ -35,10 +35,10 @@ const { repoRoot } = require('./_helpers/vendor.cjs');
 
 const adapter = require(path.join(repoRoot, 'src', 'bob-adapter.cjs'));
 
-// Bob's conservative lower bound (CAPABILITY-MAP §1): no isolated subagents, no
-// structured prompts (text_mode only) — the declaration generate-support-roster
-// emits the roster under.
-const DECL = { isolatedSubagents: false, structuredPrompts: false };
+// Bob's conservative lower bound (CAPABILITY-MAP §1): Bob HAS isolated subagents;
+// the gated primitive is parallel subagent fan-out (unverified), plus no structured
+// prompts (text_mode only) — the declaration generate-support-roster emits under.
+const DECL = { parallelSubagentFanout: false, structuredPrompts: false };
 
 // The four quality gates ported in Wave 1, built via the hyphen form so this
 // test's prose carries no colon-dialect literal.
@@ -57,8 +57,7 @@ function deriveCandidates() {
     .filter((f) => f.endsWith('.md'))
     .map((f) => ({ name: `${hyphenForm}${path.basename(f, '.md')}`, requires: [] }));
   const curated = [
-    { name: `${hyphenForm}autonomous`, requires: [] },
-    { name: `${hyphenForm}parallel-fanout`, requires: ['isolatedSubagents'] },
+    { name: `${hyphenForm}parallel-fanout`, requires: ['parallelSubagentFanout'] },
   ];
   const byName = new Map();
   for (const c of derived) byName.set(c.name, c);
@@ -66,15 +65,15 @@ function deriveCandidates() {
   return [...byName.values()];
 }
 
-// ---- (a) No supported quality gate missing / sequential-inline lower bound --
+// ---- (a) No supported quality gate missing / parallel-fan-out lower bound ----
 
-test('D-02: every quality gate reports supported:true under isolatedSubagents:false (sequential-inline lower bound)', () => {
+test('D-02: every quality gate reports supported:true under parallelSubagentFanout:false (parallel-fan-out lower bound)', () => {
   for (const name of QUALITY_GATES) {
     const res = adapter.gateArtifact({ name, requires: [] }, DECL);
     assert.equal(
       res.supported,
       true,
-      `${name} must degrade cleanly to sequential-inline (no concurrency dependency)`,
+      `${name} must be supported — no quality gate requires parallel subagent fan-out`,
     );
   }
 });

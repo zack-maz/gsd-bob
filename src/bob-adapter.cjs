@@ -298,9 +298,12 @@ function unmergeCustomModes(existingYamlText, ownedSlugs) {
  * the whole skill roster rides with Phases 4-5.
  */
 const BOB_SKIP_LIST = {
-  // Example representative: a workflow whose hard dependency on isolated subagent
-  // fan-out cannot be expressed purely in skill metadata.
-  'gsd-autonomous': 'requires isolated subagent orchestration that Bob runs sequentially inline',
+  // Intentionally empty: the former `gsd-autonomous` entry was removed because Bob
+  // DOES support isolated subagents (spawn_subagent, isolated context window,
+  // `subagent` tool group), and gsd-autonomous only needs isolation — not parallel
+  // fan-out — so it is emittable. The empty-but-present shape keeps the curated
+  // skip mechanism live (gateArtifact still consults BOB_SKIP_LIST via
+  // hasOwnProperty) for any future case metadata cannot self-describe.
 };
 
 /**
@@ -308,8 +311,9 @@ const BOB_SKIP_LIST = {
  * @type {Record<string,string>}
  */
 const PRIMITIVE_REASONS = {
-  isolatedSubagents:
-    'requires isolated subagents; Bob runs subagents sequentially inline',
+  parallelSubagentFanout:
+    'requires parallel subagent fan-out; Bob documents isolated subagents but not ' +
+    'parallel spawning — unverified',
   structuredPrompts:
     'requires structured prompts; Bob supports text_mode prompting only',
 };

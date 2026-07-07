@@ -34,12 +34,14 @@ const {
 const { sha256, safeJoin, classifyOnUpdate, classifyOrphan } = require('./manifest.cjs');
 
 /**
- * Bob's conservative lower-bound capability declaration (CAPABILITY-MAP §1): no
- * isolated subagents, no structured prompts (text_mode only). Owned by the
- * installer (the descriptor does not enforce it) — see config-merge.cjs for the
- * text_mode write itself.
+ * Bob's conservative lower-bound capability declaration (CAPABILITY-MAP §1): Bob
+ * HAS isolated subagents (spawn_subagent, isolated context window, `subagent` tool
+ * group) — the primitive that stays unsupported is parallel subagent fan-out
+ * (concurrent spawning, unverified), plus no structured prompts (text_mode only).
+ * Owned by the installer (the descriptor does not enforce it) — see
+ * config-merge.cjs for the text_mode write itself.
  */
-const BOB_CAPABILITY_DECL = { isolatedSubagents: false, structuredPrompts: false };
+const BOB_CAPABILITY_DECL = { parallelSubagentFanout: false, structuredPrompts: false };
 
 /**
  * Representative candidate set for the support roster. Mirrors
@@ -52,8 +54,7 @@ const ROSTER_CANDIDATES = [
   { name: 'gsd-help', requires: [] },
   { name: 'gsd-plan-phase', requires: [] },
   { name: 'gsd-execute-phase', requires: [] },
-  { name: 'gsd-autonomous', requires: [] },
-  { name: 'gsd-parallel-fanout', requires: ['isolatedSubagents'] },
+  { name: 'gsd-parallel-fanout', requires: ['parallelSubagentFanout'] },
 ];
 
 /** Recursively list every FILE under `dir` as a path relative to `dir`. */

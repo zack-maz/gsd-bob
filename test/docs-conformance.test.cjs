@@ -18,9 +18,9 @@
  *   3. COMMANDS.md `gsd-` token set == roster Supported set.
  *
  * The README/roster section slicing reuses the command-expansion.test.cjs
- * heading-to-next-`##` idiom so a Flagged-gaps mention of gsd-autonomous /
- * gsd-parallel-fanout (Pitfall 5) or an Unsupported-reason stem can never falsely
- * satisfy an assertion. All regexes are linear + anchored (ReDoS-safe).
+ * heading-to-next-`##` idiom so a Flagged-gaps mention of gsd-parallel-fanout
+ * (Pitfall 5) or an Unsupported-reason stem can never falsely satisfy an
+ * assertion. All regexes are linear + anchored (ReDoS-safe).
  */
 
 const test = require('node:test');

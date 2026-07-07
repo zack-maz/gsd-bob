@@ -1,8 +1,8 @@
 ## AC-01 — Subagent isolation
 
-Cmd:    Run a GSD stub mode/command under Bob that attempts to spawn an isolated subtask and await a completion signal, then list Bob's available tools (read-only). Example, inside a Bob session: invoke the stub mode, then in its terminal run `node gsd-core/bin/gsd-tools.cjs query state.load` and observe whether any isolated-subagent/`new_task` tool was offered.
-Expect: No isolated-subagent / `new_task` tool is available; the delegated work runs sequentially inline within the session (no parallel completion signal is emitted). Mode switching is in-session only.
-Confirms: SPIKE-01 — conservative default "sequential inline (assume NO isolated subagents)".
+Cmd:    Run a GSD stub mode/command under Bob that spawns an isolated subagent and awaits a completion signal, then list Bob's available tools (read-only). Example, inside a Bob session: invoke the stub mode, then in its terminal run `node gsd-core/bin/gsd-tools.cjs query state.load` and observe whether an isolated-subagent tool (`spawn_subagent`, isolated context window, `subagent` tool group) is offered, and whether any tool spawns MULTIPLE concurrent subagents (parallel fan-out).
+Expect: An isolated-subagent primitive IS available (Bob documents `spawn_subagent` with an isolated context window and a `subagent` tool group); subagents run sequentially. No parallel-fan-out tool (multiple concurrent subagents) is available or verified. Mode switching is in-session only.
+Confirms: SPIKE-01 — corrected default "isolated subagents present (sequential); parallel fan-out unconfirmed".
 Result: [ ] pass  [ ] fail
 
 ## AC-02 — Structured prompt primitive
@@ -63,7 +63,7 @@ Result: [ ] pass  [ ] fail
 
 ## AC-10 — Unsupported skill is omitted AND listed in the support roster (TRANS-04)
 
-Cmd:    On a real Bob machine, read-only confirm an unsupported artifact is absent from the emitted set yet recorded loud. List the emitted set and grep the roster (no edits): `ls .bob/skills .bob/commands` (observe the unsupported skill, e.g. `gsd-autonomous`, is NOT present) then `grep "unsupported on Bob:" SUPPORT-ROSTER.md` (observe it IS recorded with a reason). No file is written, moved, or deleted.
+Cmd:    On a real Bob machine, read-only confirm an unsupported artifact is absent from the emitted set yet recorded loud. List the emitted set and grep the roster (no edits): `ls .bob/skills .bob/commands` (observe the unsupported skill, e.g. `gsd-parallel-fanout`, is NOT present) then `grep "unsupported on Bob:" SUPPORT-ROSTER.md` (observe it IS recorded with a reason). No file is written, moved, or deleted.
 Expect: The unsupported skill does not appear under `.bob/skills` / `.bob/commands`, AND `SUPPORT-ROSTER.md` contains a matching `unsupported on Bob: <reason>` line — parity-first, never silently broken.
 Confirms: TRANS-04 — skills requiring primitives Bob cannot support are explicitly flagged/skipped (parity-first), never silently broken.
 Result: [ ] pass  [ ] fail

@@ -68,7 +68,7 @@ const REGISTRY_BLOCK = [
   "    \"id\": \"bob\",",
   "    \"role\": \"runtime\",",
   "    \"title\": \"IBM Bob\",",
-  "    \"description\": \"IBM Bob (bob.ibm.com) — backend-agnostic; .bob/skills + .bob/commands; text_mode prompts; sequential-inline subagents.\",",
+  "    \"description\": \"IBM Bob (bob.ibm.com) — backend-agnostic; .bob/skills + .bob/commands; text_mode prompts; isolated subagents (sequential; no parallel fan-out).\",",
   "    \"tier\": \"core\",",
   "    \"requires\": [],",
   "    \"runtime\": {",

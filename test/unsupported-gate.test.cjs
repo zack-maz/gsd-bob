@@ -12,9 +12,10 @@ const adapter = require(path.join(repoRoot, 'src', 'bob-adapter.cjs'));
 // can never accidentally satisfy (or trip) the assertions it makes.
 const MARKER = ['unsupported', 'on', 'Bob:'].join(' ');
 
-// Bob's conservative lower bound (CAPABILITY-MAP §1): no isolated subagents,
-// no structured prompts (text_mode only).
-const bobDecl = { isolatedSubagents: false, structuredPrompts: false };
+// Bob's conservative lower bound (CAPABILITY-MAP §1): Bob HAS isolated subagents;
+// the gated primitive is parallel subagent fan-out (unverified), plus no structured
+// prompts (text_mode only).
+const bobDecl = { parallelSubagentFanout: false, structuredPrompts: false };
 
 // BUG 1 freeze: emitGsdMode().groups must be a SUBSET of Bob's documented valid
 // tool-group set AND must include `execute` (Bob's terminal-command token; Bob has
@@ -42,28 +43,36 @@ test('a fully-supported candidate is included with no roster entry', () => {
 });
 
 test('a candidate requiring an unmet hard dependency is excluded with a concrete reason', () => {
-  const candidate = { name: 'gsd-parallel-thing', requires: ['isolatedSubagents'] };
+  const candidate = { name: 'gsd-parallel-fanout', requires: ['parallelSubagentFanout'] };
   const res = adapter.gateArtifact(candidate, bobDecl);
   assert.equal(res.supported, false);
   assert.ok(typeof res.reason === 'string' && res.reason.length > 0);
-  assert.match(res.reason, /isolatedSubagents|subagent/i);
+  assert.match(res.reason, /parallelSubagentFanout|parallel|fan-?out|subagent/i);
 });
 
-test('a curated skip-list candidate is excluded with its skip-list reason', () => {
-  // Use whatever names the adapter curates; assert the mechanism via a name the
-  // adapter is documented to skip. The adapter exposes its skip-list for the test.
+test('the curated skip-list mechanism is present and consulted by gateArtifact', () => {
+  // BOB_SKIP_LIST is intentionally empty now (Bob supports isolated subagents, so
+  // gsd-autonomous is emittable), but the MECHANISM must survive: the adapter still
+  // exposes the skip-list object AND gateArtifact still consults it. Prove the
+  // mechanism by seeding a throwaway skip entry locally and asserting the gate honors
+  // it, without depending on a real curated entry.
   const skipList = adapter.BOB_SKIP_LIST || {};
-  const skippedName = Object.keys(skipList)[0];
-  assert.ok(skippedName, 'adapter exposes at least one curated skip-list entry');
-  const res = adapter.gateArtifact({ name: skippedName, requires: [] }, bobDecl);
-  assert.equal(res.supported, false);
-  assert.ok(res.reason && res.reason.length > 0);
+  assert.equal(typeof skipList, 'object', 'adapter exposes the BOB_SKIP_LIST object');
+  const throwaway = '__gsd-throwaway-skip__';
+  skipList[throwaway] = 'seeded skip reason';
+  try {
+    const res = adapter.gateArtifact({ name: throwaway, requires: [] }, bobDecl);
+    assert.equal(res.supported, false, 'gateArtifact consults BOB_SKIP_LIST');
+    assert.equal(res.reason, 'seeded skip reason');
+  } finally {
+    delete skipList[throwaway];
+  }
 });
 
 test('buildSupportRoster emits a loud marker line for each unsupported candidate', () => {
   const candidates = [
     { name: 'gsd-help', requires: [] },
-    { name: 'gsd-parallel-thing', requires: ['isolatedSubagents'] },
+    { name: 'gsd-parallel-fanout', requires: ['parallelSubagentFanout'] },
   ];
   const roster = adapter.buildSupportRoster(candidates, bobDecl);
   assert.ok(Array.isArray(roster), 'roster is an array of lines');
@@ -77,12 +86,12 @@ test('buildSupportRoster emits a loud marker line for each unsupported candidate
 test('the unsupported candidate is OMITTED from the loadable (supported) set', () => {
   const candidates = [
     { name: 'gsd-help', requires: [] },
-    { name: 'gsd-parallel-thing', requires: ['isolatedSubagents'] },
+    { name: 'gsd-parallel-fanout', requires: ['parallelSubagentFanout'] },
   ];
   const supported = candidates.filter((c) => adapter.gateArtifact(c, bobDecl).supported);
   const names = supported.map((c) => c.name);
   assert.ok(names.includes('gsd-help'));
-  assert.ok(!names.includes('gsd-parallel-thing'));
+  assert.ok(!names.includes('gsd-parallel-fanout'));
 });
 
 test('gateArtifact is exported from bob-adapter', () => {
@@ -108,7 +117,7 @@ test('buildSupportRoster never emits a malformed undefined-prefixed line', () =>
   const undefinedPrefix = ['undefined', ':'].join('');
   const candidates = [
     { name: 'gsd-help', requires: [] },
-    { requires: ['isolatedSubagents'] }, // nameless, also unsupported
+    { requires: ['parallelSubagentFanout'] }, // nameless, also unsupported
     null, // malformed
   ];
   const roster = adapter.buildSupportRoster(candidates, bobDecl);
