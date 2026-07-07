@@ -1,0 +1,203 @@
+<svg viewBox="0 0 960 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d" font-family="'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <title id="t">gsd-bob architecture, IBM Carbon themed</title>
+  <desc id="d">gsd-core Claude sources are transformed by the bob adapter and its two converters into Bob-native commands and skills plus seeded config, gated by a capability map that emits 28 skills and withholds 1 — Bob's isolated subagents are confirmed, only parallel fan-out is unverified — and designed to upstream into gsd-core 1.6.1 as a mostly-data move.</desc>
+  <style>
+    .bg{fill:#ffffff;}
+    .panel{fill:#f4f4f4;stroke:#e0e0e0;stroke-width:1;}
+    .logic{fill:#edf5ff;stroke:#0f62fe;stroke-width:1.5;}
+    .white{fill:#ffffff;stroke:#e0e0e0;stroke-width:1;}
+    .ink{fill:#161616;}
+    .mut{fill:#525252;}
+    .blue{fill:#0f62fe;}
+    .bar{fill:#0f62fe;}
+    .mono{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;}
+    .lbl{fill:#525252;font-weight:600;letter-spacing:0.06em;}
+    .rule{stroke:#e0e0e0;stroke-width:1;}
+    .arw{stroke:#0f62fe;stroke-width:2.2;fill:none;}
+    .pill{fill:#161616;}
+    .grn{fill:#24a148;}
+    .red{fill:#da1e28;}
+  </style>
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 z" fill="#0f62fe"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="960" height="920"/>
+
+  <!-- IBM 8-bar motif -->
+  <g>
+    <rect class="bar" x="40" y="28" width="56" height="4"/>
+    <rect class="bar" x="40" y="35" width="56" height="4"/>
+    <rect class="bar" x="40" y="42" width="56" height="4"/>
+    <rect class="bar" x="40" y="49" width="56" height="4"/>
+    <rect class="bar" x="40" y="56" width="56" height="4"/>
+    <rect class="bar" x="40" y="63" width="56" height="4"/>
+    <rect class="bar" x="40" y="70" width="56" height="4"/>
+    <rect class="bar" x="40" y="77" width="56" height="4"/>
+  </g>
+  <text x="112" y="56" class="ink" font-size="26" font-weight="700">gsd-bob</text>
+  <text x="112" y="80" class="mut" font-size="14">GSD spec-driven planning, native to IBM Bob · MIT</text>
+
+  <rect class="pill" x="560" y="34" width="360" height="38"/>
+  <text x="740" y="58" text-anchor="middle" class="mono" fill="#f4f4f4" font-size="12.5">npx @zack-maz/gsd-bob --bob --local</text>
+  <text x="920" y="90" text-anchor="end" class="mut" font-size="11">scope: --local (project) · --global (machine)</text>
+
+  <line class="rule" x1="40" y1="108" x2="920" y2="108"/>
+
+  <!-- ===== PIPELINE ===== -->
+  <text x="40" y="134" class="lbl" font-size="11.5">HOW ONE INSTALL WORKS · SOURCE → TRANSFORM → EMIT</text>
+
+  <!-- Stage 1 -->
+  <rect class="white" x="40" y="146" width="277" height="248"/>
+  <rect class="bar" x="40" y="146" width="277" height="4"/>
+  <text x="58" y="174" class="lbl" font-size="10.5">STAGE 1 · SOURCE (gsd-core)</text>
+  <text x="58" y="198" class="ink" font-size="16.5" font-weight="700">Canonical Claude commands</text>
+  <line class="rule" x1="58" y1="212" x2="299" y2="212"/>
+  <text x="58" y="236" class="mut mono" font-size="11.5">agents/*.md</text>
+  <text x="58" y="258" class="mut mono" font-size="11.5">commands/gsd/*.md</text>
+  <text x="58" y="286" class="mut" font-size="12.5">Frontmatter: name, description,</text>
+  <text x="58" y="304" class="mut" font-size="12.5">tools — the runtime-neutral</text>
+  <text x="58" y="322" class="mut" font-size="12.5">source of truth.</text>
+  <text x="58" y="352" class="ink" font-size="12.5" font-weight="600">GSD command definitions</text>
+  <text x="58" y="374" class="mut" font-size="12.5">drive the full phase loop.</text>
+
+  <!-- Stage 2 (net-new) -->
+  <rect class="logic" x="341" y="146" width="277" height="248"/>
+  <rect class="bar" x="341" y="146" width="277" height="4"/>
+  <text x="359" y="174" class="lbl" font-size="10.5" fill="#0f62fe">STAGE 2 · TRANSFORM (net-new)</text>
+  <text x="359" y="198" class="ink" font-size="16.5" font-weight="700">bob-adapter.cjs</text>
+  <line class="rule" x1="359" y1="212" x2="600" y2="212"/>
+  <text x="359" y="236" class="ink mono" font-size="11">convertClaudeCmdToBobCommand()</text>
+  <text x="359" y="257" class="ink mono" font-size="11">convertClaudeCmdToBobSkill()</text>
+  <text x="359" y="278" class="ink mono" font-size="11">gateArtifact()</text>
+  <text x="359" y="299" class="ink mono" font-size="11">mergeCustomModes()</text>
+  <text x="359" y="320" class="ink mono" font-size="11">buildSupportRoster()</text>
+  <line class="rule" x1="359" y1="336" x2="600" y2="336"/>
+  <text x="359" y="360" class="blue" font-size="12.5" font-weight="600">0 model-brand literals</text>
+  <text x="359" y="378" class="mut" font-size="12">enforced by a build-time test.</text>
+
+  <!-- Stage 3 -->
+  <rect class="white" x="642" y="146" width="278" height="248"/>
+  <rect class="bar" x="642" y="146" width="278" height="4"/>
+  <text x="660" y="174" class="lbl" font-size="10.5">STAGE 3 · EMIT (Bob surface)</text>
+  <text x="660" y="198" class="ink" font-size="16.5" font-weight="700">Bob-native artifacts</text>
+  <line class="rule" x1="660" y1="212" x2="902" y2="212"/>
+  <text x="660" y="236" class="mut mono" font-size="11">.bob/commands/gsd-*.md</text>
+  <text x="660" y="257" class="mut mono" font-size="11">.bob/skills/gsd-*/SKILL.md</text>
+  <line class="rule" x1="660" y1="272" x2="902" y2="272"/>
+  <text x="660" y="296" class="ink" font-size="12.5" font-weight="600">Seeds .planning/config.json</text>
+  <text x="660" y="316" class="mut mono" font-size="11">context_window: 270000</text>
+  <text x="660" y="336" class="mut" font-size="12">text_mode → numbered choices</text>
+  <text x="660" y="366" class="grn" font-size="12.5" font-weight="700">→ .planning/ artifacts</text>
+  <text x="660" y="384" class="mut" font-size="12">identical to every runtime.</text>
+
+  <path class="arw" d="M319 270 L339 270" marker-end="url(#a)"/>
+  <path class="arw" d="M620 270 L640 270" marker-end="url(#a)"/>
+
+  <line class="rule" x1="40" y1="418" x2="920" y2="418"/>
+
+  <!-- ===== CAPABILITY (wide) ===== -->
+  <rect class="panel" x="40" y="438" width="880" height="182"/>
+  <text x="60" y="466" class="lbl" font-size="11">CAPABILITY GATE · GENERATED ROSTER</text>
+  <text x="60" y="490" class="ink" font-size="16.5" font-weight="700">28 skills emitted · 1 withheld</text>
+
+  <!-- supported chips -->
+  <g>
+    <rect class="white" x="60" y="502" width="156" height="46"/>
+    <rect class="grn" x="72" y="518" width="8" height="14"/>
+    <text x="88" y="530" class="ink" font-size="12">Core loop</text>
+    <text x="204" y="532" text-anchor="end" class="blue" font-size="19" font-weight="700">6</text>
+
+    <rect class="white" x="226" y="502" width="156" height="46"/>
+    <rect class="grn" x="238" y="518" width="8" height="14"/>
+    <text x="254" y="530" class="ink" font-size="12">Quality gates</text>
+    <text x="370" y="532" text-anchor="end" class="blue" font-size="19" font-weight="700">5</text>
+
+    <rect class="white" x="392" y="502" width="156" height="46"/>
+    <rect class="grn" x="404" y="518" width="8" height="14"/>
+    <text x="420" y="530" class="ink" font-size="12">Milestone</text>
+    <text x="536" y="532" text-anchor="end" class="blue" font-size="19" font-weight="700">4</text>
+
+    <rect class="white" x="558" y="502" width="156" height="46"/>
+    <rect class="grn" x="570" y="518" width="8" height="14"/>
+    <text x="586" y="530" class="ink" font-size="12">Planning aids</text>
+    <text x="702" y="532" text-anchor="end" class="blue" font-size="19" font-weight="700">6</text>
+
+    <rect class="white" x="724" y="502" width="176" height="46"/>
+    <rect class="grn" x="736" y="518" width="8" height="14"/>
+    <text x="752" y="530" class="ink" font-size="12">Context &amp; maint</text>
+    <text x="888" y="532" text-anchor="end" class="blue" font-size="19" font-weight="700">7</text>
+  </g>
+
+  <!-- capability nuance: isolation confirmed · fan-out withheld -->
+  <g>
+    <rect class="white" x="60" y="560" width="410" height="46"/>
+    <rect class="grn" x="72" y="574" width="8" height="18"/>
+    <text x="88" y="580" class="ink" font-size="12.5" font-weight="600">isolated subagents — confirmed</text>
+    <text x="88" y="597" class="mut" font-size="11">spawn_subagent · isolated context window</text>
+
+    <rect class="white" x="490" y="560" width="410" height="46"/>
+    <rect class="red" x="502" y="574" width="8" height="18"/>
+    <text x="518" y="580" class="ink" font-size="12.5" font-weight="600">gsd-parallel-fanout</text>
+    <text x="518" y="597" class="mut" font-size="11">parallel fan-out undocumented in Bob — unverified</text>
+  </g>
+
+  <line class="rule" x1="40" y1="646" x2="920" y2="646"/>
+
+  <!-- ===== UPSTREAM inventory ===== -->
+  <text x="40" y="672" class="lbl" font-size="11">UPSTREAM MOVE → gsd-core 1.6.1 · 4 OF 6 ARTIFACTS ARE PURE DATA</text>
+
+  <g>
+    <rect class="white" x="40" y="684" width="136" height="116"/>
+    <text x="54" y="708" class="blue" font-size="13" font-weight="700">1</text>
+    <text x="54" y="730" class="ink" font-size="12" font-weight="600">registry entry</text>
+    <text x="54" y="748" class="mut mono" font-size="9.5">capability-registry</text>
+    <text x="54" y="786" class="mut" font-size="10" font-weight="700">DATA</text>
+
+    <rect class="white" x="188" y="684" width="136" height="116"/>
+    <text x="202" y="708" class="blue" font-size="13" font-weight="700">2</text>
+    <text x="202" y="730" class="ink" font-size="12" font-weight="600">alias · manifest</text>
+    <text x="202" y="748" class="mut mono" font-size="9.5">runtime-aliases</text>
+    <text x="202" y="786" class="mut" font-size="10" font-weight="700">DATA</text>
+
+    <rect class="white" x="336" y="684" width="136" height="116"/>
+    <text x="350" y="708" class="blue" font-size="13" font-weight="700">3</text>
+    <text x="350" y="730" class="ink" font-size="12" font-weight="600">alias · policy</text>
+    <text x="350" y="748" class="mut mono" font-size="9.5">runtime-name-policy</text>
+    <text x="350" y="786" class="mut" font-size="10" font-weight="700">DATA</text>
+
+    <rect class="white" x="484" y="684" width="136" height="116"/>
+    <text x="498" y="708" class="blue" font-size="13" font-weight="700">4</text>
+    <text x="498" y="730" class="ink" font-size="12" font-weight="600">config-home</text>
+    <text x="498" y="748" class="mut mono" font-size="9.5">dot-home resolver</text>
+    <text x="498" y="786" class="mut" font-size="10" font-weight="700">REUSED</text>
+
+    <rect class="logic" x="632" y="684" width="136" height="116"/>
+    <text x="646" y="708" class="blue" font-size="13" font-weight="700">5</text>
+    <text x="646" y="730" class="ink" font-size="12" font-weight="600">converter pair</text>
+    <text x="646" y="748" class="mut" font-size="9.5">~105-line rewrite</text>
+    <text x="646" y="786" class="blue" font-size="10" font-weight="700">NET-NEW LOGIC</text>
+
+    <rect class="logic" x="780" y="684" width="140" height="116"/>
+    <text x="794" y="708" class="blue" font-size="13" font-weight="700">6</text>
+    <text x="794" y="730" class="ink" font-size="12" font-weight="600">bob-adapter.cjs</text>
+    <text x="794" y="748" class="mut" font-size="9.5">gate + merge</text>
+    <text x="794" y="786" class="blue" font-size="10" font-weight="700">NET-NEW LOGIC</text>
+  </g>
+
+  <!-- ===== FOOTER ===== -->
+  <line class="rule" x1="40" y1="828" x2="920" y2="828"/>
+  <g font-size="11.5">
+    <rect class="blue" x="40" y="848" width="12" height="12"/>
+    <text x="58" y="858" class="mut">net-new logic I wrote</text>
+    <rect class="mut" x="230" y="848" width="12" height="12"/>
+    <text x="248" y="858" class="mut">reused gsd-core data</text>
+    <rect class="grn" x="420" y="848" width="12" height="12"/>
+    <text x="438" y="858" class="mut">supported skill</text>
+    <rect class="red" x="580" y="848" width="12" height="12"/>
+    <text x="598" y="858" class="mut">withheld skill</text>
+  </g>
+  <text x="40" y="892" class="ink" font-size="12.5" font-weight="600">IBM Bob owns model routing — the adapter stays backend-agnostic by contract.</text>
+</svg>
