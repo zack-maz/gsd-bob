@@ -95,24 +95,27 @@ every exclusion **loud**.
 - **The conservative lower bound** is `BOB_CAPABILITY_DECL` in `src/installer/stage.cjs`:
 
   ```js
-  const BOB_CAPABILITY_DECL = { isolatedSubagents: false, structuredPrompts: false };
+  const BOB_CAPABILITY_DECL = { parallelSubagentFanout: false, structuredPrompts: false };
   ```
 
   Two defaults, explained in prose:
-  - **No isolated subagents** → Bob runs subagents **sequentially inline** rather than as
-    isolated parallel fan-out.
+  - **No parallel subagent fan-out** → Bob **has** isolated subagents (`spawn_subagent`, an
+    isolated context window, a `subagent` tool group) but does not document spawning MULTIPLE
+    concurrent subagents; parallel fan-out is the conservative unverified lower bound, so
+    `gsd-parallel-fanout` is the sole gated artifact.
   - **No structured-choice prompts** → Bob supports **`text_mode` prompting only** (numbered
     text choices), not a structured-choice prompt primitive.
 
   The human-readable rationale for each lives in `PRIMITIVE_REASONS` in `src/bob-adapter.cjs`
-  (around L308–L313). These two defaults map exactly to the two Unsupported entries in the
-  generated `SUPPORT-ROSTER.md`: `gsd-autonomous` (requires isolated subagent orchestration
-  that Bob runs sequentially inline) and `gsd-parallel-fanout` (requires isolated subagents).
+  (around L308–L313). These two defaults map to the Unsupported set in the generated
+  `SUPPORT-ROSTER.md`: `gsd-parallel-fanout` (requires parallel subagent fan-out; Bob has
+  isolated subagents but not parallel spawning — unverified) is the single gated artifact.
+  `gsd-autonomous` is **supported** — it only needs isolated subagents, which Bob provides.
 
-- **Context-window consequence of "no isolated subagents".** Because *no isolated subagents →
-  sequential inline* means the entire GSD loop shares **one** context window (there is no
-  per-subagent fresh context to fan work out into), Bob's **270k** runtime window is the
-  operative token budget for the whole loop. gsd-core keys its read-depth / advisory scaling on
+- **Context-window consequence of sequential subagents.** Because Bob spawns isolated
+  subagents **sequentially** (no documented parallel fan-out), the entire GSD loop effectively
+  shares **one** context window (work is not fanned out into concurrent fresh contexts), so
+  Bob's **270k** runtime window is the operative token budget for the whole loop. gsd-core keys its read-depth / advisory scaling on
   a top-level `context_window` integer in `.planning/config.json` (defaulting to a conservative
   **200000** when absent). So the installer seeds `context_window: 270000` into the
   workspace-root `.planning/config.json` — via `mergeTextMode` (constant `BOB_CONTEXT_WINDOW`)

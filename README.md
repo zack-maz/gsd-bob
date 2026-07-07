@@ -125,18 +125,19 @@ Skills that depend on a primitive Bob does not provide are **omitted from the lo
 and recorded loud** in `SUPPORT-ROSTER.md` as `unsupported on Bob: <reason>` lines — never
 silently broken. Current gaps:
 
-- `gsd-autonomous` — *unsupported on Bob: requires isolated subagent orchestration that Bob
-  runs sequentially inline.*
-- `gsd-parallel-fanout` — *unsupported on Bob: requires isolated subagents; Bob runs
-  subagents sequentially inline.*
+- `gsd-parallel-fanout` — *unsupported on Bob: requires parallel subagent fan-out; Bob
+  documents isolated subagents but not parallel spawning — unverified.*
 
-Bob runs subagents sequentially inline (no isolated-subagent / `new_task` primitive), and
-interactive prompts degrade to numbered `text_mode` choices rather than a structured-choice
-payload. These are conservative, documented lower-bound defaults. Because sequential-inline
-execution means the whole loop shares **one** context window, the installer seeds
-`context_window: 270000` (Bob's real runtime window) into `.planning/config.json` so gsd-core's
-read-depth / advisory scaling matches the real shared budget instead of the conservative 200k
-default.
+Bob **has** isolated subagents (`spawn_subagent`, an isolated context window, and a
+`subagent` tool group), so isolation-only workflows are supported. The conservative
+unconfirmed lower bound is **parallel subagent fan-out** (multiple concurrent subagents),
+which Bob does not document — so only `gsd-parallel-fanout` is flagged. Interactive prompts
+degrade to numbered `text_mode` choices rather than a structured-choice payload. These are
+conservative, documented lower-bound defaults. Because Bob spawns isolated subagents
+sequentially (no parallel fan-out), the whole loop effectively shares **one** context window,
+so the installer seeds `context_window: 270000` (Bob's real runtime window) into
+`.planning/config.json` so gsd-core's read-depth / advisory scaling matches the real shared
+budget instead of the conservative 200k default.
 
 ## Targeted gsd-core version
 
