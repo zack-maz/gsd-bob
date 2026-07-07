@@ -16,6 +16,24 @@ const MARKER = ['unsupported', 'on', 'Bob:'].join(' ');
 // no structured prompts (text_mode only).
 const bobDecl = { isolatedSubagents: false, structuredPrompts: false };
 
+// BUG 1 freeze: emitGsdMode().groups must be a SUBSET of Bob's documented valid
+// tool-group set AND must include `execute` (Bob's terminal-command token; Bob has
+// NO `command` group). Build the invalid token programmatically so this test file's
+// own prose never trips a negative grep on the bare literal.
+test('emitGsdMode().groups is a subset of the Bob valid-group set and includes execute', () => {
+  const VALID_GROUPS = [
+    'read', 'edit', 'execute', 'mcp', 'skill', 'workflow', 'todo', 'subtask', 'subagent', 'mode',
+  ];
+  const { groups } = adapter.emitGsdMode();
+  assert.ok(Array.isArray(groups), 'groups is an array');
+  for (const g of groups) {
+    assert.ok(VALID_GROUPS.includes(g), `group "${g}" is in Bob's documented valid set`);
+  }
+  assert.ok(groups.includes('execute'), 'groups includes the execute terminal-command token');
+  const invalidToken = ['comm', 'and'].join('');
+  assert.ok(!groups.includes(invalidToken), 'groups does not include the invalid legacy token');
+});
+
 test('a fully-supported candidate is included with no roster entry', () => {
   const candidate = { name: 'gsd-help', requires: [] };
   const res = adapter.gateArtifact(candidate, bobDecl);

@@ -26,7 +26,7 @@ test('emitGsdMode returns the locked gsd mode shape', () => {
   const m = adapter.emitGsdMode();
   assert.equal(m.slug, 'gsd');
   assert.equal(m.name, 'GSD');
-  assert.deepEqual(m.groups, ['read', 'edit', 'command', 'mcp']);
+  assert.deepEqual(m.groups, ['read', 'edit', 'execute', 'mcp']);
   assert.ok(typeof m.roleDefinition === 'string' && m.roleDefinition.length > 0);
   assert.ok(typeof m.whenToUse === 'string' && m.whenToUse.length > 0);
   assert.ok(typeof m.customInstructions === 'string' && m.customInstructions.length > 0);
@@ -42,7 +42,7 @@ test('merge into empty/undefined text yields a single gsd entry', () => {
   const out = adapter.mergeCustomModes('', adapter.emitGsdMode());
   const bySlug = modesBySlug(out);
   assert.ok(bySlug.gsd, 'gsd present');
-  assert.deepEqual(bySlug.gsd.groups, ['read', 'edit', 'command', 'mcp']);
+  assert.deepEqual(bySlug.gsd.groups, ['read', 'edit', 'execute', 'mcp']);
 });
 
 test('merge preserves a pre-seeded non-gsd user mode (by parsed entry)', () => {
@@ -58,7 +58,7 @@ test('merge replaces (not duplicates) an existing gsd slug', () => {
   const gsdEntries = (doc.customModes || []).filter((m) => m.slug === 'gsd');
   assert.equal(gsdEntries.length, 1);
   // the surviving entry is the FRESH one, not the stale fixture one
-  assert.deepEqual(gsdEntries[0].groups, ['read', 'edit', 'command', 'mcp']);
+  assert.deepEqual(gsdEntries[0].groups, ['read', 'edit', 'execute', 'mcp']);
 });
 
 test('merge is idempotent (twice parses equal to once)', () => {

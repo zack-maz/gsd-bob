@@ -148,12 +148,14 @@ function scanModelLiterals(content) {
 
 /**
  * The single gsd custom mode (D-01). Groups are locked to
- * `[read, edit, command, mcp]` (D-02) — `skill`/`browser` are omitted for v1
- * because the GSD seam is command -> gsd_run, not skill -> skill.
+ * `[read, edit, execute, mcp]` (D-02) — `skill`/`browser` are omitted for v1
+ * because the GSD seam is execute -> gsd_run, not skill -> skill. `execute` is
+ * Bob's terminal-shell tool-group token (Bob has NO `command` group); without
+ * it the customInstructions gsd_run shell-out seam is dead.
  * Prose (roleDefinition/whenToUse/customInstructions) is Claude's discretion
  * (D-03): minimal, pointing users at the /gsd-* slash commands and noting that
  * planning artifacts live in .planning/ and that the mode shells out via the
- * command tool.
+ * execute tool.
  *
  * @returns {{slug:string,name:string,roleDefinition:string,whenToUse:string,customInstructions:string,groups:string[]}}
  */
@@ -172,10 +174,10 @@ function emitGsdMode() {
       'specific workflow.',
     customInstructions:
       'All planning state lives under .planning/. Run GSD tooling by shelling out via ' +
-      'the command tool (e.g. `node gsd-core/bin/gsd-tools.cjs query ...`). Prefer the ' +
+      'the execute tool (e.g. `node gsd-core/bin/gsd-tools.cjs query ...`). Prefer the ' +
       '/gsd-* slash commands as entry points; never edit .planning/ artifacts outside a ' +
       'GSD workflow unless explicitly asked.',
-    groups: ['read', 'edit', 'command', 'mcp'],
+    groups: ['read', 'edit', 'execute', 'mcp'],
   };
 }
 
