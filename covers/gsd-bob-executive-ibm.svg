@@ -1,0 +1,166 @@
+<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d" font-family="'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <title id="t">gsd-bob executive overview, IBM Carbon themed</title>
+  <desc id="d">Executive summary of gsd-bob: GSD is an open-source planning framework that keeps AI coding agents on spec. gsd-bob installs the full discipline into IBM Bob with one command. Work is plan-first and auditable, adoption takes minutes, and planning records stay interchangeable with every other GSD tool. 28 planning commands are supported today, 1 withheld by a capability check. The adapter ships standalone now and is designed to merge upstream so IBM Bob becomes a first-class GSD runtime.</desc>
+  <style>
+    .bg{fill:#ffffff;}
+    .panel{fill:#f4f4f4;stroke:#e0e0e0;stroke-width:1;}
+    .logic{fill:#edf5ff;stroke:#0f62fe;stroke-width:1.5;}
+    .white{fill:#ffffff;stroke:#e0e0e0;stroke-width:1;}
+    .ink{fill:#161616;}
+    .mut{fill:#525252;}
+    .blue{fill:#0f62fe;}
+    .bar{fill:#0f62fe;}
+    .mono{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;}
+    .lbl{fill:#525252;font-weight:600;letter-spacing:0.06em;}
+    .hero{fill:#161616;font-size:20px;font-weight:700;}
+    .rule{stroke:#e0e0e0;stroke-width:1;}
+    .arw{stroke:#0f62fe;stroke-width:2.2;fill:none;}
+    .pill{fill:#161616;}
+    .grn{fill:#24a148;}
+  </style>
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 z" fill="#0f62fe"/>
+    </marker>
+    <marker id="g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 z" fill="#8d8d8d"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="960" height="960"/>
+
+  <!-- ===== HEADER ===== -->
+  <!-- IBM 8-bar motif -->
+  <g>
+    <rect class="bar" x="40" y="32" width="56" height="4"/>
+    <rect class="bar" x="40" y="39" width="56" height="4"/>
+    <rect class="bar" x="40" y="46" width="56" height="4"/>
+    <rect class="bar" x="40" y="53" width="56" height="4"/>
+    <rect class="bar" x="40" y="60" width="56" height="4"/>
+    <rect class="bar" x="40" y="67" width="56" height="4"/>
+    <rect class="bar" x="40" y="74" width="56" height="4"/>
+    <rect class="bar" x="40" y="81" width="56" height="4"/>
+  </g>
+  <text x="112" y="62" class="ink" font-size="28" font-weight="700">gsd-bob</text>
+  <text x="112" y="86" class="mut" font-size="14">Disciplined AI-agent planning, native to IBM Bob</text>
+
+  <rect class="pill" x="560" y="32" width="360" height="40"/>
+  <text x="740" y="57" text-anchor="middle" class="mono" fill="#f4f4f4" font-size="12.5">npx @zack-maz/gsd-bob --bob --local</text>
+  <text x="920" y="92" text-anchor="end" class="mut" font-size="12">open source · MIT · <tspan data-stamp="version" font-weight="600">v0.2.2</tspan></text>
+
+  <line class="rule" x1="40" y1="112" x2="920" y2="112"/>
+
+  <!-- ===== EXPLAINER ===== -->
+  <text x="40" y="142" class="ink" font-size="14" font-weight="600">What this is:</text>
+  <text x="140" y="142" class="mut" font-size="14">GSD is an open-source planning framework that keeps AI coding agents on spec: plan, execute, verify.</text>
+  <text x="40" y="164" class="mut" font-size="14">gsd-bob installs that entire discipline into IBM Bob with one command, in Bob's own native format.</text>
+
+  <line class="rule" x1="40" y1="192" x2="920" y2="192"/>
+
+  <!-- ===== VALUE ===== -->
+  <text x="40" y="222" class="lbl" font-size="12">WHY IT MATTERS</text>
+  <text x="40" y="250" class="hero">Disciplined AI development, inside the tool teams already use</text>
+
+  <!-- Value card 1 -->
+  <rect class="white" x="40" y="264" width="272" height="172"/>
+  <rect class="bar" x="40" y="264" width="272" height="4"/>
+  <text x="58" y="296" class="ink" font-size="16" font-weight="700">Plans before code</text>
+  <line class="rule" x1="58" y1="312" x2="294" y2="312"/>
+  <text x="58" y="338" class="mut" font-size="12.5">Every piece of work starts as a</text>
+  <text x="58" y="356" class="mut" font-size="12.5">written plan and ends verified</text>
+  <text x="58" y="374" class="mut" font-size="12.5">against it — a decision trail that</text>
+  <text x="58" y="392" class="mut" font-size="12.5">lives in the repo, not a chat log.</text>
+  <text x="58" y="420" class="ink" font-size="12.5" font-weight="600">Auditable by design.</text>
+
+  <!-- Value card 2 -->
+  <rect class="white" x="344" y="264" width="272" height="172"/>
+  <rect class="bar" x="344" y="264" width="272" height="4"/>
+  <text x="362" y="296" class="ink" font-size="16" font-weight="700">Adopted in minutes</text>
+  <line class="rule" x1="362" y1="312" x2="598" y2="312"/>
+  <text x="362" y="338" class="mut" font-size="12.5">One command installs the full</text>
+  <text x="362" y="356" class="mut" font-size="12.5">planning loop, per-project or</text>
+  <text x="362" y="374" class="mut" font-size="12.5">machine-wide. Updating it is just</text>
+  <text x="362" y="392" class="mut" font-size="12.5">re-running the same command.</text>
+  <text x="362" y="420" class="ink" font-size="12.5" font-weight="600">No configuration surgery.</text>
+
+  <!-- Value card 3 -->
+  <rect class="white" x="648" y="264" width="272" height="172"/>
+  <rect class="bar" x="648" y="264" width="272" height="4"/>
+  <text x="666" y="296" class="ink" font-size="16" font-weight="700">Zero lock-in</text>
+  <line class="rule" x1="666" y1="312" x2="902" y2="312"/>
+  <text x="666" y="338" class="mut" font-size="12.5">Planning records come out</text>
+  <text x="666" y="356" class="mut" font-size="12.5">identical across every GSD tool,</text>
+  <text x="666" y="374" class="mut" font-size="12.5">so teams can move between Bob</text>
+  <text x="666" y="392" class="mut" font-size="12.5">and other assistants freely.</text>
+  <text x="666" y="420" class="ink" font-size="12.5" font-weight="600">Work is never stranded.</text>
+
+  <line class="rule" x1="40" y1="460" x2="920" y2="460"/>
+
+  <!-- ===== HOW ===== -->
+  <text x="40" y="490" class="lbl" font-size="12">HOW ONE INSTALL WORKS</text>
+  <text x="40" y="518" class="hero">The open-source playbook, translated into Bob's language</text>
+
+  <!-- Step 1 -->
+  <rect class="white" x="40" y="532" width="272" height="140"/>
+  <text x="58" y="558" class="lbl" font-size="12">STEP 1 · SOURCE</text>
+  <text x="58" y="584" class="ink" font-size="16" font-weight="700">The GSD playbook</text>
+  <line class="rule" x1="58" y1="598" x2="294" y2="598"/>
+  <text x="58" y="624" class="mut" font-size="12.5"><tspan class="blue" font-weight="700" data-stamp="emitted">28</tspan> planning commands, honed</text>
+  <text x="58" y="642" class="mut" font-size="12.5">across many AI coding tools.</text>
+
+  <!-- Step 2 -->
+  <rect class="logic" x="344" y="532" width="272" height="140"/>
+  <text x="362" y="558" class="lbl" font-size="12" fill="#0f62fe">STEP 2 · TRANSLATE</text>
+  <text x="362" y="584" class="ink" font-size="16" font-weight="700">Automatic conversion</text>
+  <line class="rule" x1="362" y1="598" x2="598" y2="598"/>
+  <text x="362" y="624" class="mut" font-size="12.5">Each command is rewritten into</text>
+  <text x="362" y="642" class="mut" font-size="12.5">Bob's native format — nothing</text>
+  <text x="362" y="660" class="mut" font-size="12.5">hand-maintained, nothing forked.</text>
+
+  <!-- Step 3 -->
+  <rect class="white" x="648" y="532" width="272" height="140"/>
+  <text x="666" y="558" class="lbl" font-size="12">STEP 3 · USE</text>
+  <text x="666" y="584" class="ink" font-size="16" font-weight="700">Native in Bob</text>
+  <line class="rule" x1="666" y1="598" x2="902" y2="598"/>
+  <text x="666" y="624" class="mut" font-size="12.5">They appear as ordinary Bob</text>
+  <text x="666" y="642" class="mut" font-size="12.5">commands — type</text>
+  <text x="666" y="662" class="blue mono" font-size="12.5" font-weight="600">/gsd-new-project <tspan class="mut" font-weight="400" font-family="'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif">and go.</tspan></text>
+
+  <path class="arw" d="M316 602 L340 602" marker-end="url(#a)"/>
+  <path class="arw" d="M620 602 L644 602" marker-end="url(#a)"/>
+
+  <text x="40" y="696" class="mut" font-size="12">A capability check runs at every install — anything Bob can't yet support is withheld, never broken: <tspan class="ink" font-weight="600" data-stamp="withheld">1</tspan> command today, <tspan class="ink" font-weight="600" data-stamp="emitted">28</tspan> fully supported.</text>
+
+  <line class="rule" x1="40" y1="714" x2="920" y2="714"/>
+
+  <!-- ===== PATH ===== -->
+  <text x="40" y="744" class="lbl" font-size="12">WHERE THIS GOES</text>
+  <text x="40" y="772" class="hero">Standalone today, designed to merge upstream</text>
+
+  <!-- timeline -->
+  <line x1="60" y1="796" x2="892" y2="796" stroke="#8d8d8d" stroke-width="1.5" marker-end="url(#g)"/>
+  <rect class="blue" x="170" y="790" width="12" height="12"/>
+  <rect x="474" y="790" width="12" height="12" fill="#ffffff" stroke="#0f62fe" stroke-width="1.5"/>
+  <rect x="778" y="790" width="12" height="12" fill="#ffffff" stroke="#8d8d8d" stroke-width="1.5"/>
+
+  <rect class="white" x="40" y="812" width="272" height="90"/>
+  <text x="58" y="836" class="blue" font-size="11" font-weight="700" letter-spacing="0.06em">NOW · SHIPPED</text>
+  <text x="58" y="858" class="ink" font-size="13.5" font-weight="700">Standalone adapter</text>
+  <text x="58" y="878" class="mut" font-size="11.5">installable today · open source · MIT</text>
+
+  <rect class="white" x="344" y="812" width="272" height="90"/>
+  <text x="362" y="836" class="lbl" font-size="11">NEXT · CONTRIBUTION</text>
+  <text x="362" y="858" class="ink" font-size="13.5" font-weight="700">Merged into GSD itself</text>
+  <text x="362" y="878" class="mut" font-size="11.5">the Bob translation layer, offered</text>
+  <text x="362" y="892" class="mut" font-size="11.5">upstream to the open-source project</text>
+
+  <rect class="white" x="648" y="812" width="272" height="90"/>
+  <text x="666" y="836" class="lbl" font-size="11">GOAL</text>
+  <text x="666" y="858" class="ink" font-size="13.5" font-weight="700">First-class Bob runtime</text>
+  <text x="666" y="878" class="mut" font-size="11.5">GSD supports IBM Bob out of the box,</text>
+  <text x="666" y="892" class="mut" font-size="11.5">alongside 16+ other AI coding tools</text>
+
+  <!-- ===== FOOTER ===== -->
+  <line class="rule" x1="40" y1="918" x2="920" y2="918"/>
+  <text x="40" y="944" class="ink" font-size="13" font-weight="600">IBM Bob keeps full control of model routing — gsd-bob works the same whichever backend Bob chooses.</text>
+</svg>
